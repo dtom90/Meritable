@@ -1,0 +1,71 @@
+# Deploys the Expo web app to GitHub Pages
+
+name: Deploy Expo Web to GitHub Pages
+
+on:
+  # Runs on pushes targeting the main branch
+  push:
+    branches:
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Expo Web App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out your repository using git
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Or your preferred Node.js version
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build website
+        run: npx expo export --platform web
+        # The output directory is typically 'web-build'
+
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload the web-build directory (default output of expo export --platform web)
+          path: ./web-build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        # This action does not require any target branch settings,
+        # it automatically pushes to the gh-pages branch.
+
+# Important:
+# After adding this workflow, you need to configure GitHub Pages in your repository settings:
+# 1. Go to your repository on GitHub.
+# 2. Go to Settings > Pages.
+# 3. Under 'Build and deployment', select 'GitHub Actions' as the Source.
