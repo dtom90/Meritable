@@ -8,6 +8,7 @@ import { Platform } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
 import { useHabits } from '@/contexts/HabitContext'; // Import useHabits hook
+import { IconButton } from 'react-native-paper'; // Import IconButton
 
 export default function HomeScreen() {
   const tabs = Array.from({ length: 7 }).map((_, index) => {
@@ -41,7 +42,6 @@ export default function HomeScreen() {
       </View>
 
       {/* Added Dynamic Content Area */}
-      <ThemedView style={styles.contentContainer}>
         {habits.length === 0 && <TouchableOpacity
           style={styles.fabLarge}
           onPress={() => navigation.navigate('habits', { focusInput: true })}
@@ -49,8 +49,18 @@ export default function HomeScreen() {
         >
           <Text style={styles.fabText}>Add Habit</Text>
         </TouchableOpacity>}
-        {habits.map(habit => <Text style={styles.habitText} key={habit.id}>{habit.text}</Text>)}
-      </ThemedView>
+        {habits.map(habit => (
+          <ThemedView key={habit.id} style={styles.habitContainer}>
+            <Text style={styles.habitText}>{habit.text}</Text>
+            <IconButton
+              icon="check" // Checkmark icon
+              iconColor="green" // Green color
+              size={24} // Adjust size as needed
+              onPress={() => {}} // No action for now
+              style={styles.checkButton} // Apply style for justification
+            />
+          </ThemedView>
+        ))}
 
       {/* Floating Action Button with Tooltip */}
       <View style={styles.fabContainer}>
@@ -80,7 +90,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
-    backgroundColor: '#1c1c1e', 
+    backgroundColor: '#1c1c1e',
     marginBottom: 10,
   },
   tab: {
@@ -101,11 +111,28 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20, 
+    margin: 10,
+    borderRadius: 10,
     alignItems: 'center', 
+  },
+  habitContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    margin: 16,
+    borderRadius: 10,
   },
   habitText: {
     fontSize: 18,
     color: '#fff',
+    flex: 1,
+    textAlign: 'center',
+  },
+  checkButton: {
+    marginLeft: 'auto',
+    marginRight: 0, 
+    padding: 0, 
   },
   fabContainer: {
     position: 'absolute',
