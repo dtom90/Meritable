@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     padding: 16,
     margin: 16,
     borderRadius: 10,
+    minHeight: 68
   },
   habitText: {
     fontSize: 18,

@@ -9,6 +9,7 @@ import { Platform } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { useHabits } from '@/contexts/HabitContext'; // Import useHabits hook
 import { IconButton } from 'react-native-paper'; // Import IconButton
+import { useLiveQuery } from 'dexie-react-hooks';
 
 export default function HomeScreen() {
   const tabs = Array.from({ length: 7 }).map((_, index) => {
@@ -24,7 +25,9 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'habits'>>();
   const [fabHovered, setFabHovered] = useState(false);
-  const { habits } = useHabits(); // Access habits from context
+  const { habits, addHabitCompletion, getHabitCompletions, deleteHabitCompletion } = useHabits();
+  
+  const completions = useLiveQuery(() => getHabitCompletions(activeTab), [activeTab]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -50,15 +53,20 @@ export default function HomeScreen() {
           <Text style={styles.fabText}>Add Habit</Text>
         </TouchableOpacity>}
         {habits.map(habit => (
-          <ThemedView key={habit.id} style={styles.habitContainer}>
+          <ThemedView key={habit.id} style={[styles.habitContainer, completions?.includes(habit.id!) && styles.completedHabit]}>
             <Text style={styles.habitText}>{habit.name}</Text>
-            <IconButton
-              icon="check" // Checkmark icon
-              iconColor="green" // Green color
-              size={24} // Adjust size as needed
-              onPress={() => {}} // No action for now
-              style={styles.checkButton} // Apply style for justification
-            />
+            {!completions?.includes(habit.id!) ? <IconButton
+              icon="check"
+              iconColor="green"
+              size={24}
+              onPress={() => addHabitCompletion(habit.id!, activeTab)}
+              style={styles.habitButton}
+            /> : <IconButton
+              icon="restore"
+              size={24}
+              style={styles.habitButton}
+              onPress={() => deleteHabitCompletion(habit.id!, activeTab)} 
+            />}
           </ThemedView>
         ))}
 
@@ -122,6 +130,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     margin: 16,
     borderRadius: 10,
+    minHeight: 68
   },
   habitText: {
     fontSize: 18,
@@ -129,10 +138,13 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-  checkButton: {
+  habitButton: {
     marginLeft: 'auto',
     marginRight: 0, 
     padding: 0, 
+  },
+  completedHabit: {
+    backgroundColor: 'green',
   },
   fabContainer: {
     position: 'absolute',
