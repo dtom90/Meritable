@@ -41,14 +41,12 @@ jobs:
         run: npm ci
 
       - name: Build website
-        run: npx expo export --platform web
-        # The output directory is typically 'web-build'
+        run: npm run build-web
 
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the web-build directory (default output of expo export --platform web)
-          path: ./web-build
+          path: ./dist
 
   deploy:
     name: Deploy to GitHub Pages
@@ -61,8 +59,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        # This action does not require any target branch settings,
-        # it automatically pushes to the gh-pages branch.
 
 # Important:
 # After adding this workflow, you need to configure GitHub Pages in your repository settings:
