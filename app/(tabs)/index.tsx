@@ -5,8 +5,17 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
-  const [activeTab, setActiveTab] = useState('Tab 7');
-  const tabs = ['Tab 1', 'Tab 2', 'Tab 3', 'Tab 4', 'Tab 5', 'Tab 6', 'Tab 7'];
+  const tabs = Array.from({ length: 7 }).map((_, index) => {
+    const today = new Date();
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() - (6 - index));
+
+    const year = targetDate.getFullYear();
+    const month = (targetDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = targetDate.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+  const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
 
   return (
     <View>
