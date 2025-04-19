@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
@@ -23,11 +23,20 @@ export default function HomeScreen() {
     return `${year}-${month}-${day}`;
   });
   const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'habits'>>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'index'>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'index'>>();
   const [fabHovered, setFabHovered] = useState(false);
   const { habits, addHabitCompletion, getHabitCompletions, deleteHabitCompletion } = useHabits();
-  
   const completions = useLiveQuery(() => getHabitCompletions(activeTab), [activeTab]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.today) {
+        setActiveTab(tabs[tabs.length - 1]);
+        navigation.setParams({ today: undefined });
+      }
+    }, [route.params])
+  );
 
   return (
     <View style={{ flex: 1 }}>

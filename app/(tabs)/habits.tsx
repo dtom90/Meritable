@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useHabits } from '@/contexts/HabitContext'; 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { IconButton } from 'react-native-paper';
+import { Icon, IconButton } from 'react-native-paper';
 
 export default function HabitsScreen() {
   const { habits, addHabit, deleteHabit } = useHabits(); 
@@ -57,6 +57,10 @@ export default function HabitsScreen() {
       </View>
       {habits.map(habit => (
         <ThemedView key={habit.id} style={styles.habitContainer}>
+          <TouchableOpacity style={styles.trackButton} onPress={() => navigation.navigate('index', { today: true })}>
+            <Icon source="clock" color="#49453f" size={24} />
+            <Text style={styles.trackText}>Track</Text>
+          </TouchableOpacity>
           <Text style={styles.habitText}>{habit.name}</Text>
           <IconButton
             icon="delete"
@@ -118,5 +122,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     flex: 1,
     textAlign: 'center',
+  },
+  trackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  trackText: {
+    color: '#49453f',
   },
 });
