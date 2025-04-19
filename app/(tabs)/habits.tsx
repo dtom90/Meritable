@@ -1,82 +1,69 @@
-import { StyleSheet, View, TextInput, Button, FlatList, Text, TouchableOpacity } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
-
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { StyleSheet, View, TextInput, FlatList, Button, Text, TouchableOpacity } from 'react-native';
+import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-
-interface Habit {
-  id: string;
-  text: string;
-  completed: boolean;
-}
+import { useHabits, Habit } from '@/contexts/HabitContext'; 
 
 export default function HabitsScreen() {
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [newHabit, setNewHabit] = useState('');
+  const { habits, addHabit, setHabits } = useHabits(); 
+  const [newHabitText, setNewHabitText] = useState(''); 
   const textInputRef = useRef<TextInput>(null);
   const route = useRoute();
+  const navigation = useNavigation();
 
-  // Focus the input if navigated with { focusInput: true }
   useFocusEffect(
-    React.useCallback(() => {
-      if (route.params && (route.params as any).focusInput && textInputRef.current) {
-        setTimeout(() => {
-          textInputRef.current?.focus();
-        }, 100);
+    useCallback(() => {
+      if (route.params?.focusInput) {
+        textInputRef.current?.focus();
+        navigation.setParams({ focusInput: false });
       }
     }, [route.params])
   );
 
-  const addHabit = () => {
-    if (newHabit.trim() === '') return;
-    setHabits([...habits, { id: Date.now().toString(), text: newHabit, completed: false }]);
-    setNewHabit('');
+  const handleAddHabit = () => {
+    if (newHabitText.trim()) {
+      addHabit({ text: newHabitText.trim(), completed: false }); 
+      setNewHabitText(''); 
+    }
   };
 
   const toggleHabit = (id: string) => {
     setHabits(
-      habits.map(habit =>
+      habits.map((habit) =>
         habit.id === id ? { ...habit, completed: !habit.completed } : habit
       )
     );
   };
 
-  const removeHabit = (id: string) => {
-    setHabits(habits.filter(habit => habit.id !== id));
-  };
-
   const renderItem = ({ item }: { item: Habit }) => (
-    <View style={styles.habitItem}>
-      <TouchableOpacity onPress={() => toggleHabit(item.id)} style={styles.habitTextContainer}>
-        <ThemedText style={[styles.habitText, item.completed && styles.completedText]}>
-          {item.text}
-        </ThemedText>
-      </TouchableOpacity>
-      <Button title="Remove" onPress={() => removeHabit(item.id)} color="#ff5c5c" />
-    </View>
+    <TouchableOpacity onPress={() => toggleHabit(item.id)} style={styles.habitItem}>
+      <Text style={[styles.habitText, item.completed && styles.completedText]}>
+        {item.text}
+      </Text>
+    </TouchableOpacity>
   );
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Habits</ThemedText>
+      <ThemedText type="title" style={styles.title}>Manage Habits</ThemedText>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Add a new habit..."
-          value={newHabit}
-          onChangeText={setNewHabit}
-          onSubmitEditing={addHabit}
+          value={newHabitText}
+          onChangeText={setNewHabitText}
+          onSubmitEditing={handleAddHabit}
           ref={textInputRef}
-          blurOnSubmit={false} // Add this line
-          placeholderTextColor="#888" // Ensure placeholder is visible in dark mode
+          blurOnSubmit={false} 
+          placeholderTextColor="#888" 
         />
-        <Button title="Add" onPress={addHabit} />
+        <Button title="Add" onPress={handleAddHabit} />
       </View>
       <FlatList
         data={habits}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         style={styles.list}
       />
     </ThemedView>
@@ -86,7 +73,7 @@ export default function HabitsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50, // Add padding to avoid overlap with status bar
+    paddingTop: 50, 
     paddingHorizontal: 20,
   },
   title: {
@@ -104,8 +91,8 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
     borderRadius: 5,
-    color: '#fff', // Ensure text is visible in dark mode
-    backgroundColor: '#333' // Darker background for input
+    color: '#fff', 
+    backgroundColor: '#333' 
   },
   list: {
     flex: 1,
@@ -118,12 +105,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  habitTextContainer: {
-      flex: 1, // Take up available space
-      marginRight: 10, // Add some space before the remove button
-  },
   habitText: {
     fontSize: 18,
+    color: '#fff',
   },
   completedText: {
     textDecorationLine: 'line-through',

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
+import { useHabits } from '@/contexts/HabitContext'; // Import useHabits hook
 
 export default function HomeScreen() {
   const tabs = Array.from({ length: 7 }).map((_, index) => {
@@ -22,6 +23,7 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'habits'>>();
   const [fabHovered, setFabHovered] = useState(false);
+  const { habits } = useHabits(); // Access habits from context
 
   return (
     <View style={{ flex: 1 }}>
@@ -40,13 +42,14 @@ export default function HomeScreen() {
 
       {/* Added Dynamic Content Area */}
       <ThemedView style={styles.contentContainer}>
-        <TouchableOpacity
+        {habits.length === 0 && <TouchableOpacity
           style={styles.fabLarge}
           onPress={() => navigation.navigate('habits', { focusInput: true })}
           activeOpacity={0.8}
         >
           <Text style={styles.fabText}>Add Habit</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
+        {habits.map(habit => <Text style={styles.habitText} key={habit.id}>{habit.text}</Text>)}
       </ThemedView>
 
       {/* Floating Action Button with Tooltip */}
@@ -99,6 +102,10 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20, 
     alignItems: 'center', 
+  },
+  habitText: {
+    fontSize: 18,
+    color: '#fff',
   },
   fabContainer: {
     position: 'absolute',
