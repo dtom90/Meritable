@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 // Define the Habit type (updated)
 export interface Habit {
@@ -23,7 +23,19 @@ interface HabitProviderProps {
 }
 
 export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
-  const [habits, setHabits] = useState<Habit[]>([]);
+  // Initialize state, potentially from localStorage
+  const [habits, setHabits] = useState<Habit[]>(() => {
+    try {
+      // Check if localStorage is available (important for SSR/server environments)
+      if (typeof window !== 'undefined' && window.localStorage) {
+          const localData = localStorage.getItem('habits');
+          return localData ? JSON.parse(localData) : [];
+      }
+    } catch (error) {
+      console.error("Could not parse habits from localStorage", error);
+    }
+    return []; // Return empty array if localStorage not available or error occurs
+  });
 
   // Updated action to add a new habit
   const addHabit = (habitData: Omit<Habit, 'id'>) => {
@@ -33,6 +45,18 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     };
     setHabits(prevHabits => [...prevHabits, newHabit]);
   };
+
+  // Effect to save habits to localStorage whenever they change
+  useEffect(() => {
+    try {
+        // Check if localStorage is available
+        if (typeof window !== 'undefined' && window.localStorage) {
+            localStorage.setItem('habits', JSON.stringify(habits));
+        }
+    } catch (error) {
+      console.error("Could not save habits to localStorage", error);
+    }
+  }, [habits]);
 
   const value = {
     habits,
