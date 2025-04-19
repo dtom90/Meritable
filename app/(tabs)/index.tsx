@@ -1,7 +1,8 @@
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
@@ -16,9 +17,11 @@ export default function HomeScreen() {
     return `${year}-${month}-${day}`;
   });
   const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
+  const navigation = useNavigation();
+  const [fabHovered, setFabHovered] = useState(false);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <View style={styles.tabContainer}>
         {tabs.map((tab) => (
           <TouchableOpacity
@@ -34,8 +37,32 @@ export default function HomeScreen() {
 
       {/* Added Dynamic Content Area */}
       <ThemedView style={styles.contentContainer}>
-        <ThemedText>Content for {activeTab}</ThemedText>
+        <TouchableOpacity
+          style={styles.fabLarge}
+          onPress={() => navigation.navigate('habits', { focusInput: true })}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.fabText}>Add Habit</Text>
+        </TouchableOpacity>
       </ThemedView>
+
+      {/* Floating Action Button with Tooltip */}
+      <View style={{ position: 'absolute', right: 24, bottom: 24, flexDirection: 'row', alignItems: 'center' }}>
+        {fabHovered && (
+          <View style={styles.tooltipLeft}>
+            <Text style={styles.tooltipText}>add habit</Text>
+          </View>
+        )}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('habits', { focusInput: true })}
+          activeOpacity={0.8}
+          onMouseEnter={() => setFabHovered(true)}
+          onMouseLeave={() => setFabHovered(false)}
+        >
+          <Ionicons name="add" size={40} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -67,5 +94,66 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20, 
     alignItems: 'center', 
+  },
+  fabLarge: {
+    borderRadius: 10,
+    padding: 16,
+    backgroundColor: '#0A84FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  fabText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '500',
+  },
+  fab: {
+    position: 'relative', 
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#0A84FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  tooltip: {
+    marginBottom: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    backgroundColor: '#222',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    zIndex: 10,
+  },
+  tooltipLeft: {
+    marginRight: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    backgroundColor: '#222',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    zIndex: 10,
+    alignSelf: 'center',
+  },
+  tooltipText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

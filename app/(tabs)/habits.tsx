@@ -1,5 +1,6 @@
 import { StyleSheet, View, TextInput, Button, FlatList, Text, TouchableOpacity } from 'react-native';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -14,6 +15,18 @@ export default function HabitsScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [newHabit, setNewHabit] = useState('');
   const textInputRef = useRef<TextInput>(null);
+  const route = useRoute();
+
+  // Focus the input if navigated with { focusInput: true }
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params && (route.params as any).focusInput && textInputRef.current) {
+        setTimeout(() => {
+          textInputRef.current?.focus();
+        }, 100);
+      }
+    }, [route.params])
+  );
 
   const addHabit = () => {
     if (newHabit.trim() === '') return;
