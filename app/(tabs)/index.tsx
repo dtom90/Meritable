@@ -51,7 +51,7 @@ export default function HomeScreen() {
         </TouchableOpacity>}
         {habits.map(habit => (
           <ThemedView key={habit.id} style={styles.habitContainer}>
-            <Text style={styles.habitText}>{habit.text}</Text>
+            <Text style={styles.habitText}>{habit.name}</Text>
             <IconButton
               icon="check" // Checkmark icon
               iconColor="green" // Green color

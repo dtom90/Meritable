@@ -1,16 +1,18 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { StyleSheet, View, TextInput, FlatList, Button, Text, TouchableOpacity } from 'react-native';
-import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useState, useRef, useCallback } from 'react';
+import { StyleSheet, View, TextInput, Button, Text } from 'react-native';
+import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useHabits, Habit } from '@/contexts/HabitContext'; 
+import { useHabits } from '@/contexts/HabitContext'; 
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
 
 export default function HabitsScreen() {
-  const { habits, addHabit, setHabits } = useHabits(); 
+  const { habits, addHabit } = useHabits(); 
   const [newHabitText, setNewHabitText] = useState(''); 
   const textInputRef = useRef<TextInput>(null);
-  const route = useRoute();
-  const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'habits'>>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'habits'>>();
 
   useFocusEffect(
     useCallback(() => {
@@ -20,32 +22,16 @@ export default function HabitsScreen() {
       }
     }, [route.params])
   );
-
+  
   const handleAddHabit = () => {
     if (newHabitText.trim()) {
-      addHabit({ text: newHabitText.trim(), completed: false }); 
+      addHabit({ name: newHabitText.trim() }); 
       setNewHabitText(''); 
     }
   };
 
-  const toggleHabit = (id: string) => {
-    setHabits(
-      habits.map((habit) =>
-        habit.id === id ? { ...habit, completed: !habit.completed } : habit
-      )
-    );
-  };
-
-  const renderItem = ({ item }: { item: Habit }) => (
-    <TouchableOpacity onPress={() => toggleHabit(item.id)} style={styles.habitItem}>
-      <Text style={[styles.habitText, item.completed && styles.completedText]}>
-        {item.text}
-      </Text>
-    </TouchableOpacity>
-  );
-
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <ThemedText type="title" style={styles.title}>Manage Habits</ThemedText>
       <View style={styles.inputContainer}>
         <TextInput
@@ -60,13 +46,12 @@ export default function HabitsScreen() {
         />
         <Button title="Add" onPress={handleAddHabit} />
       </View>
-      <FlatList
-        data={habits}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-      />
-    </ThemedView>
+      {habits.map(habit => (
+        <ThemedView key={habit.id} style={styles.habitContainer}>
+          <Text style={styles.habitText}>{habit.name}</Text>
+        </ThemedView>
+      ))}
+    </View>
   );
 }
 
@@ -94,23 +79,17 @@ const styles = StyleSheet.create({
     color: '#fff', 
     backgroundColor: '#333' 
   },
-  list: {
-    flex: 1,
-  },
-  habitItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  habitContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 16,
+    margin: 16,
+    borderRadius: 10,
   },
   habitText: {
     fontSize: 18,
     color: '#fff',
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: 'grey',
+    flex: 1,
+    textAlign: 'center',
   },
 });
