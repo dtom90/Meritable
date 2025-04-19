@@ -1,14 +1,15 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, TextInput, Button, Text } from 'react-native';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity } from 'react-native';
 import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useHabits } from '@/contexts/HabitContext'; 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
+import { IconButton } from 'react-native-paper';
 
 export default function HabitsScreen() {
-  const { habits, addHabit } = useHabits(); 
+  const { habits, addHabit, deleteHabit } = useHabits(); 
   const [newHabitText, setNewHabitText] = useState(''); 
   const textInputRef = useRef<TextInput>(null);
   const route = useRoute<RouteProp<RootStackParamList, 'habits'>>();
@@ -22,11 +23,17 @@ export default function HabitsScreen() {
       }
     }, [route.params])
   );
-  
+
   const handleAddHabit = () => {
     if (newHabitText.trim()) {
       addHabit({ name: newHabitText.trim() }); 
       setNewHabitText(''); 
+    }
+  };
+
+  const handleDeleteHabit = (habitId: number) => {
+    if (confirm('Are you sure you want to delete this habit?')) {
+      deleteHabit(habitId);
     }
   };
 
@@ -44,11 +51,18 @@ export default function HabitsScreen() {
           blurOnSubmit={false} 
           placeholderTextColor="#888" 
         />
-        <Button title="Add" onPress={handleAddHabit} />
+        <TouchableOpacity style={styles.button} onPress={handleAddHabit}>
+          <Text style={styles.buttonText}>Add</Text>
+        </TouchableOpacity>
       </View>
       {habits.map(habit => (
         <ThemedView key={habit.id} style={styles.habitContainer}>
           <Text style={styles.habitText}>{habit.name}</Text>
+          <IconButton
+            icon="delete"
+            size={24}
+            onPress={() => handleDeleteHabit(habit.id!)}
+          />
         </ThemedView>
       ))}
     </View>
@@ -78,6 +92,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     color: '#fff', 
     backgroundColor: '#333' 
+  },
+  button: {
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   habitContainer: {
     flexDirection: 'row', 

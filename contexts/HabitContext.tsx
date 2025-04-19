@@ -23,6 +23,7 @@ const db = new HabitDatabase();
 interface HabitContextType {
   habits: Habit[];
   addHabit: (habit: Omit<Habit, 'id'>) => Promise<void>;
+  deleteHabit: (habitId: number) => Promise<void>;
 }
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined);
@@ -45,8 +46,17 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     }
   };
 
+  const deleteHabit = async (habitId: number) => {
+    try {
+      await db.habits.delete(habitId);
+      console.log('Habit deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete habit:', error);
+    }
+  };
+
   return (
-    <HabitContext.Provider value={{ habits: allHabits || [], addHabit }}>
+    <HabitContext.Provider value={{ habits: allHabits || [], addHabit, deleteHabit }}>
       {children}
     </HabitContext.Provider>
   );
