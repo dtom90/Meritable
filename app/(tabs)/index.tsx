@@ -1,7 +1,10 @@
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../types';
 import { Ionicons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
 
@@ -17,7 +20,7 @@ export default function HomeScreen() {
     return `${year}-${month}-${day}`;
   });
   const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'habits'>>();
   const [fabHovered, setFabHovered] = useState(false);
 
   return (
@@ -47,18 +50,20 @@ export default function HomeScreen() {
       </ThemedView>
 
       {/* Floating Action Button with Tooltip */}
-      <View style={{ position: 'absolute', right: 24, bottom: 24, flexDirection: 'row', alignItems: 'center' }}>
+      <View style={styles.fabContainer}>
         {fabHovered && (
           <View style={styles.tooltipLeft}>
-            <Text style={styles.tooltipText}>add habit</Text>
+            <Text style={styles.tooltipText}>Add Habit</Text>
           </View>
         )}
         <TouchableOpacity
           style={styles.fab}
           onPress={() => navigation.navigate('habits', { focusInput: true })}
           activeOpacity={0.8}
-          onMouseEnter={() => setFabHovered(true)}
-          onMouseLeave={() => setFabHovered(false)}
+          {...(Platform.OS === 'web' ? {
+            onMouseEnter: () => setFabHovered(true),
+            onMouseLeave: () => setFabHovered(false),
+          } : {})}
         >
           <Ionicons name="add" size={40} color="#fff" />
         </TouchableOpacity>
@@ -94,6 +99,13 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20, 
     alignItems: 'center', 
+  },
+  fabContainer: {
+    position: 'absolute',
+    right: 24,
+    bottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   fabLarge: {
     borderRadius: 10,
@@ -153,7 +165,8 @@ const styles = StyleSheet.create({
   },
   tooltipText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '500',
+    padding: 8,
   },
 });
