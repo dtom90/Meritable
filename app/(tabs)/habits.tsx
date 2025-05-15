@@ -8,7 +8,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { Icon, IconButton } from 'react-native-paper';
 
-export default function HabitsScreen() {
+export default function HabitManager() {
   const { habits, addHabit, deleteHabit } = useHabits(); 
   const [newHabitText, setNewHabitText] = useState(''); 
   const textInputRef = useRef<TextInput>(null);

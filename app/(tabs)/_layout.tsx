@@ -8,6 +8,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Icon } from 'react-native-paper';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -31,8 +32,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+            title: 'Track',
+            tabBarIcon: ({ color }) => <Icon source="clock" size={28} color={color} />,
           }}
         />
         <Tabs.Screen
