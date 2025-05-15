@@ -7,9 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
-import { useHabits } from '@/contexts/HabitContext'; // Import useHabits hook
-import { IconButton } from 'react-native-paper'; // Import IconButton
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useHabits } from '@/hooks/useHabitQueries';
+import { useHabitCompletions, useAddHabitCompletion, useDeleteHabitCompletion } from '@/hooks/useHabitQueries';
+import { IconButton } from 'react-native-paper';
 
 export default function HomeScreen() {
   const tabs = Array.from({ length: 7 }).map((_, index) => {
@@ -26,8 +26,11 @@ export default function HomeScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'index'>>();
   const route = useRoute<RouteProp<RootStackParamList, 'index'>>();
   const [fabHovered, setFabHovered] = useState(false);
-  const { habits, addHabitCompletion, getHabitCompletions, deleteHabitCompletion } = useHabits();
-  const completions = useLiveQuery(() => getHabitCompletions(activeTab), [activeTab]);
+  
+  const { data: habits = [], isLoading: isLoadingHabits } = useHabits();
+  const { data: completions = [], isLoading: isLoadingCompletions } = useHabitCompletions(activeTab);
+  const addCompletionMutation = useAddHabitCompletion();
+  const deleteCompletionMutation = useDeleteHabitCompletion();
 
   useFocusEffect(
     useCallback(() => {
@@ -37,6 +40,14 @@ export default function HomeScreen() {
       }
     }, [route.params])
   );
+
+  if (isLoadingHabits || isLoadingCompletions) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -53,33 +64,37 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Added Dynamic Content Area */}
-        {habits.length === 0 && <TouchableOpacity
-          style={styles.fabLarge}
-          onPress={() => navigation.navigate('habits', { focusInput: true })}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.fabText}>Add Habit</Text>
-        </TouchableOpacity>}
-        {habits.map(habit => (
-          <ThemedView key={habit.id} style={[styles.habitContainer, completions?.includes(habit.id!) && styles.completedHabit]}>
-            <Text style={styles.habitText}>{habit.name}</Text>
-            {!completions?.includes(habit.id!) ? <IconButton
+      {habits.length === 0 && <TouchableOpacity
+        style={styles.fabLarge}
+        onPress={() => navigation.navigate('habits', { focusInput: true })}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabText}>Add Habit</Text>
+      </TouchableOpacity>}
+      {habits.map(habit => (
+        <ThemedView key={habit.id} style={[styles.habitContainer, completions.includes(habit.id!) && styles.completedHabit]}>
+          <Text style={styles.habitText}>{habit.name}</Text>
+          {!completions.includes(habit.id!) ? (
+            <IconButton
               icon="check"
               iconColor="green"
               size={24}
-              onPress={() => addHabitCompletion(habit.id!, activeTab)}
+              onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
               style={styles.habitButton}
-            /> : <IconButton
+              disabled={addCompletionMutation.isPending}
+            />
+          ) : (
+            <IconButton
               icon="restore"
               size={24}
               style={styles.habitButton}
-              onPress={() => deleteHabitCompletion(habit.id!, activeTab)} 
-            />}
-          </ThemedView>
-        ))}
+              onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
+              disabled={deleteCompletionMutation.isPending}
+            />
+          )}
+        </ThemedView>
+      ))}
 
-      {/* Floating Action Button with Tooltip */}
       <View style={styles.fabContainer}>
         {fabHovered && (
           <View style={styles.tooltipLeft}>
@@ -103,6 +118,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
