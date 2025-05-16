@@ -13,7 +13,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <View style={{ flex: 1, alignSelf: 'center', width: '100%' }}>
+    <View className="flex-1 self-center w-full">
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,

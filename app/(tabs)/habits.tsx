@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity } from 'react-native';
 import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -41,18 +41,18 @@ export default function HabitManager() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full">
         <ThemedText>Loading habits...</ThemedText>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Manage Habits</ThemedText>
-      <View style={styles.inputContainer}>
+    <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full">
+      <ThemedText type="title" className="mb-5 text-center">Manage Habits</ThemedText>
+      <View className="flex-row mb-5">
         <TextInput
-          style={styles.input}
+          className="flex-1 p-2.5 mr-2.5 rounded bg-[#333] text-white"
           placeholder="Add a new habit..."
           value={newHabitText}
           onChangeText={setNewHabitText}
@@ -62,22 +62,22 @@ export default function HabitManager() {
           placeholderTextColor="#888"
         />
         <TouchableOpacity 
-          style={[styles.button, addHabitMutation.isPending && styles.buttonDisabled]} 
+          className={`py-3 px-5 rounded items-center ${addHabitMutation.isPending ? 'bg-[#666]' : 'bg-[#007bff]'}`}
           onPress={handleAddHabit}
           disabled={addHabitMutation.isPending}
         >
-          <Text style={styles.buttonText}>
+          <Text className="text-white text-base font-bold">
             {addHabitMutation.isPending ? 'Adding...' : 'Add'}
           </Text>
         </TouchableOpacity>
       </View>
       {habits.map(habit => (
-        <ThemedView key={habit.id} style={styles.habitContainer}>
-          <TouchableOpacity style={styles.trackButton} onPress={() => navigation.navigate('index', { today: true })}>
+        <ThemedView key={habit.id} className="flex-row items-center p-4 my-4 rounded-lg min-h-[68px]">
+          <TouchableOpacity className="flex-row items-center gap-2" onPress={() => navigation.navigate('index', { today: true })}>
             <Icon source="clock" color="#49453f" size={24} />
-            <Text style={styles.trackText}>Track</Text>
+            <Text className="text-[#49453f]">Track</Text>
           </TouchableOpacity>
-          <Text style={styles.habitText}>{habit.name}</Text>
+          <Text className="text-lg text-white flex-1 text-center">{habit.name}</Text>
           <IconButton
             icon="delete"
             size={24}
@@ -90,67 +90,3 @@ export default function HabitManager() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    maxWidth: 800,
-    alignSelf: 'center',
-    width: '100%'
-  },
-  title: {
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  input: {
-    flex: 1,
-    padding: 10,
-    marginRight: 10,
-    borderRadius: 5,
-    color: '#fff',
-    backgroundColor: '#333'
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: '#666',
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  habitContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 16,
-    marginBottom: 16,
-    borderRadius: 10,
-    minHeight: 68
-  },
-  habitText: {
-    fontSize: 18,
-    color: '#fff',
-    flex: 1,
-    textAlign: 'center',
-  },
-  trackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  trackText: {
-    color: '#49453f',
-  },
-});

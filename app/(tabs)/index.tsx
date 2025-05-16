@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useState, useCallback } from 'react';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation, useRoute, useFocusEffect, RouteProp } from '@react-navigation/native';
@@ -43,21 +43,21 @@ export default function HomeScreen() {
 
   if (isLoadingHabits || isLoadingCompletions) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 justify-center items-center">
         <Text>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.tabContainer}>
+    <View className="flex-1">
+      <View className="flex-row justify-around py-2.5 bg-[#1c1c1e] mb-2.5">
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab}
-            style={[styles.tab, activeTab === tab && styles.activeTab]}
+            className={`py-2 px-1.5 ${activeTab === tab ? 'border-b-2 border-[#0A84FF]' : ''}`}
             onPress={() => setActiveTab(tab)}>
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+            <Text className={`text-sm ${activeTab === tab ? 'text-[#0A84FF] font-bold' : 'text-[#8e8e93]'}`}>
               {tab}
             </Text>
           </TouchableOpacity>
@@ -65,31 +65,34 @@ export default function HomeScreen() {
       </View>
 
       {habits.length === 0 && <TouchableOpacity
-        style={styles.fabLarge}
+        className="rounded-lg p-4 bg-[#0A84FF] justify-center items-center shadow-lg"
         onPress={() => navigation.navigate('habits', { focusInput: true })}
         activeOpacity={0.8}
       >
-        <Text style={styles.fabText}>Add Habit</Text>
+        <Text className="text-white text-xl font-medium">Add Habit</Text>
       </TouchableOpacity>}
 
-      <View style={{ maxWidth: 800, alignSelf: 'center', width: '100%' }}>
+      <View className="max-w-3xl self-center w-full">
         {habits.map(habit => (
-          <ThemedView key={habit.id} style={[styles.habitContainer, completions.includes(habit.id!) && styles.completedHabit]}>
-            <Text style={styles.habitText}>{habit.name}</Text>
+          <ThemedView
+            key={habit.id}
+            className={`flex-1 flex-row items-center py-2 px-4 m-4 rounded-lg min-h-[68px] ${completions.includes(habit.id!) ? 'bg-green-500' : 'bg-[#1c1c1e]'}`}
+          >
+            <Text className="text-lg text-white flex-1 text-center">{habit.name}</Text>
             {!completions.includes(habit.id!) ? (
               <IconButton
                 icon="check"
                 iconColor="green"
                 size={24}
                 onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
-                style={styles.habitButton}
+                className="ml-auto mr-0 p-0"
                 disabled={addCompletionMutation.isPending}
               />
             ) : (
               <IconButton
                 icon="restore"
                 size={24}
-                style={styles.habitButton}
+                className="ml-auto mr-0 p-0"
                 onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
                 disabled={deleteCompletionMutation.isPending}
               />
@@ -97,14 +100,14 @@ export default function HomeScreen() {
           </ThemedView>
         ))}
       </View>
-      <View style={styles.fabContainer}>
+      <View className="absolute right-6 bottom-6 flex-row items-center">
         {fabHovered && (
-          <View style={styles.tooltipLeft}>
-            <Text style={styles.tooltipText}>Add Habit</Text>
+          <View className="mr-4 py-1 px-3 bg-[#222] rounded-lg shadow-md z-10 self-center">
+            <Text className="text-white text-base font-medium p-2">Add Habit</Text>
           </View>
         )}
         <TouchableOpacity
-          style={styles.fab}
+          className="relative w-16 h-16 rounded-full bg-[#0A84FF] justify-center items-center shadow-lg"
           onPress={() => navigation.navigate('habits', { focusInput: true })}
           activeOpacity={0.8}
           {...(Platform.OS === 'web' ? {
@@ -119,131 +122,3 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#1c1c1e',
-    marginBottom: 10,
-  },
-  tab: {
-    paddingVertical: 8,
-    paddingHorizontal: 5,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#0A84FF', 
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#8e8e93', 
-  },
-  activeTabText: {
-    color: '#0A84FF', 
-    fontWeight: 'bold',
-  },
-  contentContainer: {
-    padding: 20, 
-    margin: 10,
-    borderRadius: 10,
-    alignItems: 'center', 
-  },
-  habitContainer: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    margin: 16,
-    borderRadius: 10,
-    minHeight: 68
-  },
-  habitText: {
-    fontSize: 18,
-    color: '#fff',
-    flex: 1,
-    textAlign: 'center',
-  },
-  habitButton: {
-    marginLeft: 'auto',
-    marginRight: 0, 
-    padding: 0, 
-  },
-  completedHabit: {
-    backgroundColor: 'green',
-  },
-  fabContainer: {
-    position: 'absolute',
-    right: 24,
-    bottom: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fabLarge: {
-    borderRadius: 10,
-    padding: 16,
-    backgroundColor: '#0A84FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '500',
-  },
-  fab: {
-    position: 'relative', 
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#0A84FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  tooltip: {
-    marginBottom: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    backgroundColor: '#222',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    zIndex: 10,
-  },
-  tooltipLeft: {
-    marginRight: 16,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    backgroundColor: '#222',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    zIndex: 10,
-    alignSelf: 'center',
-  },
-  tooltipText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    padding: 8,
-  },
-});
