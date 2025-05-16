@@ -71,30 +71,32 @@ export default function HomeScreen() {
       >
         <Text style={styles.fabText}>Add Habit</Text>
       </TouchableOpacity>}
-      {habits.map(habit => (
-        <ThemedView key={habit.id} style={[styles.habitContainer, completions.includes(habit.id!) && styles.completedHabit]}>
-          <Text style={styles.habitText}>{habit.name}</Text>
-          {!completions.includes(habit.id!) ? (
-            <IconButton
-              icon="check"
-              iconColor="green"
-              size={24}
-              onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
-              style={styles.habitButton}
-              disabled={addCompletionMutation.isPending}
-            />
-          ) : (
-            <IconButton
-              icon="restore"
-              size={24}
-              style={styles.habitButton}
-              onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
-              disabled={deleteCompletionMutation.isPending}
-            />
-          )}
-        </ThemedView>
-      ))}
 
+      <View style={{ maxWidth: 800, alignSelf: 'center', width: '100%' }}>
+        {habits.map(habit => (
+          <ThemedView key={habit.id} style={[styles.habitContainer, completions.includes(habit.id!) && styles.completedHabit]}>
+            <Text style={styles.habitText}>{habit.name}</Text>
+            {!completions.includes(habit.id!) ? (
+              <IconButton
+                icon="check"
+                iconColor="green"
+                size={24}
+                onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
+                style={styles.habitButton}
+                disabled={addCompletionMutation.isPending}
+              />
+            ) : (
+              <IconButton
+                icon="restore"
+                size={24}
+                style={styles.habitButton}
+                onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
+                disabled={deleteCompletionMutation.isPending}
+              />
+            )}
+          </ThemedView>
+        ))}
+      </View>
       <View style={styles.fabContainer}>
         {fabHovered && (
           <View style={styles.tooltipLeft}>

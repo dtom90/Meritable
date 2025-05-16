@@ -95,6 +95,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
+    maxWidth: 800,
+    alignSelf: 'center',
+    width: '100%'
   },
   title: {
     marginBottom: 20,
@@ -106,8 +109,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
     padding: 10,
     marginRight: 10,
     borderRadius: 5,
@@ -133,7 +134,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    margin: 16,
+    marginTop: 16,
+    marginBottom: 16,
     borderRadius: 10,
     minHeight: 68
   },
