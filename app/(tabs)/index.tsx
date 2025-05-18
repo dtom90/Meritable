@@ -1,8 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useState, useCallback } from 'react';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation, useRoute, useFocusEffect, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 
@@ -23,8 +21,8 @@ export default function HomeScreen() {
     return `${year}-${month}-${day}`;
   });
   const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'index'>>();
-  const route = useRoute<RouteProp<RootStackParamList, 'index'>>();
+  const router = useRouter();
+  const params = useLocalSearchParams();
   const [fabHovered, setFabHovered] = useState(false);
   
   const { data: habits = [], isLoading: isLoadingHabits } = useHabits();
@@ -34,11 +32,11 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (route.params?.today) {
+      if (params.today) {
         setActiveTab(tabs[tabs.length - 1]);
-        navigation.setParams({ today: undefined });
+        router.replace('/');
       }
-    }, [route.params])
+    }, [params])
   );
 
   if (isLoadingHabits || isLoadingCompletions) {
@@ -66,7 +64,7 @@ export default function HomeScreen() {
 
       {habits.length === 0 && <TouchableOpacity
         className="rounded-lg p-4 bg-[#0A84FF] justify-center items-center shadow-lg"
-        onPress={() => navigation.navigate('habits', { focusInput: true })}
+        onPress={() => router.push('/habits?focusInput=true')}
         activeOpacity={0.8}
       >
         <Text className="text-white text-xl font-medium">Add Habit</Text>
@@ -74,7 +72,7 @@ export default function HomeScreen() {
 
       <View className="max-w-3xl self-center w-full">
         {habits.map(habit => (
-          <ThemedView
+          <View
             key={habit.id}
             className={`flex-1 flex-row items-center py-2 px-4 m-4 rounded-lg min-h-[68px] ${completions.includes(habit.id!) ? 'bg-green-500' : 'bg-[#1c1c1e]'}`}
           >
@@ -97,7 +95,7 @@ export default function HomeScreen() {
                 disabled={deleteCompletionMutation.isPending}
               />
             )}
-          </ThemedView>
+          </View>
         ))}
       </View>
       <View className="absolute right-6 bottom-6 flex-row items-center">
@@ -108,7 +106,7 @@ export default function HomeScreen() {
         )}
         <TouchableOpacity
           className="relative w-16 h-16 rounded-full bg-[#0A84FF] justify-center items-center shadow-lg"
-          onPress={() => navigation.navigate('habits', { focusInput: true })}
+          onPress={() => router.push('/habits?focusInput=true')}
           activeOpacity={0.8}
           {...(Platform.OS === 'web' ? {
             onMouseEnter: () => setFabHovered(true),

@@ -1,11 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { View, TextInput, Text, TouchableOpacity } from 'react-native';
-import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useHabits, useAddHabit, useDeleteHabit } from '@/hooks/useHabitQueries';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types';
 import { Icon, IconButton } from 'react-native-paper';
 
 export default function HabitManager() {
@@ -14,16 +12,16 @@ export default function HabitManager() {
   const deleteHabitMutation = useDeleteHabit();
   const [newHabitText, setNewHabitText] = useState('');
   const textInputRef = useRef<TextInput>(null);
-  const route = useRoute<RouteProp<RootStackParamList, 'habits'>>();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'habits'>>();
+  const router = useRouter();
+  const params = useLocalSearchParams();
 
   useFocusEffect(
     useCallback(() => {
-      if (route.params?.focusInput) {
+      if (params.focusInput) {
         textInputRef.current?.focus();
-        navigation.setParams({ focusInput: false });
+        router.replace('/habits');
       }
-    }, [route.params])
+    }, [params])
   );
 
   const handleAddHabit = () => {
@@ -73,7 +71,7 @@ export default function HabitManager() {
       </View>
       {habits.map(habit => (
         <ThemedView key={habit.id} className="flex-row items-center p-4 my-4 rounded-lg min-h-[68px]">
-          <TouchableOpacity className="flex-row items-center gap-2" onPress={() => navigation.navigate('index', { today: true })}>
+          <TouchableOpacity className="flex-row items-center gap-2" onPress={() => router.push('/?today=true')}>
             <Icon source="clock" color="#49453f" size={24} />
             <Text className="text-[#49453f]">Track</Text>
           </TouchableOpacity>
