@@ -2,12 +2,12 @@ import React, { useState, useRef, useCallback } from 'react';
 import { View, TextInput, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useAddHabit, useDeleteHabit } from '@/hooks/useHabitQueries';
+import { useListHabits, useCreateHabit, useDeleteHabit } from '@/hooks/useHabitQueries';
 import { Icon, IconButton } from 'react-native-paper';
 
 export default function HabitManager() {
   const { data: habits = [], isLoading } = useListHabits();
-  const addHabitMutation = useAddHabit();
+  const addHabitMutation = useCreateHabit();
   const deleteHabitMutation = useDeleteHabit();
   const [newHabitText, setNewHabitText] = useState('');
   const textInputRef = useRef<TextInput>(null);
@@ -23,7 +23,7 @@ export default function HabitManager() {
     }, [params])
   );
 
-  const handleAddHabit = () => {
+  const handleCreateHabit = () => {
     if (newHabitText.trim()) {
       addHabitMutation.mutate({ name: newHabitText.trim() });
       setNewHabitText('');
@@ -57,7 +57,7 @@ export default function HabitManager() {
             placeholder="Add a new habit..."
             value={newHabitText}
             onChangeText={setNewHabitText}
-            onSubmitEditing={handleAddHabit}
+            onSubmitEditing={handleCreateHabit}
             ref={textInputRef}
             blurOnSubmit={false}
             placeholderTextColor={Colors.textSecondary}
@@ -65,7 +65,7 @@ export default function HabitManager() {
           <TouchableOpacity 
             className="py-3 px-5 rounded items-center"
             style={{ backgroundColor: addHabitMutation.isPending ? Colors.textTertiary : Colors.primary }}
-            onPress={handleAddHabit}
+            onPress={handleCreateHabit}
             disabled={addHabitMutation.isPending}
           >
             <Text className="text-base font-bold" style={{ color: Colors.text }}>

@@ -2,19 +2,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dexieDb } from '../db/dexieDb';
 import { Habit, HabitCompletion } from '../db/types'
 
-// Query keys
+/**
+ *  Query keys
+ */
+
 const HABITS_QUERY_KEY = 'habits';
 const HABIT_COMPLETIONS_QUERY_KEY = 'habitCompletions';
 
-// Hooks for habits
-export const useListHabits = () => {
-  return useQuery({
-    queryKey: [HABITS_QUERY_KEY],
-    queryFn: () => dexieDb.habits.toArray(),
-  });
-};
+/**
+ *  Hooks for habits
+ */
 
-export const useAddHabit = () => {
+export const useCreateHabit = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -24,6 +23,13 @@ export const useAddHabit = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
     },
+  });
+};
+
+export const useListHabits = () => {
+  return useQuery({
+    queryKey: [HABITS_QUERY_KEY],
+    queryFn: () => dexieDb.habits.toArray(),
   });
 };
 
@@ -42,21 +48,11 @@ export const useDeleteHabit = () => {
   });
 };
 
-// Hooks for habit completions
-export const useListHabitCompletions = (date: string) => {
-  return useQuery({
-    queryKey: [HABIT_COMPLETIONS_QUERY_KEY, date],
-    queryFn: async () => {
-      const completions = await dexieDb.habitCompletions
-        .where('date')
-        .equals(date)
-        .toArray();
-      return completions.map((completion: HabitCompletion) => completion.habitId);
-    },
-  });
-};
+/**
+ *  Hooks for habit completions
+ */
 
-export const useAddHabitCompletion = () => {
+export const useCreateHabitCompletion = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -67,6 +63,19 @@ export const useAddHabitCompletion = () => {
       queryClient.invalidateQueries({ 
         queryKey: [HABIT_COMPLETIONS_QUERY_KEY, date] 
       });
+    },
+  });
+};
+
+export const useListHabitCompletions = (date: string) => {
+  return useQuery({
+    queryKey: [HABIT_COMPLETIONS_QUERY_KEY, date],
+    queryFn: async () => {
+      const completions = await dexieDb.habitCompletions
+        .where('date')
+        .equals(date)
+        .toArray();
+      return completions.map((completion: HabitCompletion) => completion.habitId);
     },
   });
 };

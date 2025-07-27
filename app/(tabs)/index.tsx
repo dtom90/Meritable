@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
 import { useListHabits } from '@/hooks/useHabitQueries';
-import { useListHabitCompletions, useAddHabitCompletion, useDeleteHabitCompletion } from '@/hooks/useHabitQueries';
+import { useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/hooks/useHabitQueries';
 import { IconButton } from 'react-native-paper';
 
 export default function HomeScreen() {
@@ -27,7 +27,7 @@ export default function HomeScreen() {
   
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
   const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(activeTab);
-  const addCompletionMutation = useAddHabitCompletion();
+  const addCompletionMutation = useCreateHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
 
   useFocusEffect(
