@@ -88,7 +88,7 @@ export default function HomeScreen() {
                 icon="check"
                 iconColor={Colors.success}
                 size={24}
-                onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
+                onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, completionDate: activeTab })}
                 className="ml-auto mr-0 p-0"
                 disabled={addCompletionMutation.isPending}
               />
@@ -98,7 +98,7 @@ export default function HomeScreen() {
                 iconColor={Colors.text}
                 size={24}
                 className="ml-auto mr-0 p-0"
-                onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, date: activeTab })}
+                onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, completionDate: activeTab })}
                 disabled={deleteCompletionMutation.isPending}
               />
             )}

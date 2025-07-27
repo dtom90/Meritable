@@ -17,8 +17,8 @@ export const useCreateHabit = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (habitData: Omit<Habit, 'id'>) => {
-      await dexieDb.habits.add(habitData);
+    mutationFn: async (habitData: Omit<Habit, 'id' | 'shouldSync'>) => {
+      await dexieDb.habits.add({ ...habitData, shouldSync: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
@@ -56,24 +56,24 @@ export const useCreateHabitCompletion = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ habitId, date }: { habitId: number; date: string }) => {
-      await dexieDb.habitCompletions.add({ habitId, date });
+    mutationFn: async ({ habitId, completionDate }: { habitId: number; completionDate: string }) => {
+      await dexieDb.habitCompletions.add({ habitId, completionDate, shouldSync: true });
     },
-    onSuccess: (_, { date }) => {
+    onSuccess: (_, { completionDate }) => {
       queryClient.invalidateQueries({ 
-        queryKey: [HABIT_COMPLETIONS_QUERY_KEY, date] 
+        queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate] 
       });
     },
   });
 };
 
-export const useListHabitCompletions = (date: string) => {
+export const useListHabitCompletions = (completionDate: string) => {
   return useQuery({
-    queryKey: [HABIT_COMPLETIONS_QUERY_KEY, date],
+    queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate],
     queryFn: async () => {
       const completions = await dexieDb.habitCompletions
-        .where('date')
-        .equals(date)
+        .where('completionDate')
+        .equals(completionDate)
         .toArray();
       return completions.map((completion: HabitCompletion) => completion.habitId);
     },
@@ -84,12 +84,12 @@ export const useDeleteHabitCompletion = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ habitId, date }: { habitId: number; date: string }) => {
-      await dexieDb.habitCompletions.where({ habitId, date }).delete();
+    mutationFn: async ({ habitId, completionDate }: { habitId: number; completionDate: string }) => {
+      await dexieDb.habitCompletions.where({ habitId, completionDate }).delete();
     },
-    onSuccess: (_, { date }) => {
+    onSuccess: (_, { completionDate }) => {
       queryClient.invalidateQueries({ 
-        queryKey: [HABIT_COMPLETIONS_QUERY_KEY, date] 
+        queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate] 
       });
     },
   });

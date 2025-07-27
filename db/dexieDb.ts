@@ -9,7 +9,7 @@ class HabitDatabase extends Dexie {
     super('HabitDatabase');
     this.version(1).stores({
       habits: '++id',
-      habitCompletions: '++id, habitId, date'
+      habitCompletions: '++id, habitId, completionDate'
     });
   }
 }
