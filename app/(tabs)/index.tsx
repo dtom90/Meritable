@@ -5,8 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
-import { useListHabits } from '@/hooks/useHabitQueries';
-import { useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/hooks/useHabitQueries';
+import { useListHabits } from '@/db/useHabitDb';
+import { useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
 import { IconButton } from 'react-native-paper';
 
 export default function HomeScreen() {

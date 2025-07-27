@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { View, TextInput, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useCreateHabit, useDeleteHabit } from '@/hooks/useHabitQueries';
+import { useListHabits, useCreateHabit, useDeleteHabit } from '@/db/useHabitDb';
 import { Icon, IconButton } from 'react-native-paper';
 
 export default function HabitManager() {

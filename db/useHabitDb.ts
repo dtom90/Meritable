@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { dexieDb } from '../db/dexieDb';
-import { Habit, HabitCompletion } from '../db/types'
+import { dexieDb } from './dexieDb';
+import { Habit, HabitCompletion } from './types'
 
 /**
  *  Query keys
