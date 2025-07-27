@@ -2,11 +2,11 @@ import React, { useState, useRef, useCallback } from 'react';
 import { View, TextInput, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useHabits, useAddHabit, useDeleteHabit } from '@/hooks/useHabitQueries';
+import { useListHabits, useAddHabit, useDeleteHabit } from '@/hooks/useHabitQueries';
 import { Icon, IconButton } from 'react-native-paper';
 
 export default function HabitManager() {
-  const { data: habits = [], isLoading } = useHabits();
+  const { data: habits = [], isLoading } = useListHabits();
   const addHabitMutation = useAddHabit();
   const deleteHabitMutation = useDeleteHabit();
   const [newHabitText, setNewHabitText] = useState('');

@@ -5,8 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
-import { useHabits } from '@/hooks/useHabitQueries';
-import { useHabitCompletions, useAddHabitCompletion, useDeleteHabitCompletion } from '@/hooks/useHabitQueries';
+import { useListHabits } from '@/hooks/useHabitQueries';
+import { useListHabitCompletions, useAddHabitCompletion, useDeleteHabitCompletion } from '@/hooks/useHabitQueries';
 import { IconButton } from 'react-native-paper';
 
 export default function HomeScreen() {
@@ -25,8 +25,8 @@ export default function HomeScreen() {
   const params = useLocalSearchParams();
   const [fabHovered, setFabHovered] = useState(false);
   
-  const { data: habits = [], isLoading: isLoadingHabits } = useHabits();
-  const { data: completions = [], isLoading: isLoadingCompletions } = useHabitCompletions(activeTab);
+  const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
+  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(activeTab);
   const addCompletionMutation = useAddHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
 

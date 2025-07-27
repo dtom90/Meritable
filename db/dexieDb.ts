@@ -1,15 +1,5 @@
 import Dexie, { Table } from 'dexie';
-
-export interface Habit {
-  id?: number;
-  name: string;
-}
-
-export interface HabitCompletion {
-  id?: number;
-  habitId: number;
-  date: string;
-}
+import { Habit, HabitCompletion } from './types'
 
 class HabitDatabase extends Dexie {
   habits!: Table<Habit>;
@@ -24,4 +14,4 @@ class HabitDatabase extends Dexie {
   }
 }
 
-export const db = new HabitDatabase(); 
+export const dexieDb = new HabitDatabase();
