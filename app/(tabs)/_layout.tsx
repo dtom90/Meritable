@@ -40,6 +40,13 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <Ionicons name="list" size={28} color={color} />,
           }}
         />
+        <Tabs.Screen
+          name="data"
+          options={{
+            title: 'Data',
+            tabBarIcon: ({ color }) => <Ionicons name="cloud-download" size={28} color={color} />,
+          }}
+        />
       </Tabs>
     </View>
   );
