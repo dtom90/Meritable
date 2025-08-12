@@ -20,20 +20,20 @@ export default function HomeScreen() {
     const day = targetDate.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   });
-  const [activeTab, setActiveTab] = useState(tabs[tabs.length - 1]);
+  const [selectedDate, setSelectedDate] = useState(tabs[tabs.length - 1]);
   const router = useRouter();
   const params = useLocalSearchParams();
   const [fabHovered, setFabHovered] = useState(false);
   
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
-  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(activeTab);
+  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(selectedDate);
   const addCompletionMutation = useCreateHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
 
   useFocusEffect(
     useCallback(() => {
       if (params.today) {
-        setActiveTab(tabs[tabs.length - 1]);
+        setSelectedDate(tabs[tabs.length - 1]);
         router.replace('/');
       }
     }, [params])
@@ -53,12 +53,12 @@ export default function HomeScreen() {
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab}
-            className={`py-2 px-1.5 ${activeTab === tab ? 'border-b-2' : ''}`}
-            style={activeTab === tab ? { borderBottomColor: Colors.primary } : {}}
-            onPress={() => setActiveTab(tab)}>
+            className={`py-2 px-1.5 ${selectedDate === tab ? 'border-b-2' : ''}`}
+            style={selectedDate === tab ? { borderBottomColor: Colors.primary } : {}}
+            onPress={() => setSelectedDate(tab)}>
             <Text 
-              className={`text-sm ${activeTab === tab ? 'font-bold' : ''}`}
-              style={{ color: activeTab === tab ? Colors.primary : Colors.textSecondary }}
+              className={`text-sm ${selectedDate === tab ? 'font-bold' : ''}`}
+              style={{ color: selectedDate === tab ? Colors.primary : Colors.textSecondary }}
             >
               {tab}
             </Text>
@@ -88,7 +88,7 @@ export default function HomeScreen() {
                 icon="check"
                 iconColor={Colors.success}
                 size={24}
-                onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, completionDate: activeTab })}
+                onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
                 className="ml-auto mr-0 p-0"
                 disabled={addCompletionMutation.isPending}
               />
@@ -98,7 +98,7 @@ export default function HomeScreen() {
                 iconColor={Colors.text}
                 size={24}
                 className="ml-auto mr-0 p-0"
-                onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, completionDate: activeTab })}
+                onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
                 disabled={deleteCompletionMutation.isPending}
               />
             )}

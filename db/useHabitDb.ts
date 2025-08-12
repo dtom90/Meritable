@@ -78,7 +78,8 @@ export const useListHabitCompletions = (completionDate: string) => {
   return useQuery({
     queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate],
     queryFn: async () => {
-      const completions = await activeDb.getHabitCompletions();
+      const completions = await activeDb.getHabitCompletions(completionDate);
+      console.log('completions', completions);
       return completions.map((completion: HabitCompletion) => completion.habitId);
     },
   });
