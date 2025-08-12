@@ -17,8 +17,8 @@ export const useCreateHabit = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (habitData: Omit<Habit, 'id' | 'shouldSync'>) => {
-      await dexieDb.habits.add({ ...habitData, shouldSync: true });
+    mutationFn: async (habitData: Omit<Habit, 'id'>) => {
+      await dexieDb.habits.add({ ...habitData });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
@@ -57,7 +57,7 @@ export const useCreateHabitCompletion = () => {
   
   return useMutation({
     mutationFn: async ({ habitId, completionDate }: { habitId: number; completionDate: string }) => {
-      await dexieDb.habitCompletions.add({ habitId, completionDate, shouldSync: true });
+      await dexieDb.habitCompletions.add({ habitId, completionDate });
     },
     onSuccess: (_, { completionDate }) => {
       queryClient.invalidateQueries({ 
