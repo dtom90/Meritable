@@ -1,7 +1,7 @@
 import Dexie, { Table } from 'dexie';
-import { Habit, HabitCompletion } from './types'
+import { Habit, HabitCompletion, HabitDatabaseInterface, HabitInput } from './types'
 
-class HabitDatabase extends Dexie {
+class DexieDb extends Dexie implements HabitDatabaseInterface {
   habits!: Table<Habit>;
   habitCompletions!: Table<HabitCompletion>;
 
@@ -13,42 +13,57 @@ class HabitDatabase extends Dexie {
     });
   }
 
-  // Wrapper methods for automatic timestamp handling
-  async addHabit(habit: Omit<Habit, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
+  // Implementation of HabitDatabaseInterface methods
+  async createHabit(habit: HabitInput): Promise<Habit> {
     const now = new Date().toISOString();
     const habitWithTimestamps: Habit = {
       ...habit,
+      id: await this.habits.add({
+        ...habit,
+        created_at: now,
+        updated_at: now
+      }),
       created_at: now,
       updated_at: now
     };
-    return await this.habits.add(habitWithTimestamps);
+    return habitWithTimestamps;
   }
 
-  async updateHabit(id: number, updates: Partial<Habit>): Promise<void> {
-    const updatesWithTimestamp = {
-      ...updates,
-      updated_at: new Date().toISOString()
-    };
-    await this.habits.update(id, updatesWithTimestamp);
+  async getHabits(): Promise<Habit[]> {
+    return await this.habits.toArray();
   }
 
-  async addHabitCompletion(completion: Omit<HabitCompletion, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
+  async deleteHabit(id: number): Promise<void> {
+    await this.habits.delete(id);
+    // Also delete related completions
+    await this.habitCompletions.where('habitId').equals(id).delete();
+  }
+
+  async createHabitCompletion(completion: Omit<HabitCompletion, 'id'>): Promise<HabitCompletion> {
     const now = new Date().toISOString();
     const completionWithTimestamps: HabitCompletion = {
       ...completion,
+      id: await this.habitCompletions.add({
+        ...completion,
+        created_at: now,
+        updated_at: now
+      }),
       created_at: now,
       updated_at: now
     };
-    return await this.habitCompletions.add(completionWithTimestamps);
+    return completionWithTimestamps;
   }
 
-  async updateHabitCompletion(id: number, updates: Partial<HabitCompletion>): Promise<void> {
-    const updatesWithTimestamp = {
-      ...updates,
-      updated_at: new Date().toISOString()
-    };
-    await this.habitCompletions.update(id, updatesWithTimestamp);
+  async getHabitCompletions(habitId?: number): Promise<HabitCompletion[]> {
+    if (habitId) {
+      return await this.habitCompletions.where('habitId').equals(habitId).toArray();
+    }
+    return await this.habitCompletions.toArray();
+  }
+
+  async deleteHabitCompletion(id: number): Promise<void> {
+    await this.habitCompletions.delete(id);
   }
 }
 
-export const dexieDb = new HabitDatabase();
+export { DexieDb }

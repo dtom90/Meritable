@@ -40,3 +40,6 @@ app-example
 # IDEs
 .idea
 .cursor
+
+# Environment variables
+.env
