@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useDataSource } from '@/contexts/DataSourceContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,6 +9,7 @@ export default function DataPage() {
   const { currentDataSource, setDataSource } = useDataSource();
   const { isAuthenticated, user, signOut } = useAuth();
   const [showLoginOverlay, setShowLoginOverlay] = useState(false);
+  const [showSignOutAlert, setShowSignOutAlert] = useState(false);
 
   const toggleDataSource = () => {
     if (currentDataSource === 'local') {
@@ -33,22 +34,41 @@ export default function DataPage() {
   };
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out? This will switch you back to local database.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            await signOut();
-            // Switch back to local database when signing out
-            setDataSource('local');
+    console.log('handleSignOut called');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('user:', user);
+    
+    if (Platform.OS === 'web') {
+      // Use custom modal for web
+      setShowSignOutAlert(true);
+    } else {
+      // Use native Alert for mobile
+      Alert.alert(
+        'Sign Out',
+        'Are you sure you want to sign out? This will switch you back to local database.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign Out',
+            style: 'destructive',
+            onPress: async () => {
+              await signOut();
+              console.log('Sign out confirmed');
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
+  };
+
+  const confirmSignOut = async () => {
+    await signOut();
+    console.log('Sign out confirmed');
+    setShowSignOutAlert(false);
+  };
+
+  const cancelSignOut = () => {
+    setShowSignOutAlert(false);
   };
 
   return (
@@ -90,11 +110,15 @@ export default function DataPage() {
             </View>
             
             {currentDataSource === 'cloud' && !isAuthenticated && (
-              <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: Colors.card }}>
-                <Text className="text-sm text-center" style={{ color: Colors.warning }}>
-                  ⚠️ You need to sign in to access cloud data
+              <TouchableOpacity
+                className="w-full h-12 rounded-lg items-center justify-center mt-4"
+                style={{ backgroundColor: Colors.primary }}
+                onPress={() => setShowLoginOverlay(true)}
+              >
+                <Text className="text-white font-semibold text-base">
+                  Sign In
                 </Text>
-              </View>
+              </TouchableOpacity>
             )}
             
             {currentDataSource === 'cloud' && isAuthenticated && (
@@ -128,6 +152,40 @@ export default function DataPage() {
 
         </ScrollView>
       </View>
+
+      {/* Custom Sign Out Alert Modal for Web */}
+      {showSignOutAlert && (
+        <View className="absolute inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+          <View className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full">
+            <Text className="text-xl font-bold mb-3 text-center text-gray-800">
+              Sign Out
+            </Text>
+            <Text className="text-base mb-6 text-center text-gray-600">
+              Are you sure you want to sign out? This will switch you back to local database.
+            </Text>
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 h-12 rounded-lg items-center justify-center"
+                style={{ backgroundColor: Colors.textTertiary }}
+                onPress={cancelSignOut}
+              >
+                <Text className="text-white font-semibold text-base">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 h-12 rounded-lg items-center justify-center"
+                style={{ backgroundColor: Colors.error }}
+                onPress={confirmSignOut}
+              >
+                <Text className="text-white font-semibold text-base">
+                  Sign Out
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
       <LoginOverlay
         visible={showLoginOverlay}

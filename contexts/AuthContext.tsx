@@ -80,7 +80,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log('signOut called');
+    const { error } = await supabase.auth.signOut();
+    console.log('signOut error', error);
   };
 
   const value: AuthContextType = {
