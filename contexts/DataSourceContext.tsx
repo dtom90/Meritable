@@ -21,7 +21,7 @@ interface DataSourceProviderProps {
 }
 
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
-  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>('local');
+  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>('cloud');
 
   // Initialize database instances
   const localDb = new DexieDb();
