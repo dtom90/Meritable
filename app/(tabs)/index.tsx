@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
@@ -10,20 +10,31 @@ import { useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitComple
 import { IconButton } from 'react-native-paper';
 
 export default function HomeScreen() {
-  const tabs = Array.from({ length: 7 }).map((_, index) => {
-    const today = new Date();
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() - (6 - index));
+  const tabs = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, index) => {
+      const today = new Date();
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() - (6 - index));
 
-    const year = targetDate.getFullYear();
-    const month = (targetDate.getMonth() + 1).toString().padStart(2, '0');
-    const day = targetDate.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  });
+      const year = targetDate.getFullYear();
+      const month = (targetDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = targetDate.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+  }, []);
   const [selectedDate, setSelectedDate] = useState(tabs[tabs.length - 1]);
   const router = useRouter();
   const params = useLocalSearchParams();
   const [fabHovered, setFabHovered] = useState(false);
+  
+  // Memoized function to format dates consistently across timezones
+  const formatDate = useMemo(() => {
+    return (dateString: string) => {
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', { day: 'numeric', weekday: 'short' });
+    };
+  }, []);
   
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
   const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(selectedDate);
@@ -60,7 +71,7 @@ export default function HomeScreen() {
               className={`text-sm ${selectedDate === tab ? 'font-bold' : ''}`}
               style={{ color: selectedDate === tab ? Colors.primary : Colors.textSecondary }}
             >
-              {tab}
+              {formatDate(tab)}
             </Text>
           </TouchableOpacity>
         ))}
