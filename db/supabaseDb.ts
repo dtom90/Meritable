@@ -1,19 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
 import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './types'
+import { supabaseClient } from './supabaseClient'
 
 export class SupabaseDb extends HabitDatabaseInterface {
   private supabase: any
 
   constructor() {
     super()
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || ''
-    const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Missing Supabase environment variables. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY')
-    }
-
-    this.supabase = createClient(supabaseUrl, supabaseAnonKey)
+    this.supabase = supabaseClient
   }
 
   // Habit operations
@@ -94,4 +87,4 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 }
 
-export const habitDb = new SupabaseDb()
+

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import { DexieDb } from '@/db/dexieDb';
 import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/types';
@@ -23,19 +23,19 @@ interface DataSourceProviderProps {
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
   const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>('cloud');
 
-  // Initialize database instances
-  const localDb = new DexieDb();
-  const cloudDb = new SupabaseDb();
+  // Initialize database instances once, not on every render
+  const [localDb] = useState(() => new DexieDb());
+  const [cloudDb] = useState(() => new SupabaseDb());
 
-  // Get active database based on current source
-  const getActiveDb = (): HabitDatabaseInterface => {
+  // Get active database based on current source - memoized to prevent unnecessary re-renders
+  const activeDb = useMemo((): HabitDatabaseInterface => {
     return currentDataSource === 'cloud' ? cloudDb : localDb;
-  };
+  }, [currentDataSource, cloudDb, localDb]);
 
   const value: DataSourceContextType = {
     currentDataSource,
     setDataSource: setCurrentDataSource,
-    activeDb: getActiveDb(),
+    activeDb,
   };
 
   return (
