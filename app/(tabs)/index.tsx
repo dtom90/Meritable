@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -86,36 +86,39 @@ export default function HomeScreen() {
         <Text className="text-xl font-medium" style={{ color: Colors.text }}>Add Habit</Text>
       </TouchableOpacity>}
 
-      <View className="max-w-3xl self-center w-full">
-        {habits.map(habit => (
-          <View
-            key={habit.id}
-            className="flex-1 flex-row items-center py-2 px-4 m-4 rounded-lg min-h-[68px]"
-            style={{ backgroundColor: completions.includes(habit.id!) ? Colors.success : Colors.surface }}
-          >
-            <Text className="text-lg flex-1 text-center" style={{ color: Colors.text }}>{habit.name}</Text>
-            {!completions.includes(habit.id!) ? (
-              <IconButton
-                icon="check"
-                iconColor={Colors.success}
-                size={24}
-                onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
-                className="ml-auto mr-0 p-0"
-                disabled={addCompletionMutation.isPending}
-              />
-            ) : (
-              <IconButton
-                icon="restore"
-                iconColor={Colors.text}
-                size={24}
-                className="ml-auto mr-0 p-0"
-                onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
-                disabled={deleteCompletionMutation.isPending}
-              />
-            )}
-          </View>
-        ))}
-      </View>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="max-w-3xl self-center w-full">
+          {habits.map(habit => (
+            <View
+              key={habit.id}
+              className="flex-1 flex-row items-center py-2 px-4 m-4 rounded-lg min-h-[68px]"
+              style={{ backgroundColor: completions.includes(habit.id!) ? Colors.success : Colors.surface }}
+            >
+              <Text className="text-lg flex-1 text-center" style={{ color: Colors.text }}>{habit.name}</Text>
+              {!completions.includes(habit.id!) ? (
+                <IconButton
+                  icon="check"
+                  iconColor={Colors.success}
+                  size={24}
+                  onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
+                  className="ml-auto mr-0 p-0"
+                  disabled={addCompletionMutation.isPending}
+                />
+              ) : (
+                <IconButton
+                  icon="restore"
+                  iconColor={Colors.text}
+                  size={24}
+                  className="ml-auto mr-0 p-0"
+                  onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
+                  disabled={deleteCompletionMutation.isPending}
+                />
+              )}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
       <View className="absolute right-6 bottom-6 flex-row items-center">
         {fabHovered && (
           <View className="mr-4 py-1 px-3 rounded-lg shadow-md z-10 self-center" style={{ backgroundColor: Colors.card }}>
