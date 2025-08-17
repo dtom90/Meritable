@@ -36,6 +36,21 @@
           "resizeMode": "contain",
           "backgroundColor": "#000000"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1",
+            "useFrameworks": "static",
+            "buildConfiguration": "Debug",
+            "compilerFlags": {
+              "GCC_C_LANGUAGE_STANDARD": "c17",
+              "CLANG_CXX_LANGUAGE_STANDARD": "c++17",
+              "CLANG_CXX_LIBRARY": "libc++"
+            }
+          }
+        }
       ]
     ],
     "experiments": {
