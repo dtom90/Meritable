@@ -38,8 +38,8 @@
     "expo-system-ui": "~5.0.10",
     "expo-web-browser": "~14.2.0",
     "nativewind": "^4.1.23",
-    "react": "19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "19.1.1",
+    "react-dom": "^19.1.1",
     "react-native": "^0.79.5",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-paper": "^5.13.3",
@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@react-native-community/cli": "^20.0.0",
     "@types/jest": "^29.5.12",
     "@types/react": "~19.0.10",
     "@types/react-test-renderer": "^18.0.7",
