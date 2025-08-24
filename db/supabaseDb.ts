@@ -37,6 +37,15 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async deleteHabit(id: number): Promise<void> {
+    // First delete all habit completions for this habit
+    const { error: completionsError } = await this.supabase
+      .from('habit_completions')
+      .delete()
+      .eq('habit_id', id)
+
+    if (completionsError) throw completionsError
+
+    // Then delete the habit
     const { error } = await this.supabase
       .from('habits')
       .delete()

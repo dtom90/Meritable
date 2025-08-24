@@ -34,9 +34,10 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   }
 
   async deleteHabit(id: number): Promise<void> {
-    await this.habits.delete(id);
-    // Also delete related completions
+    // First delete related completions
     await this.habitCompletions.where('habitId').equals(id).delete();
+    // Then delete the habit
+    await this.habits.delete(id);
   }
 
   async createHabitCompletion(completion: Omit<HabitCompletion, 'id'>): Promise<HabitCompletion> {
