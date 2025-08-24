@@ -41,7 +41,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
     const { error: completionsError } = await this.supabase
       .from('habit_completions')
       .delete()
-      .eq('habit_id', id)
+      .eq('habitId', id)
 
     if (completionsError) throw completionsError
 
