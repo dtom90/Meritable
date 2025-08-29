@@ -1,13 +1,13 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useState, useCallback, useMemo } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { IconButton } from 'react-native-paper';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
-
 import { Colors } from '@/constants/Colors';
-import { useListHabits } from '@/db/useHabitDb';
-import { useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
-import { IconButton } from 'react-native-paper';
+import { useListHabits, useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
+import useWindowWidth from '@/hooks/useWindowWidth'
+
+const widthThreshold = 950;
 
 export default function HomeScreen() {
   const tabs = useMemo(() => {
@@ -25,7 +25,6 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(tabs[tabs.length - 1]);
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [fabHovered, setFabHovered] = useState(false);
   
   // Memoized function to format dates consistently across timezones
   const formatDate = useMemo(() => {
@@ -40,6 +39,8 @@ export default function HomeScreen() {
   const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(selectedDate);
   const addCompletionMutation = useCreateHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
+
+  const width = useWindowWidth();
 
   useFocusEffect(
     useCallback(() => {
@@ -116,29 +117,50 @@ export default function HomeScreen() {
               )}
             </View>
           ))}
+          {width < widthThreshold &&
+            <AddHabitButton withTooltip={false} />
+          }
         </View>
       </ScrollView>
 
-      <View className="absolute right-6 bottom-6 flex-row items-center">
-        {fabHovered && (
-          <View className="mr-4 py-1 px-3 rounded-lg shadow-md z-10 self-center" style={{ backgroundColor: Colors.card }}>
-            <Text className="text-base font-medium p-2" style={{ color: Colors.text }}>Add Habit</Text>
-          </View>
-        )}
-        <TouchableOpacity
-          className="relative w-16 h-16 rounded-full justify-center items-center shadow-lg"
-          style={{ backgroundColor: Colors.primary }}
-          onPress={() => router.push('/habits?focusInput=true')}
-          activeOpacity={0.8}
-          {...(Platform.OS === 'web' ? {
-            onMouseEnter: () => setFabHovered(true),
-            onMouseLeave: () => setFabHovered(false),
-          } : {})}
-        >
-          <Ionicons name="add" size={40} color={Colors.text} />
-        </TouchableOpacity>
-      </View>
+      {width >= widthThreshold &&
+        <AddHabitButton withTooltip={true} />
+      }
     </View>
   );
 }
 
+function AddHabitButton({ withTooltip }: { withTooltip: boolean }) {
+  const router = useRouter();
+  const [fabHovered, setFabHovered] = useState(false);
+
+  const button = (
+    <TouchableOpacity
+      className="relative w-16 h-16 rounded-full justify-center items-center shadow-lg"
+      style={{ backgroundColor: Colors.primary }}
+      onPress={() => router.push('/habits?focusInput=true')}
+      activeOpacity={0.8}
+      {...(withTooltip && Platform.OS === 'web' ? {
+        onMouseEnter: () => setFabHovered(true),
+        onMouseLeave: () => setFabHovered(false),
+      } : {})}
+    >
+      <Ionicons name="add" size={40} color={Colors.text} />
+    </TouchableOpacity>
+  )
+
+  return withTooltip ? (
+    <View className="absolute right-6 bottom-6 flex-row items-center">
+      {fabHovered && (
+        <View className="mr-4 py-1 px-3 rounded-lg shadow-md z-10 self-center" style={{ backgroundColor: Colors.card }}>
+          <Text className="text-base font-medium p-2" style={{ color: Colors.text }}>Add Habit</Text>
+        </View>
+      )}
+      {button}
+    </View>
+  ) : (
+    <View className="right-flex-row items-center mb-4">
+      {button}
+    </View>
+  )
+}
