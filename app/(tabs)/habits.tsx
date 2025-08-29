@@ -1,14 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useListHabits } from '@/db/useHabitDb';
-import { Icon } from 'react-native-paper';
 import HabitInputForm from '@/components/HabitInputForm';
+import HabitItem from '@/components/HabitItem';
 
 export default function HabitManager() {
   const { data: habits = [], isLoading } = useListHabits();
-  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -30,21 +28,7 @@ export default function HabitManager() {
           <HabitInputForm />
 
           {habits.map(habit => (
-            <View key={habit.id} className="flex-row items-center p-4 my-4 rounded-lg min-h-[68px]" style={{ backgroundColor: Colors.surface }}>
-              <TouchableOpacity className="flex-row items-center gap-2" onPress={() => router.push('/(tabs)?today=true')}>
-                <Icon source="clock" color={Colors.textSecondary} size={24} />
-                <Text style={{ color: Colors.textSecondary }}>Track</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                className="flex-1 flex-row items-center justify-center" 
-                onPress={() => router.push(`/habits/${habit.id}`)}
-              >
-                <Text className="text-lg text-center" style={{ color: Colors.text }}>{habit.name}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/habits/${habit.id}`)}>
-                <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-              </TouchableOpacity>
-            </View>
+            <HabitItem key={habit.id} habit={habit} />
           ))}
         </View>
       </ScrollView>
