@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Habit, HabitCompletion } from './types'
+import { Habit, HabitCompletion, HabitInput } from './types'
 import { useDataSource } from '@/contexts/DataSourceContext';
 
 /**
@@ -18,7 +18,7 @@ export const useCreateHabit = () => {
   const { activeDb } = useDataSource();
   
   return useMutation({
-    mutationFn: async (habitData: Omit<Habit, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (habitData: HabitInput) => {
       await activeDb.createHabit(habitData);
     },
     onSuccess: () => {
