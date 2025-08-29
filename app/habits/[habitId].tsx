@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion, useUpdateHabit } from '@/db/useHabitDb';
+import { useListHabits, useUpdateHabit, useDeleteHabit } from '@/db/useHabitDb';
 import { Icon } from 'react-native-paper';
 
 export default function HabitDetail() {
@@ -19,12 +19,7 @@ export default function HabitDetail() {
   
   // Mutation for updating habit
   const updateHabitMutation = useUpdateHabit();
-
-  useFocusEffect(
-    useCallback(() => {
-      // Refresh data when the page comes into focus
-    }, [])
-  );
+  const deleteHabitMutation = useDeleteHabit();
 
   const handleBack = () => {
     router.back();
@@ -71,6 +66,19 @@ export default function HabitDetail() {
     setIsEditing(false);
     setEditName('');
   };
+
+  const handleDelete = async () => {
+    if(confirm('Are you sure that you want to delete this habit?')) {
+      if (habit?.id) {
+        try {
+          await deleteHabitMutation.mutateAsync(habit.id)
+          router.replace('/(tabs)/habits')
+        } catch (e) {
+          alert('There was a problem deleting this habit')
+        }
+      }
+    }
+  }
 
   if (!habit) {
     return (
@@ -199,6 +207,18 @@ export default function HabitDetail() {
                 <Icon source="settings" color={Colors.primary} size={24} />
                 <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
                   Manage Habits
+                </Text>
+                <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                className="flex-row items-center p-4 rounded-lg"
+                style={{ backgroundColor: Colors.card }}
+                onPress={handleDelete}
+              >
+                <Icon source="delete" color={Colors.primary} size={24} />
+                <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
+                  Delete Habit
                 </Text>
                 <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
               </TouchableOpacity>
