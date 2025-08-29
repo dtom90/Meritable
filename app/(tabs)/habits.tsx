@@ -80,7 +80,13 @@ export default function HabitManager() {
                 <Icon source="clock" color={Colors.textSecondary} size={24} />
                 <Text style={{ color: Colors.textSecondary }}>Track</Text>
               </TouchableOpacity>
-              <Text className="text-lg flex-1 text-center" style={{ color: Colors.text }}>{habit.name}</Text>
+              <TouchableOpacity 
+                className="flex-1 flex-row items-center justify-center" 
+                onPress={() => router.push(`/habits/${habit.id}`)}
+              >
+                <Text className="text-lg text-center" style={{ color: Colors.text }}>{habit.name}</Text>
+                <Icon source="chevron-right" color={Colors.textSecondary} size={16} className="ml-1" />
+              </TouchableOpacity>
               <IconButton
                 icon="delete"
                 iconColor={Colors.error}
