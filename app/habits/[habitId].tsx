@@ -13,17 +13,6 @@ export default function HabitDetail() {
   // Find the current habit
   const habit = habits.find(h => h.id === Number(habitId));
   
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0];
-  
-  // Get habit completions for today
-  const { data: completedHabitIds = [] } = useListHabitCompletions(today);
-  const isCompletedToday = completedHabitIds.includes(Number(habitId));
-  
-  // Mutations for tracking completions
-  const createCompletionMutation = useCreateHabitCompletion();
-  const deleteCompletionMutation = useDeleteHabitCompletion();
-
   // State for editing habit name
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(habit?.name || '');
@@ -36,14 +25,6 @@ export default function HabitDetail() {
       // Refresh data when the page comes into focus
     }, [])
   );
-
-  const handleToggleCompletion = () => {
-    if (isCompletedToday) {
-      deleteCompletionMutation.mutate({ habitId: Number(habitId), completionDate: today });
-    } else {
-      createCompletionMutation.mutate({ habitId: Number(habitId), completionDate: today });
-    }
-  };
 
   const handleBack = () => {
     router.back();
@@ -183,53 +164,11 @@ export default function HabitDetail() {
           {/* Habit Info Card */}
           <View className="p-6 rounded-lg mb-6" style={{ backgroundColor: Colors.surface }}>
             <Text className="text-lg font-semibold mb-4" style={{ color: Colors.text }}>
-              Habit Details
+              Habit Completions
             </Text>
             
             <View className="space-y-3">
-              <View className="flex-row justify-between items-center">
-                <Text style={{ color: Colors.textSecondary }}>Created:</Text>
-                <Text style={{ color: Colors.text }}>
-                  {habit.created_at ? new Date(habit.created_at).toLocaleDateString() : 'Unknown'}
-                </Text>
-              </View>
               
-              <View className="flex-row justify-between items-center">
-                <Text style={{ color: Colors.textSecondary }}>Last Updated:</Text>
-                <Text style={{ color: Colors.text }}>
-                  {habit.updated_at ? new Date(habit.updated_at).toLocaleDateString() : 'Unknown'}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Today's Tracking */}
-          <View className="p-6 rounded-lg mb-6" style={{ backgroundColor: Colors.surface }}>
-            <Text className="text-lg font-semibold mb-4" style={{ color: Colors.text }}>
-              Today's Progress
-            </Text>
-            
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <Icon 
-                  source={isCompletedToday ? "check-circle" : "circle-outline"} 
-                  color={isCompletedToday ? Colors.primary : Colors.textSecondary} 
-                  size={32} 
-                />
-                <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
-                  {isCompletedToday ? 'Completed' : 'Not completed'}
-                </Text>
-              </View>
-              
-              <TouchableOpacity
-                className={`py-3 px-6 rounded-lg ${isCompletedToday ? 'bg-red-500' : 'bg-green-500'}`}
-                onPress={handleToggleCompletion}
-                disabled={createCompletionMutation.isPending || deleteCompletionMutation.isPending}
-              >
-                <Text className="text-white font-semibold">
-                  {isCompletedToday ? 'Mark Incomplete' : 'Mark Complete'}
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
 
