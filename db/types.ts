@@ -22,6 +22,7 @@ export abstract class HabitDatabaseInterface {
   // Habit operations
   abstract createHabit(habit: HabitInput): Promise<Habit>
   abstract getHabits(): Promise<Habit[]>
+  abstract updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit>
   abstract deleteHabit(id: number): Promise<void>
 
   // HabitCompletion operations

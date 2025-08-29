@@ -52,6 +52,20 @@ export const useDeleteHabit = () => {
   });
 };
 
+export const useUpdateHabit = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Habit> }) => {
+      return await activeDb.updateHabit(id, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
+    },
+  });
+};
+
 /**
  *  Hooks for habit completions
  */

@@ -33,6 +33,23 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     return await this.habits.toArray();
   }
 
+  async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
+    const now = new Date().toISOString();
+    const habit = await this.habits.get(id);
+    if (!habit) {
+      throw new Error(`Habit with id ${id} not found`);
+    }
+    
+    const updatedHabit = {
+      ...habit,
+      ...updates,
+      updated_at: now
+    };
+    
+    await this.habits.update(id, updatedHabit);
+    return updatedHabit;
+  }
+
   async deleteHabit(id: number): Promise<void> {
     // First delete related completions
     await this.habitCompletions.where('habitId').equals(id).delete();

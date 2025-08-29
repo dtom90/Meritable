@@ -36,6 +36,21 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return data || []
   }
 
+  async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
+    const { data, error } = await this.supabase
+      .from('habits')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+
   async deleteHabit(id: number): Promise<void> {
     // First delete all habit completions for this habit
     const { error: completionsError } = await this.supabase
