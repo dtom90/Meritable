@@ -4,6 +4,7 @@ import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/types';
 
 export type DataSourceType = 'local' | 'cloud';
+const defaultDataSource: DataSourceType = 'cloud';
 
 interface DataSourceContextType {
   // Current data source
@@ -21,7 +22,7 @@ interface DataSourceProviderProps {
 }
 
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
-  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>('local');
+  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>(defaultDataSource);
 
   // Initialize database instances once, not on every render
   const [localDb] = useState(() => new DexieDb());
