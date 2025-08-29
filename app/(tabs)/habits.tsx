@@ -2,13 +2,12 @@ import React, { useState, useRef, useCallback } from 'react';
 import { View, TextInput, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useCreateHabit, useDeleteHabit } from '@/db/useHabitDb';
-import { Icon, IconButton } from 'react-native-paper';
+import { useListHabits, useCreateHabit } from '@/db/useHabitDb';
+import { Icon } from 'react-native-paper';
 
 export default function HabitManager() {
   const { data: habits = [], isLoading } = useListHabits();
   const addHabitMutation = useCreateHabit();
-  const deleteHabitMutation = useDeleteHabit();
   const [newHabitText, setNewHabitText] = useState('');
   const textInputRef = useRef<TextInput>(null);
   const router = useRouter();
@@ -30,11 +29,7 @@ export default function HabitManager() {
     }
   };
 
-  const handleDeleteHabit = (habitId: number) => {
-    if (confirm('Are you sure you want to delete this habit?')) {
-      deleteHabitMutation.mutate(habitId);
-    }
-  };
+
 
   if (isLoading) {
     return (
@@ -85,15 +80,10 @@ export default function HabitManager() {
                 onPress={() => router.push(`/habits/${habit.id}`)}
               >
                 <Text className="text-lg text-center" style={{ color: Colors.text }}>{habit.name}</Text>
-                <Icon source="chevron-right" color={Colors.textSecondary} size={16} className="ml-1" />
               </TouchableOpacity>
-              <IconButton
-                icon="delete"
-                iconColor={Colors.error}
-                size={24}
-                onPress={() => handleDeleteHabit(habit.id!)}
-                disabled={deleteHabitMutation.isPending}
-              />
+              <TouchableOpacity onPress={() => router.push(`/habits/${habit.id}`)}>
+                <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
+              </TouchableOpacity>
             </View>
           ))}
         </View>
