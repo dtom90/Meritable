@@ -4,7 +4,7 @@ import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/types';
 
 export type DataSourceType = 'local' | 'cloud';
-const defaultDataSource: DataSourceType = 'local';
+const defaultDataSource: DataSourceType = 'cloud';
 
 interface DataSourceContextType {
   // Current data source
