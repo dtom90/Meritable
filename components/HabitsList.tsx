@@ -15,59 +15,12 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { Habit } from '@/db/types';
 import { Colors } from '@/constants/Colors';
+import HabitItem from './HabitItem';
 
 interface HabitsListProps {
   habits: Habit[];
-}
-
-function SortableHabitItem({ habit }: { habit: Habit }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: habit.id?.toString() || '' });
-
-  const style = {
-    backgroundColor: isDragging ? '#e0e0e0' : Colors.surface,
-    padding: 20,
-    marginVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: isDragging ? '#ff0000' : '#ccc',
-    opacity: isDragging ? 0.5 : 1,
-    ...(Platform.OS === 'web' && {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      cursor: 'grab' as const,
-    }),
-  };
-
-  return (
-    <View
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
-      <Text style={{ 
-        fontSize: 18, 
-        textAlign: 'center',
-        color: isDragging ? '#ff0000' : Colors.text,
-        fontWeight: isDragging ? 'bold' : 'normal'
-      }}>
-        {habit.name} {isDragging ? '(DRAGGING)' : ''}
-      </Text>
-    </View>
-  );
 }
 
 export default function HabitsList({ habits }: HabitsListProps) {
@@ -118,7 +71,7 @@ export default function HabitsList({ habits }: HabitsListProps) {
       >
         <SortableContext items={orderedHabits.map(h => h.id?.toString() || '')} strategy={verticalListSortingStrategy}>
           {orderedHabits.map((habit) => (
-            <SortableHabitItem key={habit.id} habit={habit} />
+            <HabitItem key={habit.id} habit={habit} />
           ))}
         </SortableContext>
       </DndContext>
