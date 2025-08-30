@@ -67,7 +67,7 @@ export default function HabitItem({ habit, isActive = false, onLongPress }: Habi
         activeOpacity={0.7}
       >
         <View className="flex-1 flex-row items-center justify-center">
-          <Text className="text-lg text-center" style={{ color: Colors.text }}>{habit.name}!</Text>
+          <Text className="text-lg text-center" style={{ color: Colors.text }}>{habit.name}</Text>
         </View>
 
         <View>
