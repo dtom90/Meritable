@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Platform } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, SafeAreaView } from 'react-native';
 import {
   DndContext,
   closestCenter,
@@ -18,16 +18,15 @@ import {
 import { Habit } from '@/db/types';
 import { Colors } from '@/constants/Colors';
 import HabitItem from './HabitItem';
+import { useListHabits } from '@/db/useHabitDb';
 
-interface HabitsListProps {
-  habits: Habit[];
-}
+export default function HabitsList() {
+  const { data: habits = [], isLoading } = useListHabits();
 
-export default function HabitsList({ habits }: HabitsListProps) {
-  const [orderedHabits, setOrderedHabits] = useState<Habit[]>([]);
+  const [orderedHabits, setOrderedHabits] = useState<Habit[]>(habits);
 
   // Initialize ordered habits when data loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (habits.length > 0) {
       setOrderedHabits([...habits]);
     }
@@ -40,7 +39,7 @@ export default function HabitsList({ habits }: HabitsListProps) {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -56,7 +55,17 @@ export default function HabitsList({ habits }: HabitsListProps) {
         return items;
       });
     }
-  };
+  }, [setOrderedHabits]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
+        <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full">
+          <Text style={{ color: Colors.text }}>Loading habits...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={{ minHeight: 200 }}>
