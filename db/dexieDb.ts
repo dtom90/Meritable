@@ -16,10 +16,19 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   // Implementation of HabitDatabaseInterface methods
   async createHabit(habit: HabitInput): Promise<Habit> {
     const now = new Date().toISOString();
+    
+    // Get the current highest order value to assign the next order
+    const existingHabits = await this.habits.toArray();
+    const nextOrder = existingHabits.length > 0 
+      ? Math.max(...existingHabits.map(h => h.order)) + 1 
+      : 0;
+    
     const habitWithTimestamps: Habit = {
       ...habit,
+      order: nextOrder,
       id: await this.habits.add({
         ...habit,
+        order: nextOrder,
         created_at: now,
         updated_at: now
       }),
@@ -30,7 +39,16 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   }
 
   async getHabits(): Promise<Habit[]> {
-    return await this.habits.toArray();
+    const habits = await this.habits.toArray();
+    // Sort by order field to maintain custom ordering
+    // Fallback to id for habits without order field
+    return habits.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      // If order is missing, sort by id as fallback
+      return (a.id || 0) - (b.id || 0);
+    });
   }
 
   async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
@@ -48,6 +66,19 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     
     await this.habits.update(id, updatedHabit);
     return updatedHabit;
+  }
+
+  async reorderHabits(habits: Habit[]): Promise<Habit[]> {
+    const now = new Date().toISOString();
+    
+    // Update each habit with the new order and timestamp
+    const updatedHabits = habits.map(habit => ({
+      ...habit,
+      updated_at: now
+    }));
+    
+    await this.habits.bulkPut(updatedHabits);
+    return updatedHabits;
   }
 
   async deleteHabit(id: number): Promise<void> {

@@ -36,6 +36,34 @@ export const useListHabits = () => {
   });
 };
 
+export const useUpdateHabit = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Habit> }) => {
+      return await activeDb.updateHabit(id, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
+    },
+  });
+};
+
+export const useReorderHabits = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  
+  return useMutation({
+    mutationFn: async (habits: Habit[]) => {
+      return await activeDb.reorderHabits(habits);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
+    },
+  });
+};
+
 export const useDeleteHabit = () => {
   const queryClient = useQueryClient();
   const { activeDb } = useDataSource();
@@ -48,20 +76,6 @@ export const useDeleteHabit = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [HABIT_COMPLETIONS_QUERY_KEY] });
-    },
-  });
-};
-
-export const useUpdateHabit = () => {
-  const queryClient = useQueryClient();
-  const { activeDb } = useDataSource();
-  
-  return useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Habit> }) => {
-      return await activeDb.updateHabit(id, updates);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
     },
   });
 };

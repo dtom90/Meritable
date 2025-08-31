@@ -18,19 +18,20 @@ import {
 import { Habit } from '@/db/types';
 import { Colors } from '@/constants/Colors';
 import HabitItem from './HabitItem';
-import { useListHabits } from '@/db/useHabitDb';
+import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 
 export default function HabitsList() {
   const { data: habits = [], isLoading } = useListHabits();
+  const { mutate: reorderHabits } = useReorderHabits();
 
-  const [orderedHabits, setOrderedHabits] = useState<Habit[]>(habits);
+  // const [orderedHabits, setOrderedHabits] = useState<Habit[]>(habits);
 
   // Initialize ordered habits when data loads
-  useEffect(() => {
-    if (habits.length > 0) {
-      setOrderedHabits([...habits]);
-    }
-  }, [habits]);
+  // useEffect(() => {
+  //   if (habits.length > 0) {
+  //     setOrderedHabits([...habits]);
+  //   }
+  // }, [habits]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -41,21 +42,27 @@ export default function HabitsList() {
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
+    console.log('active', active);
+    console.log('over', over);
 
     if (active.id !== over?.id) {
-      setOrderedHabits((items) => {
-        const oldIndex = items.findIndex((item) => item.id?.toString() === active.id);
-        const newIndex = items.findIndex((item) => item.id?.toString() === over?.id);
+      const oldIndex = habits.findIndex((item) => item.id?.toString() === active.id);
+      const newIndex = habits.findIndex((item) => item.id?.toString() === over?.id);
 
-        if (oldIndex !== -1 && newIndex !== -1) {
-          const newItems = arrayMove(items, oldIndex, newIndex);
-          console.log('Habits reordered (temporary):', newItems.map(h => h.name));
-          return newItems;
-        }
-        return items;
-      });
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newItems = arrayMove(habits, oldIndex, newIndex);
+        
+        // Set the order attribute based on the new position
+        const reorderedHabits = newItems.map((habit, index) => ({
+          ...habit,
+          order: index
+        }));
+        
+        console.log('Habits reordered with order:', reorderedHabits.map(h => ({ name: h.name, order: h.order })));
+        reorderHabits(reorderedHabits);
+      }
     }
-  }, [setOrderedHabits]);
+  }, [habits, reorderHabits]);
 
   if (isLoading) {
     return (
@@ -70,7 +77,7 @@ export default function HabitsList() {
   return (
     <View style={{ minHeight: 200 }}>
       <Text className="mb-4 text-center text-sm" style={{ color: Colors.textSecondary }}>
-        Drag and drop to reorder habits (temporary)
+        Drag and drop to reorder habits
       </Text>
       
       <DndContext
@@ -78,8 +85,8 @@ export default function HabitsList() {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={orderedHabits.map(h => h.id?.toString() || '')} strategy={verticalListSortingStrategy}>
-          {orderedHabits.map((habit) => (
+        <SortableContext items={habits.map(h => h.id?.toString() || '')} strategy={verticalListSortingStrategy}>
+          {habits.map((habit) => (
             <HabitItem key={habit.id} habit={habit} />
           ))}
         </SortableContext>

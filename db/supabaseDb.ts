@@ -13,10 +13,20 @@ export class SupabaseDb extends HabitDatabaseInterface {
   async createHabit(habit: HabitInput): Promise<Habit> {
     const { data: { user } } = await this.supabase.auth.getUser()
     
+    // Get the current highest order value to assign the next order
+    const { data: existingHabits } = await this.supabase
+      .from('habits')
+      .select('order')
+      .order('order', { ascending: false })
+      .limit(1)
+    
+    const nextOrder = existingHabits && existingHabits.length > 0 ? existingHabits[0].order + 1 : 0
+    
     const { data, error } = await this.supabase
       .from('habits')
       .insert({
         ...habit,
+        order: nextOrder,
         user_id: user?.id
       })
       .select()
@@ -30,7 +40,8 @@ export class SupabaseDb extends HabitDatabaseInterface {
     const { data, error } = await this.supabase
       .from('habits')
       .select('*')
-      .order('id', { ascending: true })
+      .order('order', { ascending: true })
+      .order('id', { ascending: true }) // Fallback for habits without order
 
     if (error) throw error
     return data || []
@@ -49,6 +60,30 @@ export class SupabaseDb extends HabitDatabaseInterface {
 
     if (error) throw error
     return data
+  }
+
+  async reorderHabits(habits: Habit[]): Promise<Habit[]> {
+    // Update each habit individually to set the order field
+    const updatedHabits: Habit[] = [];
+    
+    for (const habit of habits) {
+      if (habit.id) {
+        const { data, error } = await this.supabase
+          .from('habits')
+          .update({
+            order: habit.order,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', habit.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        if (data) updatedHabits.push(data);
+      }
+    }
+
+    return updatedHabits;
   }
 
   async deleteHabit(id: number): Promise<void> {

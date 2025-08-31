@@ -2,6 +2,7 @@
 export interface Habit {
   id?: number;
   name: string;
+  order: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -23,6 +24,7 @@ export abstract class HabitDatabaseInterface {
   abstract createHabit(habit: HabitInput): Promise<Habit>
   abstract getHabits(): Promise<Habit[]>
   abstract updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit>
+  abstract reorderHabits(habits: Habit[]): Promise<Habit[]>
   abstract deleteHabit(id: number): Promise<void>
 
   // HabitCompletion operations
