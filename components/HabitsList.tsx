@@ -79,6 +79,8 @@ export default function HabitsList() {
         </SortableContext>
       </DndContext>
       
+      <View className="space-y-3">&nbsp;</View>
+      
     </View>
   );
 }

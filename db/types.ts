@@ -1,6 +1,6 @@
 
 export interface Habit {
-  id?: number;
+  id: number;
   name: string;
   order: number;
   created_at?: string;
@@ -8,7 +8,7 @@ export interface Habit {
 }
 
 export interface HabitCompletion {
-  id?: number;
+  id: number;
   habitId: number;
   completionDate: string;
   created_at?: string;

@@ -1,85 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useUpdateHabit, useDeleteHabit } from '@/db/useHabitDb';
-import { Icon } from 'react-native-paper';
+import { useListHabits } from '@/db/useHabitDb';
+import HabitTitle from '@/components/HabitTitle'
+import HabitActions from '@/components/HabitActions'
+
 
 export default function HabitDetail() {
   const { habitId } = useLocalSearchParams();
-  const router = useRouter();
   const { data: habits = [] } = useListHabits();
-  
-  // Find the current habit
   const habit = habits.find(h => h.id === Number(habitId));
   
-  // State for editing habit name
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(habit?.name || '');
-  
-  // Mutation for updating habit
-  const updateHabitMutation = useUpdateHabit();
-  const deleteHabitMutation = useDeleteHabit();
-
-  const handleBack = () => {
-    router.back();
-  };
-
-  const handleEdit = () => {
-    if (habit) {
-      setEditName(habit.name);
-      setIsEditing(true);
-    }
-  };
-
-  const handleSave = async () => {
-    const trimmedName = editName.trim();
-    if (!trimmedName) {
-      // Don't save empty names
-      setIsEditing(false);
-      setEditName('');
-      return;
-    }
-    
-    if (trimmedName.length > 100) {
-      // Limit habit name to 100 characters
-      console.error('Habit name too long');
-      return;
-    }
-    
-    if (trimmedName !== habit?.name) {
-      try {
-        await updateHabitMutation.mutateAsync({ 
-          id: Number(habitId), 
-          updates: { name: trimmedName } 
-        });
-        setIsEditing(false);
-      } catch (error) {
-        console.error('Failed to update habit:', error);
-      }
-    } else {
-      setIsEditing(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditName('');
-  };
-
-  const handleDelete = async () => {
-    if(confirm('Are you sure that you want to delete this habit?')) {
-      if (habit?.id) {
-        try {
-          await deleteHabitMutation.mutateAsync(habit.id)
-          router.replace('/(tabs)/habits')
-        } catch (e) {
-          alert('There was a problem deleting this habit')
-        }
-      }
-    }
-  }
-
   if (!habit) {
     return (
       <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
@@ -94,80 +25,7 @@ export default function HabitDetail() {
     <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="pt-[50px] px-5 max-w-[800px] self-center w-full">
-          {/* Header */}
-          <View className="flex-row items-center mb-6">
-            <TouchableOpacity onPress={handleBack} className="mr-4">
-              <Icon source="arrow-left" color={Colors.text} size={24} />
-            </TouchableOpacity>
-            
-            {isEditing ? (
-              <View className="flex-1">
-                <View className="flex-row items-center">
-                  <TextInput
-                    value={editName}
-                    onChangeText={setEditName}
-                    className="flex-1 text-2xl font-bold mr-3"
-                    style={{ color: Colors.text }}
-                    placeholder="Enter habit name"
-                    placeholderTextColor={Colors.textSecondary}
-                    autoFocus
-                    onSubmitEditing={handleSave}
-                    returnKeyType="done"
-                    blurOnSubmit={false}
-                  />
-                  <TouchableOpacity 
-                    onPress={handleSave}
-                    disabled={updateHabitMutation.isPending || !editName.trim() || editName.trim().length > 100 || editName.trim() === habit.name}
-                    className="mr-2 p-2 rounded-lg"
-                    style={{ 
-                      backgroundColor: (!editName.trim() || editName.trim().length > 100 || editName.trim() === habit.name) 
-                        ? Colors.textTertiary 
-                        : Colors.primary 
-                    }}
-                  >
-                    {updateHabitMutation.isPending ? (
-                      <Icon source="loading" color="white" size={20} />
-                    ) : (
-                      <Icon source="check" color="white" size={20} />
-                    )}
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    onPress={handleCancel}
-                    className="p-2 rounded-lg"
-                    style={{ backgroundColor: Colors.surface }}
-                  >
-                    <Icon source="close" color={Colors.text} size={20} />
-                  </TouchableOpacity>
-                </View>
-                <View className="flex-row justify-between items-center mt-1">
-                  <Text 
-                    className="text-sm" 
-                    style={{ color: editName.length > 100 ? Colors.error || '#ef4444' : Colors.textSecondary }}
-                  >
-                    {editName.length}/100 characters
-                  </Text>
-                  {editName.length > 100 && (
-                    <Text className="text-sm text-red-500">
-                      Name too long
-                    </Text>
-                  )}
-                </View>
-              </View>
-            ) : (
-              <View className="flex-1 flex-row items-center">
-                <Text className="text-2xl font-bold flex-1" style={{ color: Colors.text }}>
-                  {habit.name}
-                </Text>
-                <TouchableOpacity 
-                  onPress={handleEdit}
-                  className="p-2 rounded-lg"
-                  style={{ backgroundColor: Colors.surface }}
-                >
-                  <Icon source="pencil" color={Colors.primary} size={20} />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+          <HabitTitle habit={habit} />
 
           {/* Habit Info Card */}
           <View className="p-6 rounded-lg mb-6" style={{ backgroundColor: Colors.surface }}>
@@ -176,54 +34,12 @@ export default function HabitDetail() {
             </Text>
             
             <View className="space-y-3">
-              
+            
             </View>
           </View>
 
-          {/* Quick Actions */}
-          <View className="p-6 rounded-lg" style={{ backgroundColor: Colors.surface }}>
-            <Text className="text-lg font-semibold mb-4" style={{ color: Colors.text }}>
-              Quick Actions
-            </Text>
-            
-            <View className="space-y-3">
-              <TouchableOpacity 
-                className="flex-row items-center p-4 rounded-lg"
-                style={{ backgroundColor: Colors.card }}
-                onPress={() => router.push('/(tabs)')}
-              >
-                <Icon source="clock" color={Colors.primary} size={24} />
-                <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
-                  Track All Habits
-                </Text>
-                <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                className="flex-row items-center p-4 rounded-lg"
-                style={{ backgroundColor: Colors.card }}
-                onPress={() => router.push('/(tabs)/habits')}
-              >
-                <Icon source="settings" color={Colors.primary} size={24} />
-                <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
-                  Manage Habits
-                </Text>
-                <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                className="flex-row items-center p-4 rounded-lg"
-                style={{ backgroundColor: Colors.card }}
-                onPress={handleDelete}
-              >
-                <Icon source="delete" color={Colors.primary} size={24} />
-                <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
-                  Delete Habit
-                </Text>
-                <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <HabitActions habitId={habit.id} />
+
         </View>
       </ScrollView>
     </SafeAreaView>
