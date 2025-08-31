@@ -42,6 +42,7 @@ jobs:
 
       - name: Build website
         env:
+          DATA_SOURCE: cloud
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: npm run build-web
