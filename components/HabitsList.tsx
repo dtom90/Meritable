@@ -66,10 +66,7 @@ export default function HabitsList() {
 
   return (
     <View style={{ minHeight: 200 }}>
-      <Text className="mb-4 text-center text-sm" style={{ color: Colors.textSecondary }}>
-        Drag and drop to reorder habits
-      </Text>
-      
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -81,6 +78,7 @@ export default function HabitsList() {
           ))}
         </SortableContext>
       </DndContext>
+      
     </View>
   );
 }
