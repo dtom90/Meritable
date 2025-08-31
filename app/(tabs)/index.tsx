@@ -1,46 +1,16 @@
-import { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { useState, useCallback } from 'react';
+import { View } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
-import useWindowWidth from '@/hooks/useWindowWidth'
+import DaysHeader, { tabs } from '@/components/DaysHeader';
+import HabitCompletions from '@/components/HabitCompletions';
 
-const widthThreshold = 950;
 
 export default function HomeScreen() {
-  const tabs = useMemo(() => {
-    return Array.from({ length: 7 }).map((_, index) => {
-      const today = new Date();
-      const targetDate = new Date(today);
-      targetDate.setDate(today.getDate() - (6 - index));
-
-      const year = targetDate.getFullYear();
-      const month = (targetDate.getMonth() + 1).toString().padStart(2, '0');
-      const day = targetDate.getDate().toString().padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    });
-  }, []);
-  const [selectedDate, setSelectedDate] = useState(tabs[tabs.length - 1]);
   const router = useRouter();
   const params = useLocalSearchParams();
   
-  // Memoized function to format dates consistently across timezones
-  const formatDate = useMemo(() => {
-    return (dateString: string) => {
-      const [year, month, day] = dateString.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      return date.toLocaleDateString('en-US', { day: 'numeric', weekday: 'short' });
-    };
-  }, []);
-  
-  const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
-  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(selectedDate);
-  const addCompletionMutation = useCreateHabitCompletion();
-  const deleteCompletionMutation = useDeleteHabitCompletion();
-
-  const width = useWindowWidth();
+  const [selectedDate, setSelectedDate] = useState(tabs[tabs.length - 1]);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,116 +21,11 @@ export default function HomeScreen() {
     }, [params])
   );
 
-  if (isLoadingHabits || isLoadingCompletions) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text style={{ color: Colors.text }}>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.background }}>
-      <View className="flex-row justify-around py-2.5 mb-2.5" style={{ backgroundColor: Colors.surface }}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            className={`py-2 px-1.5 ${selectedDate === tab ? 'border-b-2' : ''}`}
-            style={selectedDate === tab ? { borderBottomColor: Colors.primary } : {}}
-            onPress={() => setSelectedDate(tab)}>
-            <Text 
-              className={`text-sm ${selectedDate === tab ? 'font-bold' : ''}`}
-              style={{ color: selectedDate === tab ? Colors.primary : Colors.textSecondary }}
-            >
-              {formatDate(tab)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <DaysHeader selectedDate={selectedDate} onDateSelect={setSelectedDate} />
 
-      {habits.length === 0 && <TouchableOpacity
-        className="rounded-lg p-4 justify-center items-center shadow-lg"
-        style={{ backgroundColor: Colors.primary }}
-        onPress={() => router.push('/habits?focusInput=true')}
-        activeOpacity={0.8}
-      >
-        <Text className="text-xl font-medium" style={{ color: Colors.text }}>Add Habit</Text>
-      </TouchableOpacity>}
-
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="max-w-3xl self-center w-full">
-          {habits.map(habit => (
-            <View
-              key={habit.id}
-              className="flex-1 flex-row items-center py-2 px-4 m-4 rounded-lg min-h-[68px]"
-              style={{ backgroundColor: completions.includes(habit.id!) ? Colors.success : Colors.surface }}
-            >
-              <Text className="text-lg flex-1 text-center" style={{ color: Colors.text }}>{habit.name}</Text>
-              {!completions.includes(habit.id!) ? (
-                <IconButton
-                  icon="check"
-                  iconColor={Colors.success}
-                  size={24}
-                  onPress={() => addCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
-                  className="ml-auto mr-0 p-0"
-                  disabled={addCompletionMutation.isPending}
-                />
-              ) : (
-                <IconButton
-                  icon="restore"
-                  iconColor={Colors.text}
-                  size={24}
-                  className="ml-auto mr-0 p-0"
-                  onPress={() => deleteCompletionMutation.mutate({ habitId: habit.id!, completionDate: selectedDate })}
-                  disabled={deleteCompletionMutation.isPending}
-                />
-              )}
-            </View>
-          ))}
-          {width < widthThreshold &&
-            <AddHabitButton withTooltip={false} />
-          }
-        </View>
-      </ScrollView>
-
-      {width >= widthThreshold &&
-        <AddHabitButton withTooltip={true} />
-      }
+      <HabitCompletions selectedDate={selectedDate} />
     </View>
   );
-}
-
-function AddHabitButton({ withTooltip }: { withTooltip: boolean }) {
-  const router = useRouter();
-  const [fabHovered, setFabHovered] = useState(false);
-
-  const button = (
-    <TouchableOpacity
-      className="relative w-16 h-16 rounded-full justify-center items-center shadow-lg"
-      style={{ backgroundColor: Colors.primary }}
-      onPress={() => router.push('/habits?focusInput=true')}
-      activeOpacity={0.8}
-      {...(withTooltip && Platform.OS === 'web' ? {
-        onMouseEnter: () => setFabHovered(true),
-        onMouseLeave: () => setFabHovered(false),
-      } : {})}
-    >
-      <Ionicons name="add" size={40} color={Colors.text} />
-    </TouchableOpacity>
-  )
-
-  return withTooltip ? (
-    <View className="absolute right-6 bottom-6 flex-row items-center">
-      {fabHovered && (
-        <View className="mr-4 py-1 px-3 rounded-lg shadow-md z-10 self-center" style={{ backgroundColor: Colors.card }}>
-          <Text className="text-base font-medium p-2" style={{ color: Colors.text }}>Add Habit</Text>
-        </View>
-      )}
-      {button}
-    </View>
-  ) : (
-    <View className="right-flex-row items-center mb-4">
-      {button}
-    </View>
-  )
 }
