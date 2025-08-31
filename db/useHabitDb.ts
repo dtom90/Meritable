@@ -58,7 +58,27 @@ export const useReorderHabits = () => {
     mutationFn: async (habits: Habit[]) => {
       return await activeDb.reorderHabits(habits);
     },
-    onSuccess: () => {
+    onMutate: async (newHabits: Habit[]) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: [HABITS_QUERY_KEY] });
+
+      // Snapshot the previous value
+      const previousHabits = queryClient.getQueryData([HABITS_QUERY_KEY]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData([HABITS_QUERY_KEY], newHabits);
+
+      // Return a context object with the snapshotted value
+      return { previousHabits };
+    },
+    onError: (err, newHabits, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousHabits) {
+        queryClient.setQueryData([HABITS_QUERY_KEY], context.previousHabits);
+      }
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
     },
   });

@@ -15,7 +15,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Habit } from '@/db/types';
 import { Colors } from '@/constants/Colors';
 import HabitItem from './HabitItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
@@ -23,15 +22,6 @@ import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 export default function HabitsList() {
   const { data: habits = [], isLoading } = useListHabits();
   const { mutate: reorderHabits } = useReorderHabits();
-
-  // const [orderedHabits, setOrderedHabits] = useState<Habit[]>(habits);
-
-  // Initialize ordered habits when data loads
-  // useEffect(() => {
-  //   if (habits.length > 0) {
-  //     setOrderedHabits([...habits]);
-  //   }
-  // }, [habits]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
