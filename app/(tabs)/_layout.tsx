@@ -31,6 +31,7 @@ export default function TabLayout() {
           options={{
             title: 'Track',
             tabBarIcon: ({ color }) => <Icon source="clock" size={28} color={color} />,
+            href: '/',
           }}
         />
         <Tabs.Screen
@@ -46,6 +47,7 @@ export default function TabLayout() {
           options={{
             title: 'Data',
             tabBarIcon: ({ color }) => <Ionicons name="cloud-download" size={28} color={color} />,
+            href: '/data',
           }}
         />
       </Tabs>
