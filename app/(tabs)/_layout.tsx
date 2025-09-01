@@ -38,6 +38,7 @@ export default function TabLayout() {
           options={{
             title: 'Habits',
             tabBarIcon: ({ color }) => <Ionicons name="list" size={28} color={color} />,
+            href: '/habits',
           }}
         />
         <Tabs.Screen
