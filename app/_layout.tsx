@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Platform } from 'react-native';
 import "./global.css"
 import { Colors } from '@/constants/Colors';
 import { DataSourceProvider } from '@/contexts/DataSourceContext';
@@ -25,6 +26,13 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  // Set document title for web
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.title = 'Mertiable';
+    }
+  }, []);
 
   if (!loaded) {
     return null;
