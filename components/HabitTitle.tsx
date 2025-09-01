@@ -70,7 +70,7 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
             <TextInput
               value={editName}
               onChangeText={setEditName}
-              className="flex-1 text-2xl font-bold mr-3"
+              className="flex-1 text-2xl font-bold text-center mr-3"
               style={{ color: Colors.text }}
               placeholder="Enter habit name"
               placeholderTextColor={Colors.textSecondary}
@@ -119,7 +119,11 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
         </View>
       ) : (
         <View className="flex-1 flex-row items-center">
-          <Text className="text-2xl font-bold flex-1" style={{ color: Colors.text }}>
+          <Text 
+            onPress={handleEdit}
+            className="text-2xl font-bold text-center flex-1"
+            style={{ color: Colors.text }}
+          >
             {habit.name}
           </Text>
           <TouchableOpacity 
