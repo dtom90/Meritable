@@ -127,7 +127,7 @@ export const useListHabitCompletions = (completionDate: string) => {
     queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate],
     queryFn: async () => {
       const completions = await activeDb.getHabitCompletions(completionDate);
-      return completions.map((completion: HabitCompletion) => completion.habitId);
+      return completions.map((completion: HabitCompletion) => completion);
     },
   });
 };
@@ -137,8 +137,8 @@ export const useDeleteHabitCompletion = () => {
   const { activeDb } = useDataSource();
   
   return useMutation({
-    mutationFn: async ({ habitId, completionDate }: { habitId: number; completionDate: string }) => {
-      await activeDb.deleteHabitCompletion(habitId);
+    mutationFn: async ({ id }: { id: number, completionDate: string }) => {
+      await activeDb.deleteHabitCompletion(id);
     },
     onSuccess: (_, { completionDate }) => {
       queryClient.invalidateQueries({ 
