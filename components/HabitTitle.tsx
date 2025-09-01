@@ -70,19 +70,19 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
             <TextInput
               value={editName}
               onChangeText={setEditName}
-              className="flex-1 text-2xl font-bold text-center mr-3"
+              onBlur={handleSave}
+              className="flex-1 text-2xl font-bold text-center mx-3"
               style={{ color: Colors.text }}
               placeholder="Enter habit name"
               placeholderTextColor={Colors.textSecondary}
               autoFocus
               onSubmitEditing={handleSave}
               returnKeyType="done"
-              blurOnSubmit={false}
             />
             <TouchableOpacity 
               onPress={handleSave}
               disabled={updateHabitMutation.isPending || !editName.trim() || editName.trim().length > maxNameLength || editName.trim() === habit.name}
-              className="mr-2 p-2 rounded-lg"
+              className="p-2 rounded-lg"
               style={{ 
                 backgroundColor: (!editName.trim() || editName.trim().length > maxNameLength || editName.trim() === habit.name) 
                   ? Colors.textTertiary 
@@ -95,27 +95,20 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
                 <Icon source="check" color="white" size={20} />
               )}
             </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={handleCancel}
-              className="p-2 rounded-lg"
-              style={{ backgroundColor: Colors.surface }}
-            >
-              <Icon source="close" color={Colors.text} size={20} />
-            </TouchableOpacity>
           </View>
-          <View className="flex-row justify-between items-center mt-1">
-            <Text 
-              className="text-sm" 
-              style={{ color: editName.length > maxNameLength ? Colors.error || '#ef4444' : Colors.textSecondary }}
-            >
-              {editName.length}/{maxNameLength} characters
-            </Text>
-            {editName.length > maxNameLength && (
+          {editName.length > maxNameLength && (
+            <View className="flex-row justify-between items-center mt-1">
+              <Text 
+                className="text-sm" 
+                style={{ color: editName.length > maxNameLength ? Colors.error || '#ef4444' : Colors.textSecondary }}
+              >
+                {editName.length}/{maxNameLength} characters
+              </Text>
               <Text className="text-sm text-red-500">
                 Name too long
               </Text>
-            )}
-          </View>
+            </View>
+          )}
         </View>
       ) : (
         <View className="flex-1 flex-row items-center">
