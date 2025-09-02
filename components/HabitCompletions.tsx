@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { useListHabits, useListHabitCompletions, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
+import { useListHabits, useListHabitCompletionsByDate, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
 import useWindowWidth from '@/hooks/useWindowWidth';
 import AddHabitButton from '@/components/AddHabitButton';
 import { HabitCompletion } from '@/db/types';
@@ -19,7 +19,7 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
   const width = useWindowWidth();
   
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
-  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletions(selectedDate);
+  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletionsByDate(selectedDate);
   const habitCompletionsMap = useMemo(() => {
     return completions.reduce((acc, completion) => {
       acc[completion.habitId] = completion;

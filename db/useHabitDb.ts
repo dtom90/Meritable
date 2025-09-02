@@ -120,13 +120,25 @@ export const useCreateHabitCompletion = () => {
   });
 };
 
-export const useListHabitCompletions = (completionDate: string) => {
+export const useListHabitCompletionsByDate = (completionDate: string) => {
   const { activeDb } = useDataSource();
   
   return useQuery({
     queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate],
     queryFn: async () => {
-      const completions = await activeDb.getHabitCompletions(completionDate);
+      const completions = await activeDb.getHabitCompletionsByDate(completionDate);
+      return completions.map((completion: HabitCompletion) => completion);
+    },
+  });
+};
+
+export const useListHabitCompletionsByHabitId = (habitId: number) => {
+  const { activeDb } = useDataSource();
+  
+  return useQuery({
+    queryKey: [HABIT_COMPLETIONS_QUERY_KEY, habitId],
+    queryFn: async () => {
+      const completions = await activeDb.getHabitCompletionsById(habitId);
       return completions.map((completion: HabitCompletion) => completion);
     },
   });

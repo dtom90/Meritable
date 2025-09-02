@@ -29,6 +29,7 @@ export abstract class HabitDatabaseInterface {
 
   // HabitCompletion operations
   abstract createHabitCompletion(habitCompletion: HabitCompletionInput): Promise<HabitCompletion>
-  abstract getHabitCompletions(completionDate?: string): Promise<HabitCompletion[]>
+  abstract getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]>
+  abstract getHabitCompletionsById(habitId: number): Promise<HabitCompletion[]>
   abstract deleteHabitCompletion(id: number): Promise<void>
 }

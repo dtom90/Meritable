@@ -4,6 +4,7 @@ import { Colors } from '@/constants/Colors';
 import { useListHabits } from '@/db/useHabitDb';
 import HabitTitle from '@/components/HabitTitle'
 import HabitActions from '@/components/HabitActions'
+import HabitCompletionsCalendar from '@/components/HabitCompletionsCalendar'
 
 
 export default function HabitDetail() {
@@ -27,16 +28,7 @@ export default function HabitDetail() {
         <View className="pt-[50px] px-5 max-w-[800px] self-center w-full">
           <HabitTitle habit={habit} />
 
-          {/* Habit Info Card */}
-          <View className="p-6 rounded-lg mb-6" style={{ backgroundColor: Colors.surface }}>
-            <Text className="text-lg font-semibold mb-4" style={{ color: Colors.text }}>
-              Habit Completions
-            </Text>
-            
-            <View className="space-y-3">
-            
-            </View>
-          </View>
+          <HabitCompletionsCalendar habitId={habit.id} />
 
           <HabitActions habitId={habit.id} />
 

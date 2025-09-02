@@ -121,7 +121,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return data
   }
 
-  async getHabitCompletions(completionDate?: string): Promise<HabitCompletion[]> {
+  async getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]> {
     let query = this.supabase
       .from('habit_completions')
       .select('*')
@@ -132,6 +132,16 @@ export class SupabaseDb extends HabitDatabaseInterface {
     }
 
     const { data, error } = await query
+    if (error) throw error
+    return data || []
+  }
+
+  async getHabitCompletionsById(habitId: number): Promise<HabitCompletion[]> {
+    const { data, error } = await this.supabase
+      .from('habit_completions')
+      .select('*')
+      .eq('habitId', habitId)
+      .order('completionDate', { ascending: false })
     if (error) throw error
     return data || []
   }

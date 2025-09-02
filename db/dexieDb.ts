@@ -103,11 +103,15 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     return completionWithTimestamps;
   }
 
-  async getHabitCompletions(completionDate?: string): Promise<HabitCompletion[]> {
+  async getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]> {
     if (completionDate) {
       return await this.habitCompletions.where('completionDate').equals(completionDate).toArray();
     }
     return await this.habitCompletions.toArray();
+  }
+
+  async getHabitCompletionsById(habitId: number): Promise<HabitCompletion[]> {
+    return await this.habitCompletions.where('habitId').equals(habitId).toArray();
   }
 
   async deleteHabitCompletion(id: number): Promise<void> {
