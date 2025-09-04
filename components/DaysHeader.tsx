@@ -1,48 +1,89 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
+import { WeekCalendar } from 'react-native-calendars';
 import { Colors } from '@/constants/Colors';
+import { formatDate, getToday } from '@/utils/dateUtils';
+import { MarkedDates } from 'react-native-calendars/src/types';
 
 interface DaysHeaderProps {
   selectedDate: string;
   onDateSelect: (date: string) => void;
 }
 
-const tabs = Array.from({ length: 7 }).map((_, index) => {
-  const today = new Date();
-  const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() - (6 - index));
-
-  const year = targetDate.getFullYear();
-  const month = (targetDate.getMonth() + 1).toString().padStart(2, '0');
-  const day = targetDate.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-});
-
-const formatDate = (dateString: string) => {
-  const [year, month, day] = dateString.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString('en-US', { day: 'numeric', weekday: 'short' });
-};
-
 export default function DaysHeader({ selectedDate, onDateSelect }: DaysHeaderProps) {
+  const today = getToday();
+  const formattedSelectedDate = formatDate(selectedDate);
+
+  const markedDates: MarkedDates = {};
+
+  // Style for the selected date
+  markedDates[formattedSelectedDate] = {
+    selected: true,
+    selectedColor: Colors.info, // Light blue background
+    selectedTextColor: Colors.background,
+  };
+
+  // Style for today's date (dark blue ring)
+  const todayMarking = {
+    customStyles: {
+      container: {
+        borderWidth: 2,
+        borderColor: Colors.secondary, // Dark blue ring
+        borderRadius: 18,
+        width: 36,
+        height: 36,
+        backgroundColor: today === formattedSelectedDate ? Colors.info : 'transparent',
+      },
+      text: {
+        color: today === formattedSelectedDate ? Colors.background : Colors.text,
+      },
+    },
+  };
+
+  if (markedDates[today]) {
+    markedDates[today] = {
+      ...markedDates[today],
+      ...todayMarking,
+      customStyles: {
+        ...markedDates[today].customStyles,
+        ...todayMarking.customStyles,
+        container: {
+          ...markedDates[today].customStyles?.container,
+          ...todayMarking.customStyles.container,
+        },
+        text: {
+          ...markedDates[today].customStyles?.text,
+          ...todayMarking.customStyles.text,
+        },
+      },
+    };
+  } else {
+    markedDates[today] = todayMarking;
+  }
+
   return (
-    <View className="flex-row justify-around py-2.5 mb-2.5" style={{ backgroundColor: Colors.surface }}>
-      {tabs.map((tab) => (
-        <TouchableOpacity
-          key={tab}
-          className={`py-2 px-1.5 ${selectedDate === tab ? 'border-b-2' : ''}`}
-          style={selectedDate === tab ? { borderBottomColor: Colors.primary } : {}}
-          onPress={() => onDateSelect(tab)}>
-          <Text 
-            className={`text-sm ${selectedDate === tab ? 'font-bold' : ''}`}
-            style={{ color: selectedDate === tab ? Colors.primary : Colors.textSecondary }}
-          >
-            {formatDate(tab)}
-          </Text>
-        </TouchableOpacity>
-      ))}
+    <View style={{ backgroundColor: Colors.surface }}>
+      <Text style={{ color: Colors.text, textAlign: 'center', marginVertical: 8 }}>
+        {formattedSelectedDate}
+      </Text>
+      <WeekCalendar
+        current={formattedSelectedDate}
+        onDayPress={(day) => onDateSelect(day.dateString)}
+        markedDates={markedDates}
+        markingType={'custom'}
+        theme={{
+          backgroundColor: Colors.surface,
+          calendarBackground: Colors.surface,
+          textSectionTitleColor: Colors.textSecondary,
+          selectedDayTextColor: Colors.text,
+          selectedDayBackgroundColor: 'transparent',
+          todayTextColor: Colors.text,
+          dayTextColor: Colors.text,
+        }}
+        firstDay={6}
+        disableMonthChange={true}
+        enableSwipeMonths={false}
+      />
     </View>
   );
 }
-
-export { tabs };

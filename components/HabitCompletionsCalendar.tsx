@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import { useListHabitCompletionsByHabitId } from "@/db/useHabitDb";
+import { getToday } from "@/utils/dateUtils";
 import { useState } from "react";
 import { View, Text } from "react-native";
 import { Calendar } from 'react-native-calendars';
@@ -7,12 +8,10 @@ import { MarkedDates } from "react-native-calendars/src/types";
 
 
 export default function HabitCompletionsCalendar({ habitId }: { habitId: number }) {
-  const [selected, setSelected] = useState('');
   const { data: completions = [] } = useListHabitCompletionsByHabitId(habitId);
   const completionDates = completions.map(completion => completion.completionDate);
 
-  // Get today's date in YYYY-MM-DD format in current timezone
-  const today = new Date().toLocaleDateString('sv-SE');
+  const today = getToday();
 
   const markedDates: MarkedDates = completionDates.reduce((acc, date) => {
     acc[date] = {
@@ -61,9 +60,6 @@ export default function HabitCompletionsCalendar({ habitId }: { habitId: number 
 
       <View>
         <Calendar
-          onDayPress={day => {
-            setSelected(day.dateString);
-          }}
           markedDates={markedDates}
           markingType={'custom'}
           theme={{
