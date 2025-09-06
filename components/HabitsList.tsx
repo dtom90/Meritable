@@ -32,8 +32,6 @@ export default function HabitsList() {
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
-    console.log('active', active);
-    console.log('over', over);
 
     if (active.id !== over?.id) {
       const oldIndex = habits.findIndex((item) => item.id?.toString() === active.id);
@@ -48,7 +46,6 @@ export default function HabitsList() {
           order: index
         }));
         
-        console.log('Habits reordered with order:', reorderedHabits.map(h => ({ name: h.name, order: h.order })));
         reorderHabits(reorderedHabits);
       }
     }

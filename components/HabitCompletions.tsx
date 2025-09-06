@@ -42,7 +42,7 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
     <>
       {habits.length === 0 && (
         <TouchableOpacity
-          className="rounded-lg p-4 justify-center items-center shadow-lg"
+          className="rounded-lg p-4 m-8 justify-center items-center shadow-lg"
           style={{ backgroundColor: Colors.primary }}
           onPress={() => router.push('/habits?focusInput=true')}
           activeOpacity={0.8}
@@ -52,7 +52,7 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
       )}
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="max-w-3xl self-center w-full">
+        <View className="max-w-3xl self-center w-full my-4">
           {habits.map(habit => (
             <View
               key={habit.id}
@@ -81,13 +81,13 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
               </View>
             </View>
           ))}
-          {width < widthThreshold && (
+          {habits.length && width < widthThreshold && (
             <AddHabitButton withTooltip={false} />
           )}
         </View>
       </ScrollView>
 
-      {width >= widthThreshold && (
+      {habits.length && width >= widthThreshold && (
         <AddHabitButton withTooltip={true} />
       )}
     </>
