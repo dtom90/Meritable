@@ -1,8 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { MarkingProps } from 'react-native-calendars/src/calendar/day/marking';
-import { Colors } from '@/constants/Colors';
-import { getToday } from '@/utils/dateUtils';
+import { Colors } from '@/lib/Colors';
+import { getToday } from '@/lib/dateUtils';
 import { DateData, DayState } from 'react-native-calendars/src/types';
 
 interface CustomDayHeaderProps {

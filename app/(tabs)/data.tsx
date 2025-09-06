@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
-import { Colors } from '@/constants/Colors';
-import { useDataSource } from '@/contexts/DataSourceContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { Colors } from '@/lib/Colors';
+import { useDataSource } from '@/db/DataSourceContext';
+import { useAuth } from '@/db/AuthContext';
 import LoginOverlay from '@/components/LoginOverlay';
 
 export default function DataPage() {

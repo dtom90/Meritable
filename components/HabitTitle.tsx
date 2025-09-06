@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { useUpdateHabit } from '@/db/useHabitDb';
 import { Habit } from '@/db/types';
 

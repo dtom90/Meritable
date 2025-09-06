@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { useListHabits } from '@/db/useHabitDb';
-import useWindowWidth from '@/hooks/useWindowWidth';
+import useWindowWidth from '@/lib/useWindowWidth';
 import AddHabitButton from '@/components/AddHabitButton';
 import HabitCompletionButton from './HabitCompletionButton';
 

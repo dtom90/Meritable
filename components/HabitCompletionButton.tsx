@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useListHabitCompletionsByDate, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
 import { View, Text } from 'react-native';
 import { IconButton } from 'react-native-paper';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { Habit, HabitCompletion } from '@/db/types';
 
 

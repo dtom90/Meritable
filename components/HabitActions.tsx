@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { useDeleteHabit } from '@/db/useHabitDb';
 
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
 import { WeekCalendar } from 'react-native-calendars';
-import { Colors } from '@/constants/Colors';
-import { formatDate } from '@/utils/dateUtils';
+import { Colors } from '@/lib/Colors';
+import { formatDate } from '@/lib/dateUtils';
 import { MarkedDates } from 'react-native-calendars/src/types';
 import CustomDayHeader from './CustomDayHeader';
 

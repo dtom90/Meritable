@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import HabitItem from './HabitItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 

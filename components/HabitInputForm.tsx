@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { View, TextInput, Text, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { useCreateHabit } from '@/db/useHabitDb';
 
 export default function HabitInputForm() {

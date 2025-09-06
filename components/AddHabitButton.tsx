@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { TouchableOpacity, View, Text, Platform } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function AddHabitButton({ withTooltip }: { withTooltip: boolean }) {

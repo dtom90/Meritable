@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Habit, HabitCompletion, HabitInput } from './types'
-import { useDataSource } from '@/contexts/DataSourceContext';
+import { useDataSource } from '@/db/DataSourceContext';
 
 /**
  *  Query keys

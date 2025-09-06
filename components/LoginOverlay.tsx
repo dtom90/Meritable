@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, Alert } from 'react-native';
-import { Colors } from '@/constants/Colors';
-import { useAuth } from '@/contexts/AuthContext';
+import { Colors } from '@/lib/Colors';
+import { useAuth } from '@/db/AuthContext';
 
 interface LoginOverlayProps {
   visible: boolean;

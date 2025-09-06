@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import HabitInputForm from '@/components/HabitInputForm';
 import HabitsList from '@/components/HabitsList';
 

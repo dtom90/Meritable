@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { Icon } from 'react-native-paper';
 import { Habit } from '@/db/types';
 import { useSortable } from '@dnd-kit/sortable';

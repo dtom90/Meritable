@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import WeekHeader from '@/components/WeekHeader';
 import HabitCompletions from '@/components/HabitCompletions';
-import { getToday } from '@/utils/dateUtils';
+import { getToday } from '@/lib/dateUtils';
 
 
 export default function HomeScreen() {

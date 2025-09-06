@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/lib/Colors';
 import { useListHabits } from '@/db/useHabitDb';
 import HabitTitle from '@/components/HabitTitle'
 import HabitActions from '@/components/HabitActions'
