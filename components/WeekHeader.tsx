@@ -6,12 +6,12 @@ import { formatDate } from '@/utils/dateUtils';
 import { MarkedDates } from 'react-native-calendars/src/types';
 import CustomDayHeader from './CustomDayHeader';
 
-interface DaysHeaderProps {
+interface WeekHeaderProps {
   selectedDate: string;
   onDateSelect: (date: string) => void;
 }
 
-export default function DaysHeader({ selectedDate, onDateSelect }: DaysHeaderProps) {
+export default function WeekHeader({ selectedDate, onDateSelect }: WeekHeaderProps) {
   const formattedSelectedDate = formatDate(selectedDate);
 
   const markedDates: MarkedDates = {
