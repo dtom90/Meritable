@@ -1,6 +1,5 @@
 
-import { useMemo } from 'react';
-import { useListHabitCompletionsByDate, useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
+import { useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
 import { View, Text } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { Colors } from '@/lib/Colors';
@@ -10,31 +9,15 @@ import { Habit, HabitCompletion } from '@/db/types';
 interface HabitCompletionButtonProps {
   habit: Habit;
   selectedDate: string;
+  habitCompletionsMap: Record<number, HabitCompletion>;
 }
 
-export default function HabitCompletionButton({ habit, selectedDate }: HabitCompletionButtonProps) {
-  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletionsByDate(selectedDate);
-  const habitCompletionsMap = useMemo(() => {
-    return completions.reduce((acc, completion) => {
-      acc[completion.habitId] = completion;
-      return acc;
-    }, {} as Record<number, HabitCompletion>);
-  }, [completions]);
-
+export default function HabitCompletionButton({ habit, selectedDate, habitCompletionsMap }: HabitCompletionButtonProps) {
   const addCompletionMutation = useCreateHabitCompletion();
   const deleteCompletionMutation = useDeleteHabitCompletion();
 
-  if (isLoadingCompletions) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text style={{ color: Colors.text }}>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <View
-      key={habit.id}
       className="flex-1 flex-row items-center py-2 px-4 m-4 rounded-lg min-h-[68px]"
       style={{ backgroundColor: habitCompletionsMap[habit.id] ? Colors.success : Colors.surface }}
     >

@@ -1,7 +1,9 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Colors } from '@/lib/Colors';
-import { useListHabits } from '@/db/useHabitDb';
+import { useListHabits, useListHabitCompletionsByDate } from '@/db/useHabitDb';
+import { HabitCompletion } from '@/db/types';
 import useWindowWidth from '@/lib/useWindowWidth';
 import AddHabitButton from '@/components/AddHabitButton';
 import HabitCompletionButton from './HabitCompletionButton';
@@ -18,8 +20,16 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
   const width = useWindowWidth();
   
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
+  const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletionsByDate(selectedDate);
   
-  if (isLoadingHabits) {
+  const habitCompletionsMap = useMemo(() => {
+    return completions.reduce((acc, completion) => {
+      acc[completion.habitId] = completion;
+      return acc;
+    }, {} as Record<number, HabitCompletion>);
+  }, [completions]);
+  
+  if (isLoadingHabits || isLoadingCompletions) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text style={{ color: Colors.text }}>Loading...</Text>
@@ -43,7 +53,12 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="max-w-3xl self-center w-full my-4">
           {habits.map(habit => (
-            <HabitCompletionButton habit={habit} selectedDate={selectedDate} />
+            <HabitCompletionButton 
+              key={habit.id} 
+              habit={habit} 
+              selectedDate={selectedDate} 
+              habitCompletionsMap={habitCompletionsMap}
+            />
           ))}
           {habits.length && width < widthThreshold && (
             <AddHabitButton withTooltip={false} />
