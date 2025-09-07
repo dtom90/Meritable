@@ -39,3 +39,22 @@ export const formatDate = (date: string, fallback?: string): string => {
 export const isValidDateFormat = (date: string): boolean => {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
 };
+
+/**
+ * Gets the day of the week for a date string in YYYY-MM-DD format
+ * Handles timezone correctly by parsing the date in local timezone
+ * @param dateString - The date string in YYYY-MM-DD format
+ * @param locale - The locale for formatting (defaults to 'en-US')
+ * @param options - Intl.DateTimeFormatOptions for formatting (defaults to { weekday: 'short' })
+ * @returns The formatted day of the week string
+ */
+export const getDayOfWeek = (
+  dateString: string, 
+  locale: string = 'en-US', 
+  options: Intl.DateTimeFormatOptions = { weekday: 'short' }
+): string => {
+  // Parse the date string in local timezone to avoid UTC midnight issues
+  const [year, month, day] = dateString.split('-').map(Number);
+  const localDate = new Date(year, month - 1, day); // month is 0-indexed
+  return localDate.toLocaleDateString(locale, options);
+};

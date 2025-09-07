@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { MarkingProps } from 'react-native-calendars/src/calendar/day/marking';
 import { Colors } from '@/lib/Colors';
-import { getToday } from '@/lib/dateUtils';
+import { getToday, getDayOfWeek } from '@/lib/dateUtils';
 import { DateData, DayState } from 'react-native-calendars/src/types';
 
 interface CustomDayHeaderProps {
@@ -20,7 +20,7 @@ const CustomDayHeader: React.FC<CustomDayHeaderProps> = ({ date, state, onPress,
   const today = getToday();
   const isToday = date.dateString === today;
   const isSelected = !!marking.selected;
-  const dayOfWeek = new Date(date.dateString).toLocaleDateString('en-US', { weekday: 'short' });
+  const dayOfWeek = getDayOfWeek(date.dateString);
 
   const containerStyle: any = {
     alignItems: 'center',
