@@ -54,10 +54,17 @@ export default function HabitsList() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
-        <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full">
+        <View className="flex-1 justify-center items-center">
           <Text style={{ color: Colors.text }}>Loading habits...</Text>
         </View>
       </SafeAreaView>
+    );
+  }
+
+  if (habits.length === 0) {
+    return (
+      <View className="flex-1 justify-center items-center">
+      </View>
     );
   }
 

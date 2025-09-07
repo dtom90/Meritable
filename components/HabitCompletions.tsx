@@ -60,13 +60,13 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
               habitCompletionsMap={habitCompletionsMap}
             />
           ))}
-          {habits.length && width < widthThreshold && (
+          {habits.length > 0 && width < widthThreshold && (
             <AddHabitButton withTooltip={false} />
           )}
         </View>
       </ScrollView>
 
-      {habits.length && width >= widthThreshold && (
+      {habits.length > 0 && width >= widthThreshold && (
         <AddHabitButton withTooltip={true} />
       )}
     </>
