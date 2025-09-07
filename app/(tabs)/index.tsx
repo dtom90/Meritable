@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import WeekHeader from '@/components/WeekHeader';
 import HabitCompletions from '@/components/HabitCompletions';
@@ -11,16 +11,18 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(today);
 
   return (
-    <View
+    <SafeAreaView
       className="flex-1"
-      style={{ backgroundColor: Colors.background }}>
+      style={{ backgroundColor: Colors.surface }}>
 
       <WeekHeader
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate} />
 
-      <HabitCompletions selectedDate={selectedDate} />
+      <View style={{ flex: 1, backgroundColor: Colors.background }}>
+        <HabitCompletions selectedDate={selectedDate} />
+      </View>
 
-    </View>
+    </SafeAreaView>
   );
 }
