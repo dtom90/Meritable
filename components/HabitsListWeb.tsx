@@ -15,11 +15,40 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Colors } from '@/lib/Colors';
 import HabitItem from './HabitItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
+import { Habit } from '@/db/types';
 
-export default function HabitsList() {
+function SortableHabitItem({ habit }: { habit: Habit }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: habit.id?.toString() || '' });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <HabitItem
+      ref={setNodeRef as any}
+      style={style}
+      habit={habit}
+      isDragging={isDragging}
+      dragHandleProps={{ ...attributes, ...listeners }}
+    />
+  );
+}
+
+export default function HabitsListWeb() {
   const { data: habits = [], isLoading } = useListHabits();
   const { mutate: reorderHabits } = useReorderHabits();
 
@@ -78,7 +107,7 @@ export default function HabitsList() {
       >
         <SortableContext items={habits.map(h => h.id?.toString() || '')} strategy={verticalListSortingStrategy}>
           {habits.map((habit) => (
-            <HabitItem key={habit.id} habit={habit} />
+            <SortableHabitItem key={habit.id} habit={habit} />
           ))}
         </SortableContext>
       </DndContext>

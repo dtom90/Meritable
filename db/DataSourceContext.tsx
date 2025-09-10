@@ -1,10 +1,12 @@
+import { Platform } from 'react-native';
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import { DexieDb } from '@/db/dexieDb';
 import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/types';
 
 export type DataSourceType = 'local' | 'cloud';
-const defaultDataSource: DataSourceType = process.env.EXPO_PUBLIC_DATA_SOURCE === 'local' ? 'local' : 'cloud';
+
+const defaultDataSource: DataSourceType = Platform.OS === 'web' && __DEV__ ? 'local' : 'cloud';
 
 interface DataSourceContextType {
   // Current data source
