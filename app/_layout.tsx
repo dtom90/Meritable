@@ -30,7 +30,7 @@ export default function RootLayout() {
   // Set document title for web
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
-      document.title = 'Mertiable';
+      document.title = 'Meritable';
     }
   }, []);
 

@@ -28,11 +28,11 @@ ios/**/*.xcodeproj/project.xcworkspace/xcuserdata/
 ios/**/*.xcworkspace/xcshareddata/
 ios/**/*.xcodeproj/project.xcworkspace/xcshareddata/
 ios/**/DerivedData/
-ios/**/mertiable.xcworkspace/xcuserdata/
-ios/**/mertiable.xcodeproj/xcuserdata/
-ios/**/mertiable.xcodeproj/project.xcworkspace/xcuserdata/
-ios/**/mertiable.xcworkspace/xcshareddata/
-ios/**/mertiable.xcodeproj/project.xcworkspace/xcshareddata/
+ios/**/meritable.xcworkspace/xcuserdata/
+ios/**/meritable.xcodeproj/xcuserdata/
+ios/**/meritable.xcodeproj/project.xcworkspace/xcuserdata/
+ios/**/meritable.xcworkspace/xcshareddata/
+ios/**/meritable.xcodeproj/project.xcworkspace/xcshareddata/
 
 # Metro
 .metro-health-check*

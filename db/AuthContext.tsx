@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const redirectTo = Platform.OS === 'web' 
         ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/callback`
-        : 'app.mertiable://auth/callback';
+        : 'app.meritable://auth/callback';
 
       const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',

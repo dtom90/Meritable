@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mertiable",
-    "slug": "mertiable",
+    "name": "meritable",
+    "slug": "meritable",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "app.mertiable",
+    "scheme": "app.meritable",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
@@ -25,7 +25,7 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "title": "Mertiable"
+      "title": "Meritable"
     },
     "plugins": [
       "expo-router",
