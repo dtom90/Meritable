@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "meritable",
-    "slug": "meritable",
+    "name": "Meritable",
+    "slug": "mertiable",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -62,8 +62,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "b9fda42f-a666-46f3-9e2b-8e071970c3a0"
+        "projectId": "d05b900b-f5e2-403c-89ec-43b5bddc9609"
       }
-    }
+    },
+    "owner": "dtom90"
   }
 }
