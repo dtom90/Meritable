@@ -1,20 +1,17 @@
-import { Platform } from 'react-native';
-import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
+import { Platform, View, Text } from 'react-native';
+import React, { createContext, useContext, useMemo, ReactNode, useState, useEffect } from 'react';
 import { DexieDb } from '@/db/dexieDb';
 import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/types';
 
 export type DataSourceType = 'local' | 'cloud';
 
-const defaultDataSource: DataSourceType = Platform.OS === 'web' && __DEV__ ? 'local' : 'cloud';
+const dataSource: DataSourceType = Platform.OS === 'web' && __DEV__ ? 'local' : 'cloud';
 
 interface DataSourceContextType {
-  // Current data source
   currentDataSource: DataSourceType;
-  setDataSource: (source: DataSourceType) => void;
-  
-  // Active database interface
-  activeDb: HabitDatabaseInterface;
+  activeDb: HabitDatabaseInterface | null;
+  isInitialized: boolean;
 }
 
 const DataSourceContext = createContext<DataSourceContextType | undefined>(undefined);
@@ -24,22 +21,67 @@ interface DataSourceProviderProps {
 }
 
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
-  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>(defaultDataSource);
+  const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize database instances once, not on every render
-  const [localDb] = useState(() => new DexieDb());
-  const [cloudDb] = useState(() => new SupabaseDb());
+  useEffect(() => {
+    const initializeDatabase = async () => {
+      try {
+        let db: HabitDatabaseInterface;
+        
+        if (dataSource === 'cloud') {
+          db = new SupabaseDb();
+        } else {
+          // Only create DexieDb on web dev
+          if (Platform.OS === 'web' && __DEV__) {
+            db = new DexieDb();
+          } else {
+            // Fallback to SupabaseDb if somehow we're not in web dev
+            console.warn('Unexpected platform for local database, falling back to cloud');
+            db = new SupabaseDb();
+          }
+        }
+        
+        // Test the database connection (only for local DB)
+        if (dataSource === 'local') {
+          await db.getHabits();
+        }
+        
+        setActiveDb(db);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Database initialization failed:', error);
+        // Set initialized to true to prevent infinite loading
+        setIsInitialized(true);
+      }
+    };
 
-  // Get active database based on current source - memoized to prevent unnecessary re-renders
-  const activeDb = useMemo((): HabitDatabaseInterface => {
-    return currentDataSource === 'cloud' ? cloudDb : localDb;
-  }, [currentDataSource, cloudDb, localDb]);
+    initializeDatabase();
+  }, []);
 
   const value: DataSourceContextType = {
-    currentDataSource,
-    setDataSource: setCurrentDataSource,
+    currentDataSource: dataSource,
     activeDb,
+    isInitialized,
   };
+
+  // Show loading state while database initializes
+  if (!isInitialized) {
+    return (
+      <DataSourceContext.Provider value={value}>
+        <View style={{ 
+          flex: 1,
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          backgroundColor: '#000'
+        }}>
+          <Text style={{ color: '#fff', fontSize: 16 }}>
+            Initializing...
+          </Text>
+        </View>
+      </DataSourceContext.Provider>
+    );
+  }
 
   return (
     <DataSourceContext.Provider value={value}>

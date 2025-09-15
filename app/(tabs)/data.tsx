@@ -6,27 +6,13 @@ import { useAuth } from '@/db/AuthContext';
 import LoginOverlay from '@/components/LoginOverlay';
 
 export default function DataPage() {
-  const { currentDataSource, setDataSource } = useDataSource();
+  const { currentDataSource } = useDataSource();
   const { isAuthenticated, user, signOut } = useAuth();
-  const [showLoginOverlay, setShowLoginOverlay] = useState(false);
   const [showSignOutAlert, setShowSignOutAlert] = useState(false);
-
-  const toggleDataSource = () => {
-    if (currentDataSource === 'local') {
-      // Switching to cloud - check if user is authenticated
-      if (!isAuthenticated) {
-        setShowLoginOverlay(true);
-        return;
-      }
-    }
-    // If switching to local or already authenticated for cloud
-    setDataSource(currentDataSource === 'local' ? 'cloud' : 'local');
-  };
+  const [showLoginOverlay, setShowLoginOverlay] = useState(false);
 
   const handleLoginSuccess = () => {
     setShowLoginOverlay(false);
-    // Now switch to cloud since user is authenticated
-    setDataSource('cloud');
   };
 
   const handleCloseLogin = () => {
@@ -45,7 +31,7 @@ export default function DataPage() {
       // Use native Alert for mobile
       Alert.alert(
         'Sign Out',
-        'Are you sure you want to sign out? This will switch you back to local database.',
+        'Are you sure you want to sign out?',
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -87,14 +73,14 @@ export default function DataPage() {
             <Text className="text-base mb-4" style={{ color: Colors.textSecondary }}>
               Currently using: {currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}
             </Text>
-            <View className="flex-row items-center gap-2">
+            
+            <View className="flex-row items-center gap-2 opacity-50">
               <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
                 Local
               </Text>
-              <TouchableOpacity
+              <View
                 className="w-16 h-8 rounded-full p-1"
                 style={{ backgroundColor: currentDataSource === 'local' ? Colors.textTertiary : Colors.primary }}
-                onPress={toggleDataSource}
               >
                 <View 
                   className="w-6 h-6 rounded-full"
@@ -103,11 +89,15 @@ export default function DataPage() {
                     transform: [{ translateX: currentDataSource === 'local' ? 0 : 24 }]
                   }}
                 />
-              </TouchableOpacity>
+              </View>
               <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
                 Cloud
               </Text>
             </View>
+            
+            <Text className="text-sm mt-3" style={{ color: Colors.textTertiary }}>
+              Data source is fixed based on your platform
+            </Text>
             
             {currentDataSource === 'cloud' && !isAuthenticated && (
               <TouchableOpacity
@@ -161,7 +151,7 @@ export default function DataPage() {
               Sign Out
             </Text>
             <Text className="text-base mb-6 text-center text-gray-600">
-              Are you sure you want to sign out? This will switch you back to local database.
+              Are you sure you want to sign out?
             </Text>
             <View className="flex-row gap-3">
               <TouchableOpacity

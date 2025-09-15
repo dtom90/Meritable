@@ -19,6 +19,7 @@ export const useCreateHabit = () => {
   
   return useMutation({
     mutationFn: async (habitData: HabitInput) => {
+      if (!activeDb) throw new Error('Database not initialized');
       await activeDb.createHabit(habitData);
     },
     onSuccess: () => {
@@ -28,11 +29,15 @@ export const useCreateHabit = () => {
 };
 
 export const useListHabits = () => {
-  const { activeDb } = useDataSource();
+  const { activeDb, isInitialized } = useDataSource();
   
   return useQuery({
     queryKey: [HABITS_QUERY_KEY],
-    queryFn: () => activeDb.getHabits(),
+    queryFn: () => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return activeDb.getHabits();
+    },
+    enabled: isInitialized && !!activeDb,
   });
 };
 
@@ -42,6 +47,7 @@ export const useUpdateHabit = () => {
   
   return useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: Partial<Habit> }) => {
+      if (!activeDb) throw new Error('Database not initialized');
       return await activeDb.updateHabit(id, updates);
     },
     onSuccess: () => {
@@ -56,6 +62,7 @@ export const useReorderHabits = () => {
   
   return useMutation({
     mutationFn: async (habits: Habit[]) => {
+      if (!activeDb) throw new Error('Database not initialized');
       return await activeDb.reorderHabits(habits);
     },
     onMutate: async (newHabits: Habit[]) => {
@@ -90,6 +97,7 @@ export const useDeleteHabit = () => {
   
   return useMutation({
     mutationFn: async (habitId: number) => {
+      if (!activeDb) throw new Error('Database not initialized');
       await activeDb.deleteHabit(habitId);
       await activeDb.deleteHabitCompletion(habitId);
     },
@@ -110,6 +118,7 @@ export const useCreateHabitCompletion = () => {
   
   return useMutation({
     mutationFn: async ({ habitId, completionDate }: { habitId: number; completionDate: string }) => {
+      if (!activeDb) throw new Error('Database not initialized');
       await activeDb.createHabitCompletion({ habitId, completionDate });
     },
     onSuccess: (_, { completionDate }) => {
@@ -121,26 +130,30 @@ export const useCreateHabitCompletion = () => {
 };
 
 export const useListHabitCompletionsByDate = (completionDate: string) => {
-  const { activeDb } = useDataSource();
+  const { activeDb, isInitialized } = useDataSource();
   
   return useQuery({
     queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate],
     queryFn: async () => {
+      if (!activeDb) throw new Error('Database not initialized');
       const completions = await activeDb.getHabitCompletionsByDate(completionDate);
       return completions.map((completion: HabitCompletion) => completion);
     },
+    enabled: isInitialized && !!activeDb,
   });
 };
 
 export const useListHabitCompletionsByHabitId = (habitId: number) => {
-  const { activeDb } = useDataSource();
+  const { activeDb, isInitialized } = useDataSource();
   
   return useQuery({
     queryKey: [HABIT_COMPLETIONS_QUERY_KEY, habitId],
     queryFn: async () => {
+      if (!activeDb) throw new Error('Database not initialized');
       const completions = await activeDb.getHabitCompletionsById(habitId);
       return completions.map((completion: HabitCompletion) => completion);
     },
+    enabled: isInitialized && !!activeDb,
   });
 };
 
@@ -150,6 +163,7 @@ export const useDeleteHabitCompletion = () => {
   
   return useMutation({
     mutationFn: async ({ id }: { id: number, completionDate: string }) => {
+      if (!activeDb) throw new Error('Database not initialized');
       await activeDb.deleteHabitCompletion(id);
     },
     onSuccess: (_, { completionDate }) => {

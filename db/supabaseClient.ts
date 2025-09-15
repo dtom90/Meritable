@@ -4,7 +4,8 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY')
+  console.error('Missing Supabase environment variables. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY');
+  // Don't throw immediately, let the app handle this gracefully
 }
 
 // Create a single, shared Supabase client instance
