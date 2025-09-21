@@ -41,7 +41,6 @@ export default function HabitCompletionsCalendar({ habitId }: { habitId: number 
         borderWidth: 2,
         borderColor: '#007AFF',
         borderRadius: 16,
-        backgroundColor: 'green',
         width: 32,
         height: 32
       },
