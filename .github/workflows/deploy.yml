@@ -40,6 +40,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run Expo Doctor
+        run: npm run doctor
+
+      - name: Run Expo Lint
+        run: npm run lint
+
+      - name: Check TypeScript compilation
+        run: npx tsc --noEmit
+
+      - name: Verify Expo configuration
+        run: npx expo config --type public
+
       - name: Build website
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

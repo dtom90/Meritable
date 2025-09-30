@@ -14,7 +14,7 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   }
 
   // Implementation of HabitDatabaseInterface methods
-  async createHabit(habit: HabitInput): Promise<Habit> {
+  async createHabit(habit: { name: string }): Promise<Habit> {
     const now = new Date().toISOString();
     
     // Get the current highest order value to assign the next order
@@ -23,17 +23,18 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
       ? Math.max(...existingHabits.map(h => h.order)) + 1 
       : 0;
     
-    const habitWithTimestamps: Habit = {
+    const habitToAdd = {
       ...habit,
       order: nextOrder,
-      id: await this.habits.add({
-        ...habit,
-        order: nextOrder,
-        created_at: now,
-        updated_at: now
-      }),
       created_at: now,
       updated_at: now
+    };
+    
+    const id = await this.habits.add(habitToAdd as any);
+    
+    const habitWithTimestamps: Habit = {
+      ...habitToAdd,
+      id,
     };
     return habitWithTimestamps;
   }
@@ -90,15 +91,17 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
 
   async createHabitCompletion(completion: Omit<HabitCompletion, 'id'>): Promise<HabitCompletion> {
     const now = new Date().toISOString();
-    const completionWithTimestamps: HabitCompletion = {
+    const completionToAdd = {
       ...completion,
-      id: await this.habitCompletions.add({
-        ...completion,
-        created_at: now,
-        updated_at: now
-      }),
       created_at: now,
       updated_at: now
+    };
+    
+    const id = await this.habitCompletions.add(completionToAdd as any);
+    
+    const completionWithTimestamps: HabitCompletion = {
+      ...completionToAdd,
+      id,
     };
     return completionWithTimestamps;
   }

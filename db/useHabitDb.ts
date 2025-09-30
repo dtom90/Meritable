@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Habit, HabitCompletion, HabitInput } from './types'
+import { Habit, HabitCompletion } from './types'
 import { useDataSource } from '@/db/DataSourceContext';
 
 /**
@@ -18,7 +18,7 @@ export const useCreateHabit = () => {
   const { activeDb } = useDataSource();
   
   return useMutation({
-    mutationFn: async (habitData: HabitInput) => {
+    mutationFn: async (habitData: { name: string }) => {
       if (!activeDb) throw new Error('Database not initialized');
       await activeDb.createHabit(habitData);
     },

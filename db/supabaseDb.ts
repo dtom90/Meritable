@@ -10,7 +10,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   // Habit operations
-  async createHabit(habit: HabitInput): Promise<Habit> {
+  async createHabit(habit: { name: string }): Promise<Habit> {
     const { data: { user } } = await this.supabase.auth.getUser()
     
     // Get the current highest order value to assign the next order

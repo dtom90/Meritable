@@ -11,13 +11,16 @@ interface HabitItemProps extends ViewProps {
   dragHandleProps?: any;
 }
 
-const HabitItem = React.forwardRef<View, HabitItemProps>(({ 
-  habit, 
-  isDragging = false, 
-  dragHandleProps = {},
-  style,
-  ...props 
-}, ref) => {
+const HabitItem = React.forwardRef<View, HabitItemProps>(function HabitItem(
+  { 
+    habit, 
+    isDragging = false, 
+    dragHandleProps = {},
+    style,
+    ...props 
+  }, 
+  ref
+) {
   const router = useRouter();
 
   const handleHabitPress = () => {
