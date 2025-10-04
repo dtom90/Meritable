@@ -27,6 +27,20 @@
       "autoIncrement": true,
       "ios": {
         "buildConfiguration": "Release"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://citdjxzghpwhpcqitybw.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpdGRqeHpnaHB3aHBjcWl0eWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTMxMjIsImV4cCI6MjA2OTI4OTEyMn0.T-NoeeTdNityZ1MD3eycmyEdYzVppK8JIpJv0LVWVxE"
+      }
+    },
+    "ios-simulator-prod": {
+      "extends": "production",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://citdjxzghpwhpcqitybw.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpdGRqeHpnaHB3aHBjcWl0eWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTMxMjIsImV4cCI6MjA2OTI4OTEyMn0.T-NoeeTdNityZ1MD3eycmyEdYzVppK8JIpJv0LVWVxE"
       }
     }
   },

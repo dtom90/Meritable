@@ -7,9 +7,10 @@
     "dev": "expo start --web",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "ios:simulator": "eas build --platform ios --profile ios-simulator --local",
     "build-web": "npx expo export --platform web",
-    "build-ios:dev": "eas build --platform ios --profile development",
+    "ios:simulator": "eas build --platform ios --profile ios-simulator --local",
+    "ios:dev": "eas build --platform ios --profile development --local",
+    "ios:prod": "eas build --platform ios --profile production --local",
     "doctor": "npx expo install --check",
     "lint": "expo lint",
     "test": "jest --watchAll"
