@@ -12,6 +12,7 @@ export const Colors = {
   textTertiary: '#48484A',
   border: '#38383A',
   success: '#34C759',
+  successSecondary: '#24B749',
   error: '#FF3B30',
   warning: '#FF9500',
   info: '#5AC8FA',
