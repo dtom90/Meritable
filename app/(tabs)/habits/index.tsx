@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import HabitInputForm from '@/components/HabitInputForm';
-import HabitsListWeb from '@/components/HabitsListWeb';
-import HabitsListMobile from '@/components/HabitsListMobile';
+import HabitReorderList from '@/components/HabitReorderList';
 
 export default function HabitManager() {
 
@@ -25,15 +24,7 @@ export default function HabitManager() {
 
           <HabitInputForm />
 
-          {
-            Platform.OS === 'web' 
-              ? (
-                <HabitsListWeb />
-              ) 
-              : (
-                <HabitsListMobile />
-              )
-          }
+          <HabitReorderList />
         </View>
       </ContentWrapper>
     </SafeAreaView>
