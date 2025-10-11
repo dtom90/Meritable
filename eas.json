@@ -35,6 +35,7 @@
     },
     "ios-simulator-prod": {
       "extends": "production",
+      "autoIncrement": false,
       "ios": {
         "simulator": true
       },

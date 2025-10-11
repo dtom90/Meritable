@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabaseClient } from '@/db/supabaseClient';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
 
 interface AuthContextType {
   user: User | null;
@@ -27,14 +28,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    // 1. Get the initial session
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
-    // Listen for auth changes
+    // 2. Listen for auth state changes (sign-in, sign-out)
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
       async (event, session) => {
         console.log('onAuthStateChange event:', event, 'session:', session);
@@ -44,7 +45,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     );
 
-    return () => subscription.unsubscribe();
+    // 3. Handle incoming deep links
+    const handleDeepLink = (event: { url: string }) => {
+      console.log('handleDeepLink received URL:', event.url);
+      const urlString = event.url;
+      // Supabase sends tokens in the fragment, not query params
+      const fragment = urlString.split('#')[1];
+
+      if (fragment) {
+        const params = new URLSearchParams(fragment);
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          console.log('Setting session from deep link...');
+          supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          }).catch(error => {
+            console.error('Error setting session from deep link:', error);
+          });
+        }
+      }
+    };
+
+    // Listen for deep links when the app is opened
+    const linkingSubscription = Linking.addEventListener('url', handleDeepLink);
+
+    return () => {
+      subscription.unsubscribe();
+      // Clean up the event listener
+      linkingSubscription?.remove();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -65,74 +97,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectTo = Platform.OS === 'web' 
-        ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/callback`
-        : 'app.meritable://auth/callback';
+      const redirectTo = makeRedirectUri(); // Creates a redirect URI like 'exp://127.0.0.1:19000/--'
 
-      const { data, error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      });
-
-      if (error) {
-        return { error };
-      }
-      
-      if (!data.url) {
-        return { error: { message: 'Failed to get auth URL' } };
-      }
-
-      const result = await WebBrowser.openAuthSessionAsync(
-        data.url,
-        redirectTo,
-      );
-
-      if (result.type === 'success') {
-        // The onAuthStateChange listener doesn't automatically trigger on mobile,
-        // so we need to manually pass the session tokens to Supabase.
-        const url = result.url;
-        
-        // Extract tokens from the URL hash
-        const hash = url.split('#')[1];
-        if (!hash) {
-          console.error("No tokens found in the redirect URL");
-          return { error: { message: "Authentication failed: Invalid redirect" } };
-        }
-        
-        const params = new URLSearchParams(hash);
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-
-        if (!accessToken || !refreshToken) {
-          console.error("Incomplete tokens in the redirect URL");
-          return { error: { message: "Authentication failed: Incomplete tokens" } };
-        }
-
-        // Manually set the session for the Supabase client
-        const { data: sessionData, error: sessionError } = await supabaseClient.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
+      if (Platform.OS === 'web') {
+        // Web flow - let Supabase handle redirect
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/callback`,
+            skipBrowserRedirect: true,
+          },
         });
 
-        if (sessionError) {
-          return { error: sessionError };
+        if (error) {
+          console.error('Error signing in with Google:', error.message);
+          return { error };
+        }
+        if (data.url) window.location.href = data.url;
+        return { error: null };
+      } else {
+        // Mobile flow - use the exact pattern from the guide
+        // 1. Initiate the OAuth flow
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo,
+            skipBrowserRedirect: true, // This is key for mobile
+          },
+        });
+
+        if (error) {
+          console.error('Error signing in with Google:', error.message);
+          return { error };
         }
 
-        // --- Manually update the auth state ---
-        if (sessionData.session && sessionData.user) {
-          setSession(sessionData.session);
-          setUser(sessionData.user);
-        }
-        // ------------------------------------
+        if (data.url) {
+          // 2. Open the URL in a web browser
+          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
-      } else if (result.type !== 'cancel' && result.type !== 'dismiss') {
-        // Log errors if the auth session failed for reasons other than user cancellation
-        console.warn('Auth session failed:', result);
+          // 3. The result contains the URL with session data in the fragment
+          if (result.type === 'success') {
+            // The session is automatically handled by the Supabase client
+            // when the deep link is processed (see useEffect above)
+          }
+        }
+
+        return { error: null };
       }
-      return { error: null };
     } catch (error) {
       console.error('Caught an exception in signInWithGoogle:', error);
       return { error: { message: 'Failed to sign in with Google' } };
