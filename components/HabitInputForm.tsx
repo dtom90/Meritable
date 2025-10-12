@@ -4,7 +4,11 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import { useCreateHabit } from '@/db/useHabitDb';
 
-export default function HabitInputForm() {
+interface HabitInputFormProps {
+  onSuccess?: () => void;
+}
+
+export default function HabitInputForm({ onSuccess }: HabitInputFormProps = {}) {
   const addHabitMutation = useCreateHabit();
   const [newHabitText, setNewHabitText] = useState('');
   const textInputRef = useRef<TextInput>(null);
@@ -22,8 +26,15 @@ export default function HabitInputForm() {
 
   const handleCreateHabit = () => {
     if (newHabitText.trim()) {
-      addHabitMutation.mutate({ name: newHabitText.trim() });
-      setNewHabitText('');
+      addHabitMutation.mutate(
+        { name: newHabitText.trim() },
+        {
+          onSuccess: () => {
+            setNewHabitText('');
+            onSuccess?.();
+          }
+        }
+      );
     }
   };
 

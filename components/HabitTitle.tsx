@@ -60,7 +60,7 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
 
   return (
     <View className="flex-row items-center mb-6">
-      <TouchableOpacity onPress={() => router.push('/(tabs)/habits')} className="mr-4">
+      <TouchableOpacity onPress={() => router.push('/(tabs)')} className="mr-4">
         <Icon source="arrow-left" color={Colors.text} size={24} />
       </TouchableOpacity>
       
