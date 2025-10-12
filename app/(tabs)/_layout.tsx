@@ -29,9 +29,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Track',
-            tabBarIcon: ({ color }) => <Icon source="clock" size={28} color={color} />,
-            href: '/',
+            href: null,
           }}
         />
         <Tabs.Screen

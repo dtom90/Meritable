@@ -1,32 +1,42 @@
-import React from 'react';
-import { View, Text, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { useState } from 'react';
+import { SafeAreaView, View, Pressable, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import HabitInputForm from '@/components/HabitInputForm';
+import WeekHeader from '@/components/WeekHeader';
+import HabitCompletions from '@/components/HabitCompletions';
+import { getToday } from '@/lib/dateUtils';
 import HabitReorderList from '@/components/HabitReorderList';
 
-export default function HabitManager() {
 
-  const ContentWrapper = Platform.OS === 'web' ? ScrollView : View;
-  
+export default function HomeScreen() {
+  const today = getToday();
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [isEditing, setIsEditing] = useState(false);
+
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
-      <ContentWrapper 
-        className="flex-1" 
-        {...(Platform.OS === 'web' && { 
-          showsVerticalScrollIndicator: false, 
-          contentContainerStyle: { flexGrow: 1 } 
-        })}
-      >
-        <View className="pt-[50px] px-5 max-w-[800px] self-center w-full flex-1">
-          <Text className="mb-5 text-center text-3xl font-bold leading-8" style={{ color: Colors.text }}>
-            Manage Habits
-          </Text>
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: Colors.surface }}>
 
-          <HabitInputForm />
+      <WeekHeader
+        selectedDate={selectedDate}
+        onDateSelect={setSelectedDate} />
+      
+        <View style={{ flex: 1, backgroundColor: Colors.background }}>
 
-          <HabitReorderList />
+          <View className='flex-row justify-between items-center'>
+            <Pressable onPress={() => setIsEditing(!isEditing)} className="px-4 pt-4">
+              <Text style={{ color: Colors.primary }}>{isEditing ? 'Done' : 'Edit'}</Text>
+            </Pressable>
+          </View>
+
+          {isEditing ? (
+            <HabitReorderList />
+          ) : (
+            <HabitCompletions selectedDate={selectedDate} />
+          )}
+
         </View>
-      </ContentWrapper>
+
     </SafeAreaView>
   );
 }

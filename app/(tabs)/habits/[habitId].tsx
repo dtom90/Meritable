@@ -32,6 +32,7 @@ export default function HabitDetail() {
 
           <HabitActions habitId={habit.id} />
 
+          <View style={{ height: 24 }} />
         </View>
       </ScrollView>
     </SafeAreaView>

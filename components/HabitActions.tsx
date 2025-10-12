@@ -14,9 +14,10 @@ export default function HabitActions({ habitId }: { habitId: number }) {
       if (habitId) {
         try {
           await deleteHabitMutation.mutateAsync(habitId)
-          router.replace('/(tabs)/habits')
+          router.replace('/(tabs)')
         } catch (e) {
           alert('There was a problem deleting this habit')
+          console.error(e)
         }
       }
     }
@@ -26,30 +27,6 @@ export default function HabitActions({ habitId }: { habitId: number }) {
     <View className="p-6 rounded-lg" style={{ backgroundColor: Colors.surface }}>
       
       <View className="space-y-3">
-        <TouchableOpacity 
-          className="flex-row items-center p-4 rounded-lg"
-          style={{ backgroundColor: Colors.card }}
-          onPress={() => router.push('/(tabs)')}
-        >
-          <Icon source="clock" color={Colors.primary} size={24} />
-          <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
-            Track All Habits
-          </Text>
-          <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          className="flex-row items-center p-4 rounded-lg"
-          style={{ backgroundColor: Colors.card }}
-          onPress={() => router.push('/(tabs)/habits')}
-        >
-          <Icon source="settings" color={Colors.primary} size={24} />
-          <Text className="ml-3 text-lg" style={{ color: Colors.text }}>
-            Manage Habits
-          </Text>
-          <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-        </TouchableOpacity>
-        
         <TouchableOpacity 
           className="flex-row items-center p-4 rounded-lg"
           style={{ backgroundColor: Colors.card }}

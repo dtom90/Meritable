@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Colors } from '@/lib/Colors';
 import { useListHabits, useListHabitCompletionsByDate } from '@/db/useHabitDb';
 import { HabitCompletion } from '@/db/types';
 import useWindowWidth from '@/lib/useWindowWidth';
 import AddHabitButton from '@/components/AddHabitButton';
 import HabitCompletionButton from './HabitCompletionButton';
+import HabitInputModal from './HabitInputModal';
 
 
 interface HabitCompletionsProps {
@@ -16,8 +16,8 @@ interface HabitCompletionsProps {
 const widthThreshold = 950;
 
 export default function HabitCompletions({ selectedDate }: HabitCompletionsProps) {
-  const router = useRouter();
   const width = useWindowWidth();
+  const [modalVisible, setModalVisible] = useState(false);
   
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
   const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletionsByDate(selectedDate);
@@ -43,7 +43,7 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
         <TouchableOpacity
           className="rounded-lg p-4 m-8 justify-center items-center shadow-lg"
           style={{ backgroundColor: Colors.primary }}
-          onPress={() => router.push('/habits?focusInput=true')}
+          onPress={() => setModalVisible(true)}
           activeOpacity={0.8}
         >
           <Text className="text-xl font-medium" style={{ color: Colors.text }}>Add Habit</Text>
@@ -69,6 +69,12 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
       {habits.length > 0 && width >= widthThreshold && (
         <AddHabitButton withTooltip={true} />
       )}
+      
+      <HabitInputModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Add New Habit"
+      />
     </>
   );
 }

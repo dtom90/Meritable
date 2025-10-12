@@ -19,7 +19,7 @@ export default function HabitInputForm({ onSuccess }: HabitInputFormProps = {}) 
     useCallback(() => {
       if (params.focusInput) {
         textInputRef.current?.focus();
-        router.replace('/habits');
+        router.replace('/(tabs)');
       }
     }, [params])
   );
