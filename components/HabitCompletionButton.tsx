@@ -31,14 +31,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
       className="flex-1 flex-row items-center justify-between py-2 px-4 my-4 rounded-lg min-h-[68px]"
       style={{ backgroundColor }}
     >
-      <View>
-        <IconButton
-          size={24}
-          icon="check"
-          iconColor={backgroundColor}
-          containerColor={backgroundColor}
-        />
-      </View>
+      <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
       
       <View>
         <TouchableOpacity 
