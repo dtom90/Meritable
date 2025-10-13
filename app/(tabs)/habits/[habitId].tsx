@@ -5,6 +5,7 @@ import { useListHabits } from '@/db/useHabitDb';
 import HabitTitle from '@/components/HabitTitle'
 import HabitActions from '@/components/HabitActions'
 import HabitCompletionsCalendar from '@/components/HabitCompletionsCalendar'
+import { NarrowView } from '@/components/NarrowView';
 
 
 export default function HabitDetail() {
@@ -23,18 +24,14 @@ export default function HabitDetail() {
   }
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="pt-[50px] px-5 max-w-[800px] self-center w-full">
-          <HabitTitle habit={habit} />
+    <NarrowView>
+      <HabitTitle habit={habit} />
 
-          <HabitCompletionsCalendar habitId={habit.id} />
+      <HabitCompletionsCalendar habitId={habit.id} />
 
-          <HabitActions habitId={habit.id} />
+      <HabitActions habitId={habit.id} />
 
-          <View style={{ height: 24 }} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <View style={{ height: 24 }} />
+    </NarrowView>
   );
 }

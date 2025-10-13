@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, SafeAreaView } from 'react-native';
+import { View, Text } from 'react-native';
 import {
   DndContext,
   closestCenter,
@@ -82,11 +82,9 @@ export default function HabitsListWeb() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
-        <View className="flex-1 justify-center items-center">
-          <Text style={{ color: Colors.text }}>Loading habits...</Text>
-        </View>
-      </SafeAreaView>
+      <View className="flex-1 justify-center items-center">
+        <Text style={{ color: Colors.text }}>Loading habits...</Text>
+      </View>
     );
   }
 
@@ -111,10 +109,6 @@ export default function HabitsListWeb() {
           ))}
         </SortableContext>
       </DndContext>
-      
-      <View className="space-y-3">
-        <Text>&nbsp;</Text>
-      </View>
       
     </View>
   );

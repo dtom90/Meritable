@@ -28,7 +28,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
 
   return (
     <View
-      className="flex-1 flex-row items-center justify-between py-2 px-4 m-4 rounded-lg min-h-[68px]"
+      className="flex-1 flex-row items-center justify-between py-2 px-4 my-4 rounded-lg min-h-[68px]"
       style={{ backgroundColor }}
     >
       <View>

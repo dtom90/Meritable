@@ -26,7 +26,7 @@ export default function AddHabitButton({ withTooltip }: { withTooltip: boolean }
   return (
     <>
       {withTooltip ? (
-        <View className="absolute right-6 bottom-6 flex-row items-center">
+        <View className="absolute right-6 bottom-6 flex-row items-center my-4">
           {fabHovered && (
             <View className="mr-4 py-1 px-3 rounded-lg shadow-md z-10 self-center" style={{ backgroundColor: Colors.card }}>
               <Text className="text-base font-medium p-2" style={{ color: Colors.text }}>Add Habit</Text>
@@ -35,7 +35,7 @@ export default function AddHabitButton({ withTooltip }: { withTooltip: boolean }
           {button}
         </View>
       ) : (
-        <View className="right-flex-row items-center mb-4">
+        <View className="right-flex-row items-center my-4">
           {button}
         </View>
       )}

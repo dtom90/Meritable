@@ -1,24 +1,15 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useMemo, useState } from 'react';
+import { View, Text } from 'react-native';
+import { useMemo } from 'react';
 import { Colors } from '@/lib/Colors';
 import { useListHabits, useListHabitCompletionsByDate } from '@/db/useHabitDb';
 import { HabitCompletion } from '@/db/types';
-import useWindowWidth from '@/lib/useWindowWidth';
-import AddHabitButton from '@/components/AddHabitButton';
 import HabitCompletionButton from './HabitCompletionButton';
-import HabitInputModal from './HabitInputModal';
-
 
 interface HabitCompletionsProps {
   selectedDate: string;
 }
 
-const widthThreshold = 950;
-
 export default function HabitCompletions({ selectedDate }: HabitCompletionsProps) {
-  const width = useWindowWidth();
-  const [modalVisible, setModalVisible] = useState(false);
-  
   const { data: habits = [], isLoading: isLoadingHabits } = useListHabits();
   const { data: completions = [], isLoading: isLoadingCompletions } = useListHabitCompletionsByDate(selectedDate);
   
@@ -38,43 +29,15 @@ export default function HabitCompletions({ selectedDate }: HabitCompletionsProps
   }
 
   return (
-    <>
-      {habits.length === 0 && (
-        <TouchableOpacity
-          className="rounded-lg p-4 m-8 justify-center items-center shadow-lg"
-          style={{ backgroundColor: Colors.primary }}
-          onPress={() => setModalVisible(true)}
-          activeOpacity={0.8}
-        >
-          <Text className="text-xl font-medium" style={{ color: Colors.text }}>Add Habit</Text>
-        </TouchableOpacity>
-      )}
-
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="max-w-3xl self-center w-full my-4">
-          {habits.map(habit => (
-            <HabitCompletionButton 
-              key={habit.id} 
-              habit={habit} 
-              selectedDate={selectedDate} 
-              habitCompletionsMap={habitCompletionsMap}
-            />
-          ))}
-          {habits.length > 0 && width < widthThreshold && (
-            <AddHabitButton withTooltip={false} />
-          )}
-        </View>
-      </ScrollView>
-
-      {habits.length > 0 && width >= widthThreshold && (
-        <AddHabitButton withTooltip={true} />
-      )}
-      
-      <HabitInputModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Add New Habit"
-      />
-    </>
+    <View>
+      {habits.map(habit => (
+        <HabitCompletionButton 
+          key={habit.id} 
+          habit={habit} 
+          selectedDate={selectedDate} 
+          habitCompletionsMap={habitCompletionsMap}
+        />
+      ))}
+    </View>
   );
 }

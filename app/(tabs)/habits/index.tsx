@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { SafeAreaView, View, Pressable, Text } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import WeekHeader from '@/components/WeekHeader';
 import HabitCompletions from '@/components/HabitCompletions';
 import { getToday } from '@/lib/dateUtils';
 import HabitReorderList from '@/components/HabitReorderList';
+import { NarrowView } from '@/components/NarrowView';
+import AddHabitButton from '@/components/AddHabitButton';
 
 
 export default function HomeScreen() {
@@ -13,30 +15,28 @@ export default function HomeScreen() {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <SafeAreaView
-      className="flex-1"
-      style={{ backgroundColor: Colors.surface }}>
-
+    <>
       <WeekHeader
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate} />
       
-        <View style={{ flex: 1, backgroundColor: Colors.background }}>
+      <NarrowView>
 
-          <View className='flex-row justify-between items-center'>
-            <Pressable onPress={() => setIsEditing(!isEditing)} className="px-4 pt-4">
-              <Text style={{ color: Colors.primary }}>{isEditing ? 'Done' : 'Edit'}</Text>
-            </Pressable>
-          </View>
-
-          {isEditing ? (
-            <HabitReorderList />
-          ) : (
-            <HabitCompletions selectedDate={selectedDate} />
-          )}
-
+        <View className='flex-row justify-between items-center'>
+          <Pressable onPress={() => setIsEditing(!isEditing)}>
+            <Text style={{ color: Colors.primary }}>{isEditing ? 'Done' : 'Edit'}</Text>
+          </Pressable>
         </View>
 
-    </SafeAreaView>
+        {isEditing ? (
+          <HabitReorderList />
+        ) : (
+          <HabitCompletions selectedDate={selectedDate} />
+        )}
+
+        <AddHabitButton withTooltip={false} />
+
+      </NarrowView>
+    </>
   );
 }

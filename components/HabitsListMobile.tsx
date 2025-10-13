@@ -40,14 +40,9 @@ export default function HabitsListMobile() {
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        className="flex-1"
-        style={{ backgroundColor: Colors.background }}
-      >
-        <View className="flex-1 justify-center items-center">
-          <Text style={{ color: Colors.text }}>Loading habits...</Text>
-        </View>
-      </SafeAreaView>
+      <View className="flex-1 justify-center items-center">
+        <Text style={{ color: Colors.text }}>Loading habits...</Text>
+      </View>
     );
   }
 

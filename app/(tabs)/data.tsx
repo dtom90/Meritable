@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useDataSource } from '@/db/DataSourceContext';
 import { useAuth } from '@/db/AuthContext';
 import LoginOverlay from '@/components/LoginOverlay';
+import { NarrowView } from '@/components/NarrowView';
 
 export default function DataPage() {
   const { currentDataSource } = useDataSource();
@@ -58,90 +59,84 @@ export default function DataPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
-      <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full">
-        <Text className="mb-5 text-center text-3xl font-bold leading-8" style={{ color: Colors.text }}>
-          Data
-        </Text>
-        
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-
-          <View className="mb-6 p-4 rounded-lg" style={{ backgroundColor: Colors.surface }}>
-            <Text className="text-xl font-semibold mb-3" style={{ color: Colors.text }}>
-              Database Source
+    <NarrowView>
+      <Text className="my-5 text-center text-3xl font-bold leading-8" style={{ color: Colors.text }}>
+        Data
+      </Text>
+      
+        <View className="mb-6 p-4 rounded-lg" style={{ backgroundColor: Colors.surface }}>
+          <Text className="text-xl font-semibold mb-3" style={{ color: Colors.text }}>
+            Database Source
+          </Text>
+          <Text className="text-base mb-4" style={{ color: Colors.textSecondary }}>
+            Currently using: {currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}
+          </Text>
+          
+          <View className="flex-row items-center gap-2 opacity-50">
+            <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
+              Local
             </Text>
-            <Text className="text-base mb-4" style={{ color: Colors.textSecondary }}>
-              Currently using: {currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}
-            </Text>
-            
-            <View className="flex-row items-center gap-2 opacity-50">
-              <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
-                Local
-              </Text>
-              <View
-                className="w-16 h-8 rounded-full p-1"
-                style={{ backgroundColor: currentDataSource === 'local' ? Colors.textTertiary : Colors.primary }}
-              >
-                <View 
-                  className="w-6 h-6 rounded-full"
-                  style={{ 
-                    backgroundColor: Colors.background,
-                    transform: [{ translateX: currentDataSource === 'local' ? 0 : 24 }]
-                  }}
-                />
-              </View>
-              <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
-                Cloud
-              </Text>
+            <View
+              className="w-16 h-8 rounded-full p-1"
+              style={{ backgroundColor: currentDataSource === 'local' ? Colors.textTertiary : Colors.primary }}
+            >
+              <View 
+                className="w-6 h-6 rounded-full"
+                style={{ 
+                  backgroundColor: Colors.background,
+                  transform: [{ translateX: currentDataSource === 'local' ? 0 : 24 }]
+                }}
+              />
             </View>
-            
-            <Text className="text-sm mt-3" style={{ color: Colors.textTertiary }}>
-              Data source is fixed based on your platform
+            <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
+              Cloud
             </Text>
-            
-            {currentDataSource === 'cloud' && !isAuthenticated && (
-              <TouchableOpacity
-                className="w-full h-12 rounded-lg items-center justify-center mt-4"
-                style={{ backgroundColor: Colors.primary }}
-                onPress={() => setShowLoginOverlay(true)}
-              >
-                <Text className="text-white font-semibold text-base">
-                  Sign In
-                </Text>
-              </TouchableOpacity>
-            )}
-            
-            {currentDataSource === 'cloud' && isAuthenticated && (
-              <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: Colors.card }}>
-                <Text className="text-sm text-center" style={{ color: Colors.success }}>
-                  ✅ Connected to cloud database
-                </Text>
-              </View>
-            )}
           </View>
-
-          {isAuthenticated && (
-            <View className="mb-6 p-4 rounded-lg" style={{ backgroundColor: Colors.surface }}>
-              <Text className="text-xl font-semibold mb-3" style={{ color: Colors.text }}>
-                Account
+          
+          <Text className="text-sm mt-3" style={{ color: Colors.textTertiary }}>
+            Data source is fixed based on your platform
+          </Text>
+          
+          {currentDataSource === 'cloud' && !isAuthenticated && (
+            <TouchableOpacity
+              className="w-full h-12 rounded-lg items-center justify-center mt-4"
+              style={{ backgroundColor: Colors.primary }}
+              onPress={() => setShowLoginOverlay(true)}
+            >
+              <Text className="text-white font-semibold text-base">
+                Sign In
               </Text>
-              <Text className="text-base mb-3" style={{ color: Colors.textSecondary }}>
-                Signed in as: {user?.email}
+            </TouchableOpacity>
+          )}
+          
+          {currentDataSource === 'cloud' && isAuthenticated && (
+            <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: Colors.card }}>
+              <Text className="text-sm text-center" style={{ color: Colors.success }}>
+                ✅ Connected to cloud database
               </Text>
-              <TouchableOpacity
-                className="w-full h-12 rounded-lg items-center justify-center"
-                style={{ backgroundColor: Colors.error }}
-                onPress={handleSignOut}
-              >
-                <Text className="text-white font-semibold text-base">
-                  Sign Out
-                </Text>
-              </TouchableOpacity>
             </View>
           )}
+        </View>
 
-        </ScrollView>
-      </View>
+        {isAuthenticated && (
+          <View className="mb-6 p-4 rounded-lg" style={{ backgroundColor: Colors.surface }}>
+            <Text className="text-xl font-semibold mb-3" style={{ color: Colors.text }}>
+              Account
+            </Text>
+            <Text className="text-base mb-3" style={{ color: Colors.textSecondary }}>
+              Signed in as: {user?.email}
+            </Text>
+            <TouchableOpacity
+              className="w-full h-12 rounded-lg items-center justify-center"
+              style={{ backgroundColor: Colors.error }}
+              onPress={handleSignOut}
+            >
+              <Text className="text-white font-semibold text-base">
+                Sign Out
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
       {/* Custom Sign Out Alert Modal for Web */}
       {showSignOutAlert && (
@@ -182,6 +177,6 @@ export default function DataPage() {
         onClose={handleCloseLogin}
         onSuccess={handleLoginSuccess}
       />
-    </SafeAreaView>
+    </NarrowView>
   );
 }
