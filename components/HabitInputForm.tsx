@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { View, TextInput, Text, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/lib/Colors';
@@ -8,12 +8,22 @@ interface HabitInputFormProps {
   onSuccess?: () => void;
 }
 
-export default function HabitInputForm({ onSuccess }: HabitInputFormProps = {}) {
+export interface HabitInputFormRef {
+  focus: () => void;
+}
+
+const HabitInputForm = forwardRef<HabitInputFormRef, HabitInputFormProps>(({ onSuccess }, ref) => {
   const addHabitMutation = useCreateHabit();
   const [newHabitText, setNewHabitText] = useState('');
   const textInputRef = useRef<TextInput>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      textInputRef.current?.focus();
+    }
+  }));
 
   useFocusEffect(
     useCallback(() => {
@@ -21,7 +31,7 @@ export default function HabitInputForm({ onSuccess }: HabitInputFormProps = {}) 
         textInputRef.current?.focus();
         router.replace('/(tabs)');
       }
-    }, [params])
+    }, [params, textInputRef, router])
   );
 
   const handleCreateHabit = () => {
@@ -63,4 +73,8 @@ export default function HabitInputForm({ onSuccess }: HabitInputFormProps = {}) 
       </TouchableOpacity>
     </View>
   );
-}
+});
+
+HabitInputForm.displayName = 'HabitInputForm';
+
+export default HabitInputForm;

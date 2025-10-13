@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import HabitInputForm from './HabitInputForm';
+import HabitInputForm, { HabitInputFormRef } from './HabitInputForm';
 
 interface HabitInputModalProps {
   visible: boolean;
@@ -28,15 +28,21 @@ export default function HabitInputModal({
 }: HabitInputModalProps) {
   const [modalVisible, setModalVisible] = useState(visible);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const habitInputFormRef = useRef<HabitInputFormRef>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
       setModalVisible(true);
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 300,
         useNativeDriver: true,
-      }).start();
+      }).start(() => {
+        // Focus the text input after the modal animation completes
+        setTimeout(() => {
+          habitInputFormRef.current?.focus();
+        }, 100);
+      });
     } else {
       Animated.timing(slideAnim, {
         toValue: screenHeight,
@@ -110,18 +116,8 @@ export default function HabitInputModal({
                   </TouchableOpacity>
                 </View>
 
-                {/* Habit Input Form */}
-                <HabitInputForm onSuccess={handleClose} />
+                <HabitInputForm ref={habitInputFormRef} onSuccess={handleClose} />
 
-                {/* Additional Info */}
-                <View className="mt-4">
-                  <Text 
-                    className="text-sm text-center"
-                    style={{ color: Colors.textSecondary }}
-                  >
-                    Press the input field to start typing your new habit
-                  </Text>
-                </View>
               </Animated.View>
             </TouchableWithoutFeedback>
           </View>
