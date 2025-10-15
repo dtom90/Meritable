@@ -1,10 +1,11 @@
 
 import { useCreateHabitCompletion, useDeleteHabitCompletion } from '@/db/useHabitDb';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Icon, IconButton } from 'react-native-paper';
+import { Icon } from 'react-native-paper';
 import { Colors } from '@/lib/Colors';
 import { Habit, HabitCompletion } from '@/db/types';
 import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
 
 
 interface HabitCompletionButtonProps {
@@ -24,47 +25,48 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
     }
   };
 
-  const backgroundColor = habitCompletionsMap[habit.id] ? Colors.success : Colors.surface
+  const isCompleted = habitCompletionsMap[habit.id] ? true : false;
+  const backgroundColor = isCompleted ? Colors.success : Colors.card
+  const icon = isCompleted ? 'restore' : 'check'
+  const iconColor = isCompleted ? Colors.text : Colors.success
+
+  const handleCompletionToggle = useCallback(() => {
+    if (isCompleted) {
+      deleteCompletionMutation.mutate({ id: habitCompletionsMap[habit.id].id, completionDate: selectedDate });
+    } else {
+      addCompletionMutation.mutate({ habitId: habit.id, completionDate: selectedDate });
+    }
+  }, [isCompleted, habitCompletionsMap, habit, selectedDate, deleteCompletionMutation, addCompletionMutation]);
 
   return (
     <View
-      className="flex-1 flex-row items-center justify-between py-2 px-4 my-4 rounded-lg min-h-[68px]"
+      className="flex-1 flex-row items-center my-4 rounded-lg min-h-[68px] overflow-hidden"
       style={{ backgroundColor }}
     >
-      <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
-      
-      <View>
-        <TouchableOpacity 
-          onPress={navigateToHabit}
-          style={{ backgroundColor: habitCompletionsMap[habit.id] ? Colors.successSecondary : Colors.card }}
-          className='pl-4 pr-2 py-2 rounded-lg flex flex-row items-center'
-        >
+      <TouchableOpacity 
+        onPress={navigateToHabit}
+        style={{ backgroundColor }}
+        className='flex-1 h-full flex flex-row items-center border-r border-gray-600'
+      >
+        <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
+        <View className="flex-1 flex flex-row items-center justify-center">
           <Text className="text-lg text-center mr-1" style={{ color: Colors.text }}>{habit.name}</Text>
           <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
       
-      <View>
-        {!habitCompletionsMap[habit.id] ? (
-          <IconButton
-            icon="check"
-            iconColor={Colors.success}
-            containerColor={Colors.card}
-            size={24}
-            onPress={() => addCompletionMutation.mutate({ habitId: habit.id, completionDate: selectedDate })}
-            disabled={addCompletionMutation.isPending}
-          />
+      <TouchableOpacity
+        onPress={handleCompletionToggle}
+        disabled={isCompleted ? deleteCompletionMutation.isPending : addCompletionMutation.isPending}
+        className="h-full w-16 flex items-center justify-center"
+        style={{ backgroundColor }}
+      >
+        {deleteCompletionMutation.isPending || addCompletionMutation.isPending ? (
+          <Icon source="loading" color={iconColor} size={24} />
         ) : (
-          <IconButton
-            icon="restore"
-            iconColor={Colors.text}
-            containerColor={Colors.successSecondary}
-            size={24}
-            onPress={() => deleteCompletionMutation.mutate({ id: habitCompletionsMap[habit.id].id, completionDate: selectedDate })}
-            disabled={deleteCompletionMutation.isPending}
-          />
+          <Icon source={icon} color={iconColor} size={24} />
         )}
-      </View>
+      </TouchableOpacity>
     </View>
   )
 }
