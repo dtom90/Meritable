@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabaseClient } from '@/db/supabaseClient';
-import { Platform, Linking } from 'react-native';
+import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 
@@ -38,44 +38,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // 2. Listen for auth state changes (sign-in, sign-out)
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('onAuthStateChange event:', event, 'session:', session);
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
       }
     );
 
-    // 3. Handle incoming deep links
-    const handleDeepLink = (event: { url: string }) => {
-      console.log('handleDeepLink received URL:', event.url);
-      const urlString = event.url;
-      // Supabase sends tokens in the fragment, not query params
-      const fragment = urlString.split('#')[1];
-
-      if (fragment) {
-        const params = new URLSearchParams(fragment);
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-
-        if (accessToken && refreshToken) {
-          console.log('Setting session from deep link...');
-          supabaseClient.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          }).catch(error => {
-            console.error('Error setting session from deep link:', error);
-          });
-        }
-      }
-    };
-
-    // Listen for deep links when the app is opened
-    const linkingSubscription = Linking.addEventListener('url', handleDeepLink);
+    // Note: Deep link handling is now done directly in signInWithGoogle function
+    // since the OAuth flow completes within WebBrowser.openAuthSessionAsync
 
     return () => {
       subscription.unsubscribe();
-      // Clean up the event listener
-      linkingSubscription?.remove();
     };
   }, []);
 
@@ -97,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectTo = makeRedirectUri(); // Creates a redirect URI like 'exp://127.0.0.1:19000/--'
+      const redirectTo = makeRedirectUri(); // Creates a redirect URI like 'app.meritable://'
 
       if (Platform.OS === 'web') {
         // Web flow - let Supabase handle redirect
@@ -110,7 +83,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
 
         if (error) {
-          console.error('Error signing in with Google:', error.message);
           return { error };
         }
         if (data.url) window.location.href = data.url;
@@ -127,7 +99,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
 
         if (error) {
-          console.error('Error signing in with Google:', error.message);
           return { error };
         }
 
@@ -136,9 +107,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
           // 3. The result contains the URL with session data in the fragment
-          if (result.type === 'success') {
-            // The session is automatically handled by the Supabase client
-            // when the deep link is processed (see useEffect above)
+          if (result.type === 'success' && result.url) {
+            
+            // Manually extract tokens from the URL fragment
+            const url = new URL(result.url);
+            const fragment = url.hash.substring(1); // Remove the # symbol
+            const params = new URLSearchParams(fragment);
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+            
+            if (accessToken && refreshToken) {
+              
+              const { error: sessionError } = await supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              
+              if (sessionError) {
+                return { error: sessionError };
+              }
+              
+            } else {
+              return { error: { message: 'No tokens found in OAuth response' } };
+            }
+          } else if (result.type === 'cancel') {
+            return { error: { message: 'Sign in cancelled' } };
+          } else {
+            return { error: { message: 'Sign in failed' } };
           }
         }
 

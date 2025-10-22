@@ -12,7 +12,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.meritable",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "app.meritable",
+            "CFBundleURLSchemes": ["app.meritable"]
+          }
+        ]
       }
     },
     "android": {
