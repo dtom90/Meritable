@@ -1,8 +1,10 @@
 import { Platform, View, Text } from 'react-native';
-import React, { createContext, useContext, useMemo, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { DexieDb } from '@/db/dexieDb';
 import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/types';
+import { useAuth } from '@/db/AuthContext';
 
 export type DataSourceType = 'local' | 'cloud';
 
@@ -23,6 +25,8 @@ interface DataSourceProviderProps {
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
   const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const queryClient = useQueryClient();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     const initializeDatabase = async () => {
@@ -60,6 +64,14 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
 
     initializeDatabase();
   }, []);
+
+  // Invalidate queries when authentication state changes
+  useEffect(() => {
+    if (isInitialized && activeDb) {
+      // Invalidate all queries when user logs in or out
+      queryClient.invalidateQueries();
+    }
+  }, [isAuthenticated, user, isInitialized, activeDb, queryClient]);
 
   const value: DataSourceContextType = {
     currentDataSource: dataSource,
