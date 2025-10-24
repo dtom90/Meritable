@@ -20,8 +20,8 @@ export default function LoginOverlay({ visible, onClose, onSuccess }: LoginOverl
       if (error) {
         Alert.alert('Error', error.message);
       } else {
-        // Google OAuth will redirect, so we don't call onSuccess here
-        // The auth state change will handle the success
+        // Authentication successful, dismiss the modal
+        onSuccess();
       }
     } catch (error) {
       Alert.alert('Error', 'An unexpected error occurred during Google sign-in');
