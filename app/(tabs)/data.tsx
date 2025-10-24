@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useDataSource } from '@/db/DataSourceContext';
 import { useAuth } from '@/db/AuthContext';
@@ -21,10 +21,6 @@ export default function DataPage() {
   };
 
   const handleSignOut = () => {
-    console.log('handleSignOut called');
-    console.log('isAuthenticated:', isAuthenticated);
-    console.log('user:', user);
-    
     if (Platform.OS === 'web') {
       // Use custom modal for web
       setShowSignOutAlert(true);
@@ -40,7 +36,6 @@ export default function DataPage() {
             style: 'destructive',
             onPress: async () => {
               await signOut();
-              console.log('Sign out confirmed');
             },
           },
         ]
@@ -50,7 +45,6 @@ export default function DataPage() {
 
   const confirmSignOut = async () => {
     await signOut();
-    console.log('Sign out confirmed');
     setShowSignOutAlert(false);
   };
 

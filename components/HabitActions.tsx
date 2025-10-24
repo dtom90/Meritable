@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
@@ -15,9 +15,10 @@ export default function HabitActions({ habitId }: { habitId: number }) {
         try {
           await deleteHabitMutation.mutateAsync(habitId)
           router.replace('/(tabs)')
-        } catch (e) {
-          alert('There was a problem deleting this habit')
-          console.error(e)
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error deleting habit:', error);
+          Alert.alert('Error', 'There was a problem deleting this habit')
         }
       }
     }

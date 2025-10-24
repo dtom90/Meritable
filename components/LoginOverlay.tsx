@@ -24,6 +24,8 @@ export default function LoginOverlay({ visible, onClose, onSuccess }: LoginOverl
         onSuccess();
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error during Google sign-in:', error);
       Alert.alert('Error', 'An unexpected error occurred during Google sign-in');
     } finally {
       setIsGoogleLoading(false);

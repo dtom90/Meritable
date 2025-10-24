@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
@@ -33,7 +33,7 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
     }
     
     if (trimmedName.length > maxNameLength) {
-      console.error('Habit name too long');
+      Alert.alert('Error', 'Habit name too long');
       return;
     }
     
@@ -45,17 +45,14 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
         });
         setIsEditing(false);
       } catch (error) {
-        console.error('Failed to update habit:', error);
+        // eslint-disable-next-line no-console
+        console.error('Error updating habit:', error);
+        Alert.alert('Error', 'Failed to update habit. Please try again.');
       }
     } else {
       setIsEditing(false);
     }
-  }, [habit, editName, setEditName, setIsEditing]);
-
-  const handleCancel = useCallback(() => {
-    setIsEditing(false);
-    setEditName('');
-  }, [setIsEditing, setEditName]);
+  }, [habit, editName, setEditName, setIsEditing, updateHabitMutation]);
 
 
   return (

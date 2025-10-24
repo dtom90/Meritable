@@ -1,7 +1,6 @@
 import { Colors } from "@/lib/Colors";
 import { useListHabitCompletionsByHabitId } from "@/db/useHabitDb";
 import { getToday } from "@/lib/dateUtils";
-import { useState } from "react";
 import { View, Text } from "react-native";
 import { Calendar } from 'react-native-calendars';
 import { MarkedDates } from "react-native-calendars/src/types";
