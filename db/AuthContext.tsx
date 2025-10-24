@@ -18,11 +18,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
+interface AuthContextProviderProps {
   children: ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,15 +140,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { error: null };
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Caught an exception in signInWithGoogle:', error);
       return { error: { message: 'Failed to sign in with Google' } };
     }
   };
 
   const signOut = async () => {
-    console.log('signOut called');
     const { error } = await supabaseClient.auth.signOut();
-    console.log('signOut error', error);
   };
 
   const value: AuthContextType = {

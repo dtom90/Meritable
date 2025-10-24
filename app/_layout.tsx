@@ -9,7 +9,7 @@ import { Platform } from 'react-native';
 import "./global.css"
 import { Colors } from '@/lib/Colors';
 import { DataSourceProvider } from '@/db/DataSourceContext';
-import { AuthProvider } from '@/db/AuthContext';
+import { AuthContextProvider } from '@/db/AuthContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -40,7 +40,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <AuthContextProvider>
         <DataSourceProvider>
           <Stack
             screenOptions={{
@@ -55,7 +55,7 @@ export default function RootLayout() {
           </Stack>
           <StatusBar style="light" />
         </DataSourceProvider>
-      </AuthProvider>
+      </AuthContextProvider>
     </QueryClientProvider>
   );
 }

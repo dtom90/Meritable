@@ -37,6 +37,7 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
             db = new DexieDb();
           } else {
             // Fallback to SupabaseDb if somehow we're not in web dev
+            // eslint-disable-next-line no-console
             console.warn('Unexpected platform for local database, falling back to cloud');
             db = new SupabaseDb();
           }
@@ -50,6 +51,7 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
         setActiveDb(db);
         setIsInitialized(true);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Database initialization failed:', error);
         // Set initialized to true to prevent infinite loading
         setIsInitialized(true);

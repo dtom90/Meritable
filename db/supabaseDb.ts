@@ -37,9 +37,12 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async getHabits(): Promise<Habit[]> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
     const { data, error } = await this.supabase
       .from('habits')
       .select('*')
+      .eq('user_id', user?.id)
       .order('order', { ascending: true })
       .order('id', { ascending: true }) // Fallback for habits without order
 
@@ -48,6 +51,8 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
     const { data, error } = await this.supabase
       .from('habits')
       .update({
@@ -55,6 +60,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
+      .eq('user_id', user?.id)
       .select()
       .single()
 
@@ -87,11 +93,14 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async deleteHabit(id: number): Promise<void> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
     // First delete all habit completions for this habit
     const { error: completionsError } = await this.supabase
       .from('habit_completions')
       .delete()
       .eq('habitId', id)
+      .eq('user_id', user?.id)
 
     if (completionsError) throw completionsError
 
@@ -100,6 +109,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
       .from('habits')
       .delete()
       .eq('id', id)
+      .eq('user_id', user?.id)
 
     if (error) throw error
   }
@@ -122,9 +132,12 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
     let query = this.supabase
       .from('habit_completions')
       .select('*')
+      .eq('user_id', user?.id)
       .order('completionDate', { ascending: false })
 
     if (completionDate) {
@@ -137,20 +150,26 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async getHabitCompletionsById(habitId: number): Promise<HabitCompletion[]> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
     const { data, error } = await this.supabase
       .from('habit_completions')
       .select('*')
       .eq('habitId', habitId)
+      .eq('user_id', user?.id)
       .order('completionDate', { ascending: false })
     if (error) throw error
     return data || []
   }
 
   async deleteHabitCompletion(id: number): Promise<void> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
     const { error } = await this.supabase
       .from('habit_completions')
       .delete()
       .eq('id', id)
+      .eq('user_id', user?.id)
 
     if (error) throw error
   }
