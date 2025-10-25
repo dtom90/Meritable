@@ -73,28 +73,26 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       const redirectTo = makeRedirectUri(); // Creates a redirect URI like 'app.meritable://'
 
       if (Platform.OS === 'web') {
-        // Web flow - let Supabase handle redirect
+        // Web flow - use proper redirect URL
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/callback`,
-            skipBrowserRedirect: true,
+            redirectTo: window.location.origin,
+            skipBrowserRedirect: false, // Let Supabase handle the redirect
           },
         });
 
         if (error) {
           return { error };
         }
-        if (data.url) window.location.href = data.url;
         return { error: null };
       } else {
-        // Mobile flow - use the exact pattern from the guide
-        // 1. Initiate the OAuth flow
+        // Mobile flow - use PKCE flow for better security
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo,
-            skipBrowserRedirect: true, // This is key for mobile
+            skipBrowserRedirect: true, // This enables PKCE flow automatically
           },
         });
 
@@ -103,32 +101,30 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         }
 
         if (data.url) {
-          // 2. Open the URL in a web browser
+          // Open the URL in a web browser
           const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
-          // 3. The result contains the URL with session data in the fragment
+          // Handle the result
           if (result.type === 'success' && result.url) {
-            
-            // Manually extract tokens from the URL fragment
+            // Extract the authorization code from the URL
             const url = new URL(result.url);
-            const fragment = url.hash.substring(1); // Remove the # symbol
-            const params = new URLSearchParams(fragment);
-            const accessToken = params.get('access_token');
-            const refreshToken = params.get('refresh_token');
+            const code = url.searchParams.get('code');
             
-            if (accessToken && refreshToken) {
+            if (code) {
+              // Exchange the code for a session
+              const { data: sessionData, error: sessionError } = await supabaseClient.auth.exchangeCodeForSession(code);
               
-              const { error: sessionError } = await supabaseClient.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-              });
+              setUser(sessionData?.user ?? null);
+              setSession(sessionData.session ?? null);
+              setIsLoading(false);
               
               if (sessionError) {
                 return { error: sessionError };
               }
               
+              return { error: null };
             } else {
-              return { error: { message: 'No tokens found in OAuth response' } };
+              return { error: { message: 'No authorization code found in OAuth response' } };
             }
           } else if (result.type === 'cancel') {
             return { error: { message: 'Sign in cancelled' } };
