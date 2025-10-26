@@ -44,9 +44,6 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       }
     );
 
-    // Note: Deep link handling is now done directly in signInWithGoogle function
-    // since the OAuth flow completes within WebBrowser.openAuthSessionAsync
-
     return () => {
       subscription.unsubscribe();
     };
@@ -70,8 +67,6 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectTo = makeRedirectUri(); // Creates a redirect URI like 'app.meritable://'
-
       if (Platform.OS === 'web') {
         // Web flow - use proper redirect URL
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -85,9 +80,14 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         if (error) {
           return { error };
         }
+        
+        // For web, the redirect will happen automatically
+        // and the onAuthStateChange listener will handle the session
         return { error: null };
       } else {
         // Mobile flow - use PKCE flow for better security
+        const redirectTo = makeRedirectUri(); // Creates a redirect URI like 'app.meritable://'
+        
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -108,23 +108,47 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
           if (result.type === 'success' && result.url) {
             // Extract the authorization code from the URL
             const url = new URL(result.url);
-            const code = url.searchParams.get('code');
+            let code = url.searchParams.get('code');
+            
+            // If no code in query params, check URL fragment (after #)
+            if (!code) {
+              const fragment = url.hash.substring(1); // Remove the # symbol
+              const fragmentParams = new URLSearchParams(fragment);
+              code = fragmentParams.get('code');
+            }
             
             if (code) {
               // Exchange the code for a session
               const { data: sessionData, error: sessionError } = await supabaseClient.auth.exchangeCodeForSession(code);
               
-              setUser(sessionData?.user ?? null);
-              setSession(sessionData.session ?? null);
-              setIsLoading(false);
-              
               if (sessionError) {
                 return { error: sessionError };
               }
               
+              // Session will be automatically updated by onAuthStateChange listener
               return { error: null };
             } else {
-              return { error: { message: 'No authorization code found in OAuth response' } };
+              // Fallback: try to extract tokens directly from URL fragment
+              const fragment = url.hash.substring(1);
+              const fragmentParams = new URLSearchParams(fragment);
+              const accessToken = fragmentParams.get('access_token');
+              const refreshToken = fragmentParams.get('refresh_token');
+              
+              if (accessToken && refreshToken) {
+                // Set session directly with tokens
+                const { error: sessionError } = await supabaseClient.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken,
+                });
+                
+                if (sessionError) {
+                  return { error: sessionError };
+                }
+                
+                return { error: null };
+              } else {
+                return { error: { message: 'No authorization code or tokens found in OAuth response' } };
+              }
             }
           } else if (result.type === 'cancel') {
             return { error: { message: 'Sign in cancelled' } };
