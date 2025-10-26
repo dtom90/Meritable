@@ -35,7 +35,10 @@ export default function DataPage() {
             text: 'Sign Out',
             style: 'destructive',
             onPress: async () => {
-              await signOut();
+              const { error } = await signOut();
+              if (error) {
+                Alert.alert('Error', error.message);
+              }
             },
           },
         ]
