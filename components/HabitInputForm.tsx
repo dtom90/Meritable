@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { View, TextInput, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity, Keyboard, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import { useCreateHabit } from '@/db/useHabitDb';
@@ -16,6 +16,7 @@ const HabitInputForm = forwardRef<HabitInputFormRef, HabitInputFormProps>(({ onS
   const addHabitMutation = useCreateHabit();
   const [newHabitText, setNewHabitText] = useState('');
   const textInputRef = useRef<TextInput>(null);
+  const isSubmittingRef = useRef(false);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -35,17 +36,31 @@ const HabitInputForm = forwardRef<HabitInputFormRef, HabitInputFormProps>(({ onS
   );
 
   const handleCreateHabit = () => {
-    if (newHabitText.trim()) {
-      addHabitMutation.mutate(
-        { name: newHabitText.trim() },
-        {
-          onSuccess: () => {
-            setNewHabitText('');
-            onSuccess?.();
-          }
-        }
-      );
+    // Prevent double submission
+    if (isSubmittingRef.current || addHabitMutation.isPending || !newHabitText.trim()) {
+      return;
     }
+    
+    isSubmittingRef.current = true;
+    
+    // Dismiss keyboard on mobile before submitting
+    if (Platform.OS !== 'web') {
+      Keyboard.dismiss();
+    }
+    
+    addHabitMutation.mutate(
+      { name: newHabitText.trim() },
+      {
+        onSuccess: () => {
+          setNewHabitText('');
+          isSubmittingRef.current = false;
+          onSuccess?.();
+        },
+        onError: () => {
+          isSubmittingRef.current = false;
+        }
+      }
+    );
   };
 
   return (
@@ -64,7 +79,10 @@ const HabitInputForm = forwardRef<HabitInputFormRef, HabitInputFormProps>(({ onS
       <TouchableOpacity 
         className="py-3 px-5 rounded items-center"
         style={{ backgroundColor: addHabitMutation.isPending ? Colors.textTertiary : Colors.primary }}
-        onPress={handleCreateHabit}
+        {...(Platform.OS === 'web' 
+          ? { onPress: handleCreateHabit }
+          : { onPressIn: handleCreateHabit }
+        )}
         disabled={addHabitMutation.isPending}
       >
         <Text className="text-base font-bold" style={{ color: Colors.text }}>
