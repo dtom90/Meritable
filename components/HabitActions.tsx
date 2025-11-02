@@ -10,18 +10,32 @@ export default function HabitActions({ habitId }: { habitId: number }) {
   const deleteHabitMutation = useDeleteHabit();
 
   const handleDelete = async () => {
-    if(confirm('Are you sure that you want to delete this habit?')) {
-      if (habitId) {
-        try {
-          await deleteHabitMutation.mutateAsync(habitId)
-          router.replace('/(tabs)')
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Error deleting habit:', error);
-          Alert.alert('Error', 'There was a problem deleting this habit')
-        }
-      }
-    }
+    Alert.alert(
+      'Delete Habit',
+      'Are you sure that you want to delete this habit?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            if (habitId) {
+              try {
+                await deleteHabitMutation.mutateAsync(habitId)
+                router.replace('/(tabs)')
+              } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Error deleting habit:', error);
+                Alert.alert('Error', 'There was a problem deleting this habit')
+              }
+            }
+          },
+        },
+      ]
+    );
   }
 
   return (
