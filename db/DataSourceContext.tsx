@@ -1,4 +1,4 @@
-import { Platform, View, Text } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DexieDb } from '@/db/dexieDb';
@@ -7,8 +7,6 @@ import { HabitDatabaseInterface } from '@/db/types';
 import { useAuth } from '@/db/AuthContext';
 
 export type DataSourceType = 'local' | 'cloud';
-
-const dataSource: DataSourceType = Platform.OS === 'web' && __DEV__ ? 'local' : 'cloud';
 
 interface DataSourceContextType {
   currentDataSource: DataSourceType;
@@ -23,7 +21,13 @@ interface DataSourceProviderProps {
 }
 
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
-  const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(null);
+  const isMobile = Platform.OS !== 'web';
+  const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(
+    isMobile ? null : new DexieDb()
+  );
+  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>(
+    isMobile ? 'cloud' : 'local'
+  );
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuth();
@@ -33,23 +37,16 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
       try {
         let db: HabitDatabaseInterface;
         
-        if (dataSource === 'cloud') {
+        if (isMobile) {
+          // On mobile, always use cloud database
           db = new SupabaseDb();
+          setCurrentDataSource('cloud');
         } else {
-          // Only create DexieDb on web dev
-          if (Platform.OS === 'web' && __DEV__) {
-            db = new DexieDb();
-          } else {
-            // Fallback to SupabaseDb if somehow we're not in web dev
-            // eslint-disable-next-line no-console
-            console.warn('Unexpected platform for local database, falling back to cloud');
-            db = new SupabaseDb();
-          }
-        }
-        
-        // Test the database connection (only for local DB)
-        if (dataSource === 'local') {
+          // On web, start with local database
+          db = new DexieDb();
+          // Test the database connection
           await db.getHabits();
+          setCurrentDataSource('local');
         }
         
         setActiveDb(db);
@@ -63,18 +60,47 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
     };
 
     initializeDatabase();
-  }, []);
+  }, [isMobile]);
 
-  // Invalidate queries when authentication state changes
+  // Switch database based on authentication state and invalidate queries (web only)
   useEffect(() => {
-    if (isInitialized && activeDb) {
-      // Invalidate all queries when user logs in or out
-      queryClient.invalidateQueries();
-    }
-  }, [isAuthenticated, user, isInitialized, activeDb, queryClient]);
+    if (!isInitialized || isMobile) return;
+
+    const switchDatabase = async () => {
+      if (isAuthenticated && currentDataSource === 'local') {
+        // Switch to cloud database when user logs in (web only)
+        try {
+          const cloudDb = new SupabaseDb();
+          setActiveDb(cloudDb);
+          setCurrentDataSource('cloud');
+          queryClient.invalidateQueries();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to switch to cloud database:', error);
+        }
+      } else if (!isAuthenticated && currentDataSource === 'cloud') {
+        // Switch back to local when user logs out (web only)
+        try {
+          const localDb = new DexieDb();
+          await localDb.getHabits();
+          setActiveDb(localDb);
+          setCurrentDataSource('local');
+          queryClient.invalidateQueries();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to switch to local database:', error);
+        }
+      } else if (isInitialized && activeDb) {
+        // Invalidate queries when authentication state changes (user change, etc.)
+        queryClient.invalidateQueries();
+      }
+    };
+
+    switchDatabase();
+  }, [isAuthenticated, user, isInitialized, currentDataSource, activeDb, queryClient, isMobile]);
 
   const value: DataSourceContextType = {
-    currentDataSource: dataSource,
+    currentDataSource,
     activeDb,
     isInitialized,
   };
