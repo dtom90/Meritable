@@ -8,6 +8,7 @@ import HabitReorderList from '@/components/HabitReorderList';
 import { NarrowView } from '@/components/NarrowView';
 import AddHabitButton from '@/components/AddHabitButton';
 import { useQueryClient } from '@tanstack/react-query';
+import { useListHabits } from '@/db/useHabitDb';
 
 
 export default function HomeScreen() {
@@ -18,6 +19,7 @@ export default function HomeScreen() {
   const appState = useRef(AppState.currentState);
   const selectedDateRef = useRef(selectedDate);
   const todayRef = useRef(today);
+  const { data: habits } = useListHabits();
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -61,11 +63,13 @@ export default function HomeScreen() {
       
       <NarrowView>
 
-        <View className='flex-row justify-between items-center'>
-          <Pressable onPress={() => setIsEditing(!isEditing)}>
-            <Text style={{ color: Colors.primary }}>{isEditing ? 'Done' : 'Edit'}</Text>
-          </Pressable>
-        </View>
+        {habits && habits.length > 1 && (
+          <View className='flex-row justify-between items-center'>
+            <Pressable onPress={() => setIsEditing(!isEditing)}>
+              <Text style={{ color: Colors.primary }}>{isEditing ? 'Done' : 'Edit'}</Text>
+            </Pressable>
+          </View>
+        )}
 
         {isEditing ? (
           <HabitReorderList />
