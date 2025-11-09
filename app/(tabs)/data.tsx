@@ -69,30 +69,11 @@ export default function DataPage() {
             Currently using: {currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}
           </Text>
           
-          <View className="flex-row items-center gap-2 opacity-50">
-            <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
-              Local
+          {currentDataSource === 'local' && (
+            <Text className="text-sm mt-3 italic" style={{ color: Colors.textTertiary }}>
+              Cloud storage coming soon!
             </Text>
-            <View
-              className="w-16 h-8 rounded-full p-1"
-              style={{ backgroundColor: currentDataSource === 'local' ? Colors.textTertiary : Colors.primary }}
-            >
-              <View 
-                className="w-6 h-6 rounded-full"
-                style={{ 
-                  backgroundColor: Colors.background,
-                  transform: [{ translateX: currentDataSource === 'local' ? 0 : 24 }]
-                }}
-              />
-            </View>
-            <Text className="text-base font-medium" style={{ color: Colors.textSecondary }}>
-              Cloud
-            </Text>
-          </View>
-          
-          <Text className="text-sm mt-3" style={{ color: Colors.textTertiary }}>
-            Data source is fixed based on your platform
-          </Text>
+          )}
           
           {currentDataSource === 'cloud' && !isAuthenticated && (
             <TouchableOpacity
