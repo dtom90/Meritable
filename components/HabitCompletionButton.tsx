@@ -29,10 +29,18 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
   const isCompleted = habitCompletionsMap[habit.id] ? true : false;
   const currentCompletion = habitCompletionsMap[habit.id];
   const currentCount = currentCompletion?.count ?? 0;
-  const backgroundColor = isCompleted ? Colors.success : Colors.card
   // Handle null/undefined countTarget properly
   const hasCountTarget = habit.countTarget != null && habit.countTarget > 0;
-  const icon = hasCountTarget ? 'plus' : (isCompleted ? 'restore' : 'check')
+  // Calculate completion percentage for countTarget case
+  const completionPercentage = hasCountTarget && habit.countTarget! > 0
+    ? Math.min((currentCount / habit.countTarget!) * 100, 100)
+    : 0;
+  // For countTarget case, always use card background so progress bar is visible
+  // For non-countTarget case, use success when completed
+  const backgroundColor = hasCountTarget ? Colors.card : (isCompleted ? Colors.success : Colors.card)
+  const icon = hasCountTarget 
+    ? (currentCount >= habit.countTarget! ? 'check' : 'plus')
+    : (isCompleted ? 'restore' : 'check')
   const iconColor = isCompleted ? Colors.text : Colors.success
   
   // Calculate disabled states
@@ -113,11 +121,24 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
   return (
     <View
       className="flex-1 flex-row items-center my-4 rounded-lg min-h-[68px] overflow-hidden"
-      style={{ backgroundColor }}
+      style={{ backgroundColor, position: 'relative' }}
     >
+      {hasCountTarget && (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${completionPercentage}%`,
+            backgroundColor: Colors.success,
+            zIndex: 0,
+          }}
+        />
+      )}
       <TouchableOpacity 
         onPress={navigateToHabit}
-        style={{ backgroundColor }}
+        style={{ backgroundColor: 'transparent', zIndex: 1 }}
         className='flex-1 h-full flex flex-row items-center border-r border-gray-600'
       >
         <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
@@ -137,7 +158,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
           onPress={handleDecrement}
           disabled={isMinusDisabled}
           className="h-full w-16 flex items-center justify-center border-r border-gray-600"
-          style={{ backgroundColor }}
+          style={{ backgroundColor: 'transparent', zIndex: 1 }}
         >
           {deleteCompletionMutation.isPending || updateCompletionMutation.isPending ? (
             <Icon source="loading" color={isMinusDisabled ? Colors.textSecondary : iconColor} size={24} />
@@ -151,7 +172,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
         onPress={handleCompletionToggle}
         disabled={isPlusDisabled}
         className="h-full w-16 flex items-center justify-center"
-        style={{ backgroundColor }}
+        style={{ backgroundColor: 'transparent', zIndex: 1 }}
       >
         {deleteCompletionMutation.isPending || addCompletionMutation.isPending || updateCompletionMutation.isPending ? (
           <Icon source="loading" color={isPlusDisabled ? Colors.textSecondary : iconColor} size={24} />
