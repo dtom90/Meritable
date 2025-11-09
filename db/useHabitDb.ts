@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Habit, HabitCompletion } from './types'
+import { Habit, HabitCompletion, HabitCompletionInput } from './types'
 import { useDataSource } from '@/db/DataSourceContext';
 
 /**
@@ -117,9 +117,26 @@ export const useCreateHabitCompletion = () => {
   const { activeDb } = useDataSource();
   
   return useMutation({
-    mutationFn: async ({ habitId, completionDate }: { habitId: number; completionDate: string }) => {
+    mutationFn: async ({ habitId, completionDate, count }: { habitId: number; completionDate: string; count?: number }) => {
       if (!activeDb) throw new Error('Database not initialized');
-      await activeDb.createHabitCompletion({ habitId, completionDate });
+      await activeDb.createHabitCompletion({ habitId, completionDate, count });
+    },
+    onSuccess: (_, { completionDate }) => {
+      queryClient.invalidateQueries({ 
+        queryKey: [HABIT_COMPLETIONS_QUERY_KEY, completionDate] 
+      });
+    },
+  });
+};
+
+export const useUpdateHabitCompletion = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  
+  return useMutation({
+    mutationFn: async ({ id, updates, completionDate }: { id: number; updates: Partial<HabitCompletionInput>; completionDate: string }) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.updateHabitCompletion(id, updates);
     },
     onSuccess: (_, { completionDate }) => {
       queryClient.invalidateQueries({ 

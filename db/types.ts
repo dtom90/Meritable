@@ -3,6 +3,7 @@ export interface Habit {
   id: number;
   name: string;
   order: number;
+  countTarget?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -11,6 +12,7 @@ export interface HabitCompletion {
   id: number;
   habitId: number;
   completionDate: string;
+  count?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -29,6 +31,7 @@ export abstract class HabitDatabaseInterface {
 
   // HabitCompletion operations
   abstract createHabitCompletion(habitCompletion: HabitCompletionInput): Promise<HabitCompletion>
+  abstract updateHabitCompletion(id: number, updates: Partial<HabitCompletionInput>): Promise<HabitCompletion>
   abstract getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]>
   abstract getHabitCompletionsById(habitId: number): Promise<HabitCompletion[]>
   abstract deleteHabitCompletion(id: number): Promise<void>

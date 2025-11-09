@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { Habit, HabitCompletion, HabitDatabaseInterface, HabitInput } from './types'
+import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './types'
 
 class DexieDb extends Dexie implements HabitDatabaseInterface {
   habits!: Table<Habit>;
@@ -104,6 +104,23 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
       id,
     };
     return completionWithTimestamps;
+  }
+
+  async updateHabitCompletion(id: number, updates: Partial<HabitCompletionInput>): Promise<HabitCompletion> {
+    const now = new Date().toISOString();
+    const completion = await this.habitCompletions.get(id);
+    if (!completion) {
+      throw new Error(`HabitCompletion with id ${id} not found`);
+    }
+    
+    const updatedCompletion = {
+      ...completion,
+      ...updates,
+      updated_at: now
+    };
+    
+    await this.habitCompletions.update(id, updatedCompletion);
+    return updatedCompletion;
   }
 
   async getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]> {

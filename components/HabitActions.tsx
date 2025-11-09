@@ -1,15 +1,19 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
-import { useDeleteHabit } from '@/db/useHabitDb';
+import { useDeleteHabit, useUpdateHabit, useListHabits } from '@/db/useHabitDb';
 
 
 export default function HabitActions({ habitId }: { habitId: number }) {
   const router = useRouter();
   const deleteHabitMutation = useDeleteHabit();
+  const updateHabitMutation = useUpdateHabit();
+  const { data: habits = [] } = useListHabits();
+  const habit = habits.find(h => h.id === habitId);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [countTarget, setCountTarget] = useState<string>('');
 
   const handleDelete = () => {
     setShowDeleteAlert(true);
@@ -33,11 +37,74 @@ export default function HabitActions({ habitId }: { habitId: number }) {
     setShowDeleteAlert(false);
   };
 
+  // Initialize countTarget from habit data
+  useEffect(() => {
+    if (habit?.countTarget !== undefined && habit.countTarget !== null) {
+      setCountTarget(habit.countTarget.toString());
+    } else {
+      setCountTarget('');
+    }
+  }, [habit?.countTarget]);
+
+  const handleCountTargetChange = (value: string) => {
+    // Only allow numbers or empty string
+    if (value === '' || /^\d+$/.test(value)) {
+      setCountTarget(value);
+    }
+  };
+
+  const handleCountTargetBlur = async () => {
+    if (!habit) return;
+    
+    const numericValue = countTarget === '' ? null : parseInt(countTarget, 10);
+    
+    // Only update if the value has changed
+    if (numericValue !== habit.countTarget) {
+      try {
+        await updateHabitMutation.mutateAsync({
+          id: habitId,
+          updates: { countTarget: numericValue ?? undefined }
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error updating count target:', error);
+        // Revert to original value on error
+        setCountTarget(habit.countTarget?.toString() ?? '');
+      }
+    }
+  };
+
+  if (!habit) {
+    return null;
+  }
+
   return (
     <>
       <View className="p-6 rounded-lg" style={{ backgroundColor: Colors.surface }}>
         
         <View className="space-y-3">
+          {/* Count Target Input */}
+          <View className="p-4 rounded-lg" style={{ backgroundColor: Colors.card }}>
+            <Text className="text-base mb-2" style={{ color: Colors.text }}>
+              Count Target (optional)
+            </Text>
+            <TextInput
+              className="p-3 rounded"
+              style={{ 
+                backgroundColor: Colors.background, 
+                color: Colors.text,
+                borderWidth: 1,
+                borderColor: Colors.textSecondary + '40'
+              }}
+              placeholder="Enter target count..."
+              value={countTarget}
+              onChangeText={handleCountTargetChange}
+              onBlur={handleCountTargetBlur}
+              keyboardType="numeric"
+              placeholderTextColor={Colors.textSecondary}
+            />
+          </View>
+
           <TouchableOpacity 
             className="flex-row items-center p-4 rounded-lg"
             style={{ backgroundColor: Colors.card }}

@@ -131,6 +131,24 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return data
   }
 
+  async updateHabitCompletion(id: number, updates: Partial<HabitCompletionInput>): Promise<HabitCompletion> {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    
+    const { data, error } = await this.supabase
+      .from('habit_completions')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+
   async getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]> {
     const { data: { user } } = await this.supabase.auth.getUser()
     
