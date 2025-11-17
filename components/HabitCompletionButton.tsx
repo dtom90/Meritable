@@ -39,7 +39,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
   // For non-countTarget case, use success when completed
   const backgroundColor = hasCountTarget ? Colors.card : (isCompleted ? Colors.success : Colors.card)
   const icon = hasCountTarget 
-    ? (currentCount >= habit.countTarget! ? 'check' : 'plus')
+    ? (currentCount === habit.countTarget! ? 'check' : 'plus')
     : (isCompleted ? 'restore' : 'check')
   const iconColor = isCompleted ? Colors.text : Colors.success
   
@@ -48,7 +48,6 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
     ? (currentCount === 0 || !isCompleted || !currentCompletion || deleteCompletionMutation.isPending || updateCompletionMutation.isPending)
     : false;
   const isPlusDisabled = 
-    (hasCountTarget ? currentCount >= habit.countTarget! : false) ||
     deleteCompletionMutation.isPending || 
     addCompletionMutation.isPending || 
     updateCompletionMutation.isPending;
@@ -145,7 +144,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
         <View className="flex-1 flex flex-row items-center justify-center">
           <Text className="text-lg text-center mr-1" style={{ color: Colors.text }}>{habit.name}</Text>
           {hasCountTarget && (
-            <Text className="text-md text-bold text-center ml-2 mr-2" style={{ color: Colors.text }}>
+            <Text className="text-lg text-bold text-center ml-2 mr-2" style={{ color: Colors.text }}>
               {habitCompletionsMap[habit.id]?.count || 0} / {habit.countTarget}
             </Text>
           )}
