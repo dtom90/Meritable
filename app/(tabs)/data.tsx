@@ -118,11 +118,11 @@ export default function DataPage() {
       {/* Custom Sign Out Alert Modal for Web */}
       {showSignOutAlert && (
         <View className="absolute inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-          <View className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full">
-            <Text className="text-xl font-bold mb-3 text-center text-gray-800">
+          <View className="rounded-lg p-6 mx-4 max-w-sm w-full" style={{ backgroundColor: Colors.card }}>
+            <Text className="text-xl font-bold mb-3 text-center" style={{ color: Colors.text }}>
               Sign Out
             </Text>
-            <Text className="text-base mb-6 text-center text-gray-600">
+            <Text className="text-base mb-6 text-center" style={{ color: Colors.textSecondary }}>
               Are you sure you want to sign out?
             </Text>
             <View className="flex-row gap-3">
