@@ -69,25 +69,24 @@ export default function DataPage() {
             Currently using: {currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}
           </Text>
           
-          {currentDataSource === 'local' && (
-            <Text className="text-sm mt-3 italic" style={{ color: Colors.textTertiary }}>
-              Cloud storage coming soon!
-            </Text>
-          )}
-          
-          {currentDataSource === 'cloud' && !isAuthenticated && (
-            <TouchableOpacity
-              className="w-full h-12 rounded-lg items-center justify-center mt-4"
-              style={{ backgroundColor: Colors.primary }}
-              onPress={() => setShowLoginOverlay(true)}
-            >
-              <Text className="text-white font-semibold text-base">
-                Sign In
+          {!isAuthenticated && (
+            <View className="mt-4">
+              <Text className="text-sm mb-3" style={{ color: Colors.textSecondary }}>
+                Sign in to sync your data across devices
               </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="w-full h-12 rounded-lg items-center justify-center"
+                style={{ backgroundColor: Colors.primary }}
+                onPress={() => setShowLoginOverlay(true)}
+              >
+                <Text className="text-white font-semibold text-base">
+                  Sign In
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
           
-          {currentDataSource === 'cloud' && isAuthenticated && (
+          {isAuthenticated && (
             <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: Colors.card }}>
               <Text className="text-sm text-center" style={{ color: Colors.success }}>
                 ✅ Connected to cloud database

@@ -22,12 +22,8 @@ interface DataSourceProviderProps {
 
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
   const isMobile = Platform.OS !== 'web';
-  const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(
-    isMobile ? null : new DexieDb()
-  );
-  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>(
-    isMobile ? 'cloud' : 'local'
-  );
+  const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(null);
+  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>('cloud');
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuth();
@@ -35,20 +31,9 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
   useEffect(() => {
     const initializeDatabase = async () => {
       try {
-        let db: HabitDatabaseInterface;
-        
-        if (isMobile) {
-          // On mobile, always use cloud database
-          db = new SupabaseDb();
-          setCurrentDataSource('cloud');
-        } else {
-          // On web, start with local database
-          db = new DexieDb();
-          // Test the database connection
-          await db.getHabits();
-          setCurrentDataSource('local');
-        }
-        
+        // Use cloud database by default on both mobile and web
+        const db = new SupabaseDb();
+        setCurrentDataSource('cloud');
         setActiveDb(db);
         setIsInitialized(true);
       } catch (error) {
@@ -60,7 +45,7 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
     };
 
     initializeDatabase();
-  }, [isMobile]);
+  }, []);
 
   // Switch database based on authentication state and invalidate queries (web only)
   useEffect(() => {
