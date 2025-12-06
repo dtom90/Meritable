@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useDataSource } from '@/db/DataSourceContext';
@@ -11,6 +11,57 @@ export default function DataPage() {
   const { isAuthenticated, user, signOut } = useAuth();
   const [showSignOutAlert, setShowSignOutAlert] = useState(false);
   const [showLoginOverlay, setShowLoginOverlay] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  // Check for OAuth errors on mount (web only)
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      // Small delay to ensure page is fully loaded before showing alert
+      const checkForError = () => {
+        let errorMessage: string | null = null;
+        
+        // Check URL params for OAuth errors
+        const searchParams = new URLSearchParams(window.location.search);
+        const hash = window.location.hash;
+        const hashParams = hash ? new URLSearchParams(hash.substring(1)) : new URLSearchParams();
+        
+        const error = searchParams.get('error') || hashParams.get('error');
+        const errorCode = searchParams.get('error_code') || hashParams.get('error_code');
+        const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
+        
+        if (error) {
+          if (errorDescription) {
+            // Decode and clean the error description
+            let decoded = decodeURIComponent(errorDescription.replace(/\+/g, ' '));
+            // Remove any trailing query parameters (e.g., "?error=access_denied")
+            errorMessage = decoded.split('?')[0].split('&')[0].trim();
+          } else if (errorCode) {
+            errorMessage = `${error}: ${errorCode}`;
+          } else {
+            errorMessage = 'Authentication failed. Please try again.';
+          }
+          // Clear error params from URL
+          window.history.replaceState(null, '', '/data');
+        }
+
+        // Show error modal if error found
+        if (errorMessage) {
+          // Use setTimeout to ensure modal shows after render
+          setTimeout(() => {
+            setOauthError(errorMessage);
+          }, 100);
+        }
+      };
+
+      // Check immediately and also after a short delay to catch any race conditions
+      checkForError();
+      setTimeout(checkForError, 200);
+    }
+  }, []);
+
+  const handleCloseOAuthError = () => {
+    setOauthError(null);
+  };
 
   const handleLoginSuccess = () => {
     setShowLoginOverlay(false);
@@ -114,6 +165,29 @@ export default function DataPage() {
             </TouchableOpacity>
           </View>
         )}
+
+      {/* Custom OAuth Error Modal */}
+      {oauthError && (
+        <View className="absolute inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+          <View className="rounded-lg p-6 mx-4 max-w-sm w-full" style={{ backgroundColor: Colors.card }}>
+            <Text className="text-xl font-bold mb-3 text-center" style={{ color: Colors.text }}>
+              Login Failed
+            </Text>
+            <Text className="text-base mb-6 text-center" style={{ color: Colors.textSecondary }}>
+              {oauthError}
+            </Text>
+            <TouchableOpacity
+              className="w-full h-12 rounded-lg items-center justify-center"
+              style={{ backgroundColor: Colors.primary }}
+              onPress={handleCloseOAuthError}
+            >
+              <Text className="text-white font-semibold text-base">
+                OK
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Custom Sign Out Alert Modal for Web */}
       {showSignOutAlert && (

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabaseClient } from '@/db/supabaseClient';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 
@@ -49,7 +49,20 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     // but this ensures it works even if that fails)
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const handleOAuthRedirect = async () => {
+        // Check for error parameters in query string or hash
+        const searchParams = new URLSearchParams(window.location.search);
         const hash = window.location.hash;
+        const hashParams = hash ? new URLSearchParams(hash.substring(1)) : new URLSearchParams();
+        
+        const error = searchParams.get('error') || hashParams.get('error');
+        
+        if (error) {
+          // OAuth error occurred
+          // The root index.tsx will handle the redirect to /data
+          return;
+        }
+        
+        // Check for access_token in hash (successful OAuth)
         if (hash && hash.includes('access_token')) {
           // Extract tokens from URL fragment
           const fragment = hash.substring(1); // Remove the # symbol
@@ -67,6 +80,16 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
             if (!sessionError) {
               // Clear the hash from URL after successful auth
               window.history.replaceState(null, '', window.location.pathname);
+            } else {
+              // On error, redirect to /data and show error message
+              // Clear the hash first to remove tokens from URL
+              window.history.replaceState(null, '', '/data');
+              // Show error alert
+              Alert.alert(
+                'Login Failed',
+                sessionError.message || 'Authentication failed. Please try again.',
+                [{ text: 'OK' }]
+              );
             }
           }
         }

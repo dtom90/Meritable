@@ -4,7 +4,7 @@ import { AuthContextProvider, useAuth } from '../AuthContext';
 import { supabaseClient } from '../supabaseClient';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 
 describe('AuthContext', () => {
   beforeEach(() => {
@@ -138,15 +138,25 @@ describe('AuthContext', () => {
   describe('Web OAuth redirect handling', () => {
     const originalWindow = (global as any).window;
     const mockReplaceState = jest.fn();
+    const mockLocationHref = jest.fn();
+    const mockAlert = jest.spyOn(Alert, 'alert');
 
     beforeEach(() => {
       jest.clearAllMocks();
       (Platform.OS as any) = 'web';
+      mockAlert.mockClear();
       // Mock window object
       const mockWindow = {
         location: {
           hash: '',
           pathname: '/',
+          search: '',
+          set href(value: string) {
+            mockLocationHref(value);
+          },
+          get href() {
+            return 'http://localhost:8081/';
+          },
         },
         history: {
           replaceState: mockReplaceState,
@@ -244,7 +254,68 @@ describe('AuthContext', () => {
       expect(supabaseClient.auth.setSession).not.toHaveBeenCalled();
     });
 
-    it('does not clear hash when setSession fails on web', async () => {
+    it('handles Supabase login rejection during redirect on web', async () => {
+      const accessToken = 'invalid-access-token';
+      const refreshToken = 'invalid-refresh-token';
+      const hash = `#access_token=${accessToken}&refresh_token=${refreshToken}&type=bearer`;
+      
+      (global as any).window.location.hash = hash;
+      
+      const mockSession = { data: { session: null } };
+      (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+      (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      });
+      const rejectionError = { 
+        message: 'Invalid token: The access token is invalid or expired',
+        status: 401 
+      };
+      (supabaseClient.auth.setSession as jest.Mock).mockResolvedValue({ 
+        error: rejectionError 
+      });
+
+      let authValue: any;
+      const TestComponent = () => {
+        authValue = useAuth();
+        return null;
+      };
+
+      render(
+        <AuthContextProvider>
+          <TestComponent />
+        </AuthContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(authValue).toBeDefined();
+        expect(authValue.isLoading).toBe(false);
+      });
+
+      // Wait for redirect handling to complete
+      await waitFor(() => {
+        expect(supabaseClient.auth.setSession).toHaveBeenCalledWith({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+      });
+
+      // When Supabase rejects the login, user should remain unauthenticated
+      expect(authValue.user).toBeNull();
+      expect(authValue.session).toBeNull();
+      expect(authValue.isAuthenticated).toBe(false);
+      
+      // Should redirect to /data and show error alert
+      await waitFor(() => {
+        expect(mockReplaceState).toHaveBeenCalledWith(null, '', '/data');
+        expect(mockAlert).toHaveBeenCalledWith(
+          'Login Failed',
+          rejectionError.message,
+          [{ text: 'OK' }]
+        );
+      });
+    });
+
+    it('redirects to /data and shows alert when setSession fails on web', async () => {
       const accessToken = 'test-access-token';
       const refreshToken = 'test-refresh-token';
       const hash = `#access_token=${accessToken}&refresh_token=${refreshToken}&type=bearer`;
@@ -256,8 +327,9 @@ describe('AuthContext', () => {
       (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
         data: { subscription: { unsubscribe: jest.fn() } },
       });
+      const errorMessage = 'Invalid tokens';
       (supabaseClient.auth.setSession as jest.Mock).mockResolvedValue({ 
-        error: { message: 'Invalid tokens' } 
+        error: { message: errorMessage } 
       });
 
       render(
@@ -270,8 +342,15 @@ describe('AuthContext', () => {
         expect(supabaseClient.auth.setSession).toHaveBeenCalled();
       });
 
-      // replaceState should not be called when there's an error
-      expect(mockReplaceState).not.toHaveBeenCalled();
+      // Should redirect to /data and show alert when there's an error
+      await waitFor(() => {
+        expect(mockReplaceState).toHaveBeenCalledWith(null, '', '/data');
+        expect(mockAlert).toHaveBeenCalledWith(
+          'Login Failed',
+          errorMessage,
+          [{ text: 'OK' }]
+        );
+      });
     });
 
     it('does not process redirect when hash is empty', async () => {
@@ -294,6 +373,132 @@ describe('AuthContext', () => {
       });
 
       expect(supabaseClient.auth.setSession).not.toHaveBeenCalled();
+    });
+
+    it('handles OAuth error in query string and redirects to /data', async () => {
+      (global as any).window.location.search = '?error=access_denied&error_code=signup_disabled&error_description=Signups+not+allowed+for+this+instance';
+      (global as any).window.location.hash = '';
+      
+      const mockSession = { data: { session: null } };
+      (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+      (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      });
+
+      render(
+        <AuthContextProvider>
+          {null}
+        </AuthContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(supabaseClient.auth.getSession).toHaveBeenCalled();
+      });
+
+      // AuthContext should not redirect (index.tsx handles that)
+      expect(mockLocationHref).not.toHaveBeenCalled();
+
+      // Should not attempt to set session when there's an OAuth error
+      expect(supabaseClient.auth.setSession).not.toHaveBeenCalled();
+    });
+
+    it('handles OAuth error in hash and redirects to /data', async () => {
+      (global as any).window.location.search = '';
+      (global as any).window.location.hash = '#error=access_denied&error_code=signup_disabled&error_description=Signups+not+allowed+for+this+instance';
+      
+      const mockSession = { data: { session: null } };
+      (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+      (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      });
+
+      render(
+        <AuthContextProvider>
+          {null}
+        </AuthContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(supabaseClient.auth.getSession).toHaveBeenCalled();
+      });
+
+      // AuthContext should not redirect (index.tsx handles that)
+      expect(mockLocationHref).not.toHaveBeenCalled();
+
+      // Should not attempt to set session when there's an OAuth error
+      expect(supabaseClient.auth.setSession).not.toHaveBeenCalled();
+    });
+
+    it('handles OAuth error with only error code when description is missing', async () => {
+      (global as any).window.location.search = '?error=access_denied&error_code=signup_disabled';
+      (global as any).window.location.hash = '';
+      
+      const mockSession = { data: { session: null } };
+      (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+      (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      });
+
+      render(
+        <AuthContextProvider>
+          {null}
+        </AuthContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(supabaseClient.auth.getSession).toHaveBeenCalled();
+      });
+
+      // AuthContext should not redirect (index.tsx handles that)
+      expect(mockLocationHref).not.toHaveBeenCalled();
+    });
+
+    it('handles OAuth error with only error when code and description are missing', async () => {
+      (global as any).window.location.search = '?error=access_denied';
+      (global as any).window.location.hash = '';
+      
+      const mockSession = { data: { session: null } };
+      (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+      (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      });
+
+      render(
+        <AuthContextProvider>
+          {null}
+        </AuthContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(supabaseClient.auth.getSession).toHaveBeenCalled();
+      });
+
+      // AuthContext should not redirect (index.tsx handles that)
+      expect(mockLocationHref).not.toHaveBeenCalled();
+    });
+
+    it('prioritizes query string error over hash error', async () => {
+      (global as any).window.location.search = '?error=query_error&error_description=Query+error';
+      (global as any).window.location.hash = '#error=hash_error&error_description=Hash+error';
+      
+      const mockSession = { data: { session: null } };
+      (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+      (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      });
+
+      render(
+        <AuthContextProvider>
+          {null}
+        </AuthContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(supabaseClient.auth.getSession).toHaveBeenCalled();
+      });
+
+      // AuthContext should not redirect (index.tsx handles that)
+      expect(mockLocationHref).not.toHaveBeenCalled();
     });
   });
 
