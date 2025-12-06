@@ -61,3 +61,6 @@ app-example
 
 # Environment variables
 .env
+
+# Coverage
+coverage/

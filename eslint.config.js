@@ -9,5 +9,18 @@ module.exports = defineConfig([
     rules: {
       "no-console": "error"
     }
+  },
+  {
+    files: ["jest.setup.ts", "**/__tests__/**/*", "**/*.test.*", "**/*.spec.*"],
+    languageOptions: {
+      globals: {
+        jest: "readonly",
+        expect: "readonly",
+        describe: "readonly",
+        it: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+      }
+    }
   }
 ]);

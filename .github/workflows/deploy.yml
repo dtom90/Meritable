@@ -46,6 +46,9 @@ jobs:
       - name: Run Expo Lint
         run: npm run lint
 
+      - name: Run tests
+        run: npm test -- --coverage --watchAll=false
+
       - name: Check TypeScript compilation
         run: npx tsc --noEmit
 
