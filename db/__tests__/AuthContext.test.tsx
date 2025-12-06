@@ -1,5 +1,5 @@
 import React from 'react';
-import renderer from 'react-test-renderer';
+import { render, waitFor } from '@testing-library/react-native';
 import { AuthContextProvider, useAuth } from '../AuthContext';
 import { supabaseClient } from '../supabaseClient';
 
@@ -10,7 +10,10 @@ describe('AuthContext', () => {
 
   it('provides initial loading state', async () => {
     const mockSession = { data: { session: null } };
-    (supabaseClient.auth.getSession as jest.Mock).mockResolvedValue(mockSession);
+    // Make getSession resolve after a delay to test loading state
+    (supabaseClient.auth.getSession as jest.Mock).mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve(mockSession), 20))
+    );
     (supabaseClient.auth.onAuthStateChange as jest.Mock).mockReturnValue({
       data: { subscription: { unsubscribe: jest.fn() } },
     });
@@ -21,30 +24,19 @@ describe('AuthContext', () => {
       return null;
     };
 
-    const tree = renderer.create(
+    render(
       <AuthContextProvider>
         <TestComponent />
       </AuthContextProvider>
     );
-
-    // Wait a tick for component to render
-    await new Promise(resolve => setTimeout(resolve, 0));
     
-    // Initially loading should be true
+    // Initially should be loading (before getSession resolves)
     expect(authValue?.isLoading).toBe(true);
     
     // Wait for session to load
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    // Force update to get latest state
-    tree.update(
-      <AuthContextProvider>
-        <TestComponent />
-      </AuthContextProvider>
-    );
-    
-    // After loading, should be false
-    expect(authValue.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(authValue.isLoading).toBe(false);
+    });
   });
 
   it('provides authentication state after session loads', async () => {
@@ -63,25 +55,18 @@ describe('AuthContext', () => {
       return null;
     };
 
-    const tree = renderer.create(
+    render(
       <AuthContextProvider>
         <TestComponent />
       </AuthContextProvider>
     );
 
-    // Wait for async session load - need to wait for promises to resolve
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    // Force update to get latest state
-    tree.update(
-      <AuthContextProvider>
-        <TestComponent />
-      </AuthContextProvider>
-    );
-
-    expect(authValue.user).toEqual(mockUser);
-    expect(authValue.isAuthenticated).toBe(true);
-    expect(authValue.isLoading).toBe(false);
+    // Wait for async session load
+    await waitFor(() => {
+      expect(authValue.user).toEqual(mockUser);
+      expect(authValue.isAuthenticated).toBe(true);
+      expect(authValue.isLoading).toBe(false);
+    });
   });
 
   it('signIn calls supabase signInWithPassword', async () => {
@@ -98,13 +83,15 @@ describe('AuthContext', () => {
       return null;
     };
 
-    renderer.create(
+    render(
       <AuthContextProvider>
         <TestComponent />
       </AuthContextProvider>
     );
 
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await waitFor(() => {
+      expect(authValue).toBeDefined();
+    });
 
     const result = await authValue.signIn('test@example.com', 'password123');
     
@@ -129,13 +116,15 @@ describe('AuthContext', () => {
       return null;
     };
 
-    renderer.create(
+    render(
       <AuthContextProvider>
         <TestComponent />
       </AuthContextProvider>
     );
 
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await waitFor(() => {
+      expect(authValue).toBeDefined();
+    });
 
     const result = await authValue.signOut();
     
