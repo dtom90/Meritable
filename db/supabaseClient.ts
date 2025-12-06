@@ -21,14 +21,17 @@ export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
           // Disable storage on web
           storage: undefined,
           persistSession: false,
+          // Enable URL detection for OAuth redirects on web
+          detectSessionInUrl: true,
         }
       : {
           // Use AsyncStorage on native platforms
           storage: AsyncStorage,
           persistSession: true,
+          // Disable URL detection on native (we handle it manually)
+          detectSessionInUrl: false,
         }
     ),
     autoRefreshToken: true,
-    detectSessionInUrl: false,
   },
 })

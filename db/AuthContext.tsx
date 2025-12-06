@@ -44,6 +44,37 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       }
     );
 
+    // 3. On web, manually handle OAuth redirect URL parsing as a fallback
+    // (Supabase should handle this automatically with detectSessionInUrl: true,
+    // but this ensures it works even if that fails)
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const handleOAuthRedirect = async () => {
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token')) {
+          // Extract tokens from URL fragment
+          const fragment = hash.substring(1); // Remove the # symbol
+          const fragmentParams = new URLSearchParams(fragment);
+          const accessToken = fragmentParams.get('access_token');
+          const refreshToken = fragmentParams.get('refresh_token');
+          
+          if (accessToken && refreshToken) {
+            // Set session directly with tokens
+            const { error: sessionError } = await supabaseClient.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            
+            if (!sessionError) {
+              // Clear the hash from URL after successful auth
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+          }
+        }
+      };
+      
+      handleOAuthRedirect();
+    }
+
     return () => {
       subscription.unsubscribe();
     };
