@@ -1,12 +1,36 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@/lib/Colors';
 import { NarrowView } from '@/components/NarrowView';
 import { useDataSource } from '@/db/DataSourceContext';
 import CloudAuthSection from '@/components/CloudAuthSection';
 
+const SHOW_CLOUD_AUTH_KEY = 'showCloudAuth';
+
 export default function DataPage() {
   const { currentDataSource } = useDataSource();
+  const [showCloudAuth, setShowCloudAuth] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkStorage = async () => {
+      try {
+        if (Platform.OS === 'web') {
+          const value = typeof window !== 'undefined' ? localStorage.getItem(SHOW_CLOUD_AUTH_KEY) : null;
+          setShowCloudAuth(value !== null && value !== '');
+        } else {
+          const value = await AsyncStorage.getItem(SHOW_CLOUD_AUTH_KEY);
+          setShowCloudAuth(value !== null && value !== '');
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error checking storage:', error);
+        setShowCloudAuth(false);
+      }
+    };
+
+    checkStorage();
+  }, []);
 
   return (
     <NarrowView>
@@ -19,11 +43,20 @@ export default function DataPage() {
           Database Source
         </Text>
         <Text className="text-base mb-4" style={{ color: Colors.textSecondary }}>
-          Currently using: {currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}
+          <Text>Currently using: </Text>
+          <Text>{currentDataSource === 'local' ? 'Local Database' : 'Cloud Database'}</Text>
         </Text>
       </View>
       
-      <CloudAuthSection />
+      {showCloudAuth ? (
+        <CloudAuthSection />
+      ) : (
+        <View className="mb-6 p-4 rounded-lg" style={{ backgroundColor: Colors.surface }}>
+          <Text className="text-base text-center" style={{ color: Colors.textSecondary }}>
+            Cloud sync coming soon!
+          </Text>
+        </View>
+      )}
     </NarrowView>
   );
 }
