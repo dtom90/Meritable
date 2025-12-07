@@ -3,7 +3,7 @@ import { View, Text, Pressable, TouchableOpacity, Platform, ViewProps } from 're
 import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import { Icon } from 'react-native-paper';
-import { Habit } from '@/db/types';
+import { Habit } from '@/db/habitDatabase';
 
 interface HabitItemProps extends ViewProps {
   habit: Habit;

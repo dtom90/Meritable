@@ -1,24 +1,41 @@
 // Import fake-indexeddb before Dexie to mock IndexedDB
 import 'fake-indexeddb/auto';
 import { DexieDb } from '../dexieDb';
-import { Habit } from '../types';
+import { Habit, HabitDatabaseInterface } from '../habitDatabase';
 
-describe('DexieDb - HabitDatabaseInterface Implementation', () => {
-  let db: DexieDb;
+// Array of database implementations to test
+const databaseImplementations = [
+  {
+    name: 'DexieDb',
+    factory: () => new DexieDb(),
+  },
+] as const;
+
+type DatabaseInstance = HabitDatabaseInterface | DexieDb;
+
+describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $name', ({ name, factory }) => {
+  let db: DatabaseInstance;
 
   beforeEach(async () => {
     // Create a fresh database instance for each test
-    db = new DexieDb();
-    await db.open();
+    db = factory();
+    // DexieDb-specific: open the database
+    if (db instanceof DexieDb) {
+      await db.open();
+    }
   });
 
   afterEach(async () => {
     // Clean up: delete all data and close the database
-    if (db && db.isOpen()) {
-      await db.habits.clear();
-      await db.habitCompletions.clear();
-      await db.close();
-      await db.delete(); // Delete the database completely
+    // This cleanup is specific to DexieDb implementation
+    if (db instanceof DexieDb) {
+      const dexieDb = db as DexieDb;
+      if (dexieDb.isOpen()) {
+        await dexieDb.habits.clear();
+        await dexieDb.habitCompletions.clear();
+        await dexieDb.close();
+        await dexieDb.delete(); // Delete the database completely
+      }
     }
   });
 
@@ -105,15 +122,18 @@ describe('DexieDb - HabitDatabaseInterface Implementation', () => {
 
       it('should fallback to id sorting when order is missing', async () => {
         // Manually insert habits without order (simulating old data)
-        await db.habits.bulkAdd([
-          { id: 3, name: 'Third', order: undefined as any, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { id: 1, name: 'First', order: undefined as any, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { id: 2, name: 'Second', order: undefined as any, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        ] as any);
+        // This test is specific to DexieDb implementation
+        if (db instanceof DexieDb) {
+          await db.habits.bulkAdd([
+            { id: 3, name: 'Third', order: undefined as any, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: 1, name: 'First', order: undefined as any, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: 2, name: 'Second', order: undefined as any, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          ] as any);
 
-        const habits = await db.getHabits();
-        expect(habits[0].id).toBeLessThan(habits[1].id);
-        expect(habits[1].id).toBeLessThan(habits[2].id);
+          const habits = await db.getHabits();
+          expect(habits[0].id).toBeLessThan(habits[1].id);
+          expect(habits[1].id).toBeLessThan(habits[2].id);
+        }
       });
     });
 

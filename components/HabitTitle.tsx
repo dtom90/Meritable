@@ -4,7 +4,7 @@ import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import { useUpdateHabit } from '@/db/useHabitDb';
-import { Habit } from '@/db/types';
+import { Habit } from '@/db/habitDatabase';
 
 
 const maxNameLength = 100

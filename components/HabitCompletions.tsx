@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 import { useMemo } from 'react';
 import { Colors } from '@/lib/Colors';
 import { useListHabits, useListHabitCompletionsByDate } from '@/db/useHabitDb';
-import { HabitCompletion } from '@/db/types';
+import { HabitCompletion } from '@/db/habitDatabase';
 import HabitCompletionButton from './HabitCompletionButton';
 
 interface HabitCompletionsProps {

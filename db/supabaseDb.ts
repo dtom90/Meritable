@@ -1,4 +1,4 @@
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './types'
+import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './habitDatabase'
 import { supabaseClient } from './supabaseClient'
 
 export class SupabaseDb extends HabitDatabaseInterface {

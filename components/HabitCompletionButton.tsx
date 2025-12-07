@@ -3,7 +3,7 @@ import { useCreateHabitCompletion, useDeleteHabitCompletion, useUpdateHabitCompl
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { Colors } from '@/lib/Colors';
-import { Habit, HabitCompletion } from '@/db/types';
+import { Habit, HabitCompletion } from '@/db/habitDatabase';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
