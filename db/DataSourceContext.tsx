@@ -25,7 +25,7 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
   const isMobile = Platform.OS !== 'web';
   const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(null);
   const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>(
-    isMobile ? 'local' : 'cloud'
+    'local'
   );
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
@@ -41,9 +41,9 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
           setCurrentDataSource('local');
           setActiveDb(localDb);
         } else {
-          // Use cloud database by default on web
-          const db = new SupabaseDb();
-          setCurrentDataSource('cloud');
+          // Use local database (Dexie-based) by default on web
+          const db = new DexieDb();
+          setCurrentDataSource('local');
           setActiveDb(db);
         }
         setIsInitialized(true);
