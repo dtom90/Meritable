@@ -7,6 +7,9 @@ import { DexieDb } from '../dexieDb';
 import { AsyncStorageDb } from '../asyncStorageDb';
 import { SupabaseDb } from '../supabaseDb';
 import { useAuth } from '../AuthContext';
+import { MockedDexieDb } from '../__mocks__/dexieDbMock';
+import { MockedAsyncStorageDb } from '../__mocks__/asyncStorageDbMock';
+import { MockedSupabaseDb } from '../__mocks__/supabaseDbMock';
 
 // Mock the database classes
 jest.mock('../dexieDb');
@@ -15,9 +18,9 @@ jest.mock('../supabaseDb');
 jest.mock('../AuthContext');
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
-const MockedDexieDb = DexieDb as jest.MockedClass<typeof DexieDb>;
-const MockedAsyncStorageDb = AsyncStorageDb as jest.MockedClass<typeof AsyncStorageDb>;
-const MockedSupabaseDb = SupabaseDb as jest.MockedClass<typeof SupabaseDb>;
+const MockedDexieDbClass = DexieDb as jest.MockedClass<typeof DexieDb>;
+const MockedAsyncStorageDbClass = AsyncStorageDb as jest.MockedClass<typeof AsyncStorageDb>;
+const MockedSupabaseDbClass = SupabaseDb as jest.MockedClass<typeof SupabaseDb>;
 
 describe('DataSourceContext', () => {
   let queryClient: QueryClient;
@@ -44,44 +47,9 @@ describe('DataSourceContext', () => {
       signOut: jest.fn(),
     } as any);
 
-    MockedSupabaseDb.mockImplementation(() => ({
-      getHabits: jest.fn().mockResolvedValue([]),
-      createHabit: jest.fn(),
-      updateHabit: jest.fn(),
-      reorderHabits: jest.fn(),
-      deleteHabit: jest.fn(),
-      createHabitCompletion: jest.fn(),
-      updateHabitCompletion: jest.fn(),
-      getHabitCompletionsByDate: jest.fn(),
-      getHabitCompletionsById: jest.fn(),
-      deleteHabitCompletion: jest.fn(),
-    } as any));
-
-    MockedDexieDb.mockImplementation(() => ({
-      getHabits: jest.fn().mockResolvedValue([]),
-      createHabit: jest.fn(),
-      updateHabit: jest.fn(),
-      reorderHabits: jest.fn(),
-      deleteHabit: jest.fn(),
-      createHabitCompletion: jest.fn(),
-      updateHabitCompletion: jest.fn(),
-      getHabitCompletionsByDate: jest.fn(),
-      getHabitCompletionsById: jest.fn(),
-      deleteHabitCompletion: jest.fn(),
-    } as any));
-
-    MockedAsyncStorageDb.mockImplementation(() => ({
-      getHabits: jest.fn().mockResolvedValue([]),
-      createHabit: jest.fn(),
-      updateHabit: jest.fn(),
-      reorderHabits: jest.fn(),
-      deleteHabit: jest.fn(),
-      createHabitCompletion: jest.fn(),
-      updateHabitCompletion: jest.fn(),
-      getHabitCompletionsByDate: jest.fn(),
-      getHabitCompletionsById: jest.fn(),
-      deleteHabitCompletion: jest.fn(),
-    } as any));
+    MockedSupabaseDbClass.mockImplementation(MockedSupabaseDb);
+    MockedDexieDbClass.mockImplementation(MockedDexieDb);
+    MockedAsyncStorageDbClass.mockImplementation(MockedAsyncStorageDb);
   });
 
   const TestComponent = () => {
@@ -123,7 +91,7 @@ describe('DataSourceContext', () => {
       expect(dataSourceValue.isInitialized).toBe(true);
     });
 
-    expect(MockedSupabaseDb).toHaveBeenCalled();
+    expect(MockedSupabaseDbClass).toHaveBeenCalled();
     expect(dataSourceValue.currentDataSource).toBe('cloud');
     expect(dataSourceValue.activeDb).not.toBeNull();
     expect(dataSourceValue.activeDb).toBeDefined();
@@ -177,7 +145,7 @@ describe('DataSourceContext', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     const initError = new Error('Database initialization failed');
 
-    MockedSupabaseDb.mockImplementationOnce(() => {
+    MockedSupabaseDbClass.mockImplementationOnce(() => {
       throw initError;
     });
 
@@ -314,7 +282,7 @@ describe('DataSourceContext', () => {
     );
 
     await waitFor(() => {
-      expect(MockedDexieDb).toHaveBeenCalled();
+      expect(MockedDexieDbClass).toHaveBeenCalled();
     }, { timeout: 3000 });
   });
 
@@ -346,8 +314,8 @@ describe('DataSourceContext', () => {
 
     // Should initialize with local (AsyncStorage) on mobile
     expect(dataSourceValue.currentDataSource).toBe('local');
-    expect(MockedAsyncStorageDb).toHaveBeenCalled();
-    expect(MockedDexieDb).not.toHaveBeenCalled();
+    expect(MockedAsyncStorageDbClass).toHaveBeenCalled();
+    expect(MockedDexieDbClass).not.toHaveBeenCalled();
   });
 
   it('invalidates queries when switching databases on web', async () => {
@@ -448,7 +416,7 @@ describe('DataSourceContext', () => {
     // After initialization, should switch to local when not authenticated on web
     await waitFor(() => {
       expect(dataSourceValue.currentDataSource).toBe('local');
-      expect(MockedDexieDb).toHaveBeenCalled();
+      expect(MockedDexieDbClass).toHaveBeenCalled();
     });
   });
 
@@ -481,7 +449,7 @@ describe('DataSourceContext', () => {
 
     // Mock DexieDb.getHabits to throw error
     const switchError = new Error('Failed to switch to local');
-    MockedDexieDb.mockImplementationOnce(() => {
+    MockedDexieDbClass.mockImplementationOnce(() => {
       const mockDb = {
         getHabits: jest.fn().mockRejectedValue(switchError),
         createHabit: jest.fn(),
@@ -559,8 +527,8 @@ describe('DataSourceContext', () => {
       });
 
       // Mobile should use local database (AsyncStorage-based) by default
-      expect(MockedAsyncStorageDb).toHaveBeenCalled();
-      expect(MockedDexieDb).not.toHaveBeenCalled();
+      expect(MockedAsyncStorageDbClass).toHaveBeenCalled();
+      expect(MockedDexieDbClass).not.toHaveBeenCalled();
       expect(dataSourceValue.currentDataSource).toBe('local');
       expect(dataSourceValue.activeDb).not.toBeNull();
       expect(dataSourceValue.activeDb).toBeDefined();
@@ -593,8 +561,8 @@ describe('DataSourceContext', () => {
 
       // Should be local when not authenticated
       expect(dataSourceValue.currentDataSource).toBe('local');
-      expect(MockedAsyncStorageDb).toHaveBeenCalled();
-      expect(MockedDexieDb).not.toHaveBeenCalled();
+      expect(MockedAsyncStorageDbClass).toHaveBeenCalled();
+      expect(MockedDexieDbClass).not.toHaveBeenCalled();
 
       // Change to authenticated - should switch to cloud
       mockUseAuth.mockReturnValue({
@@ -624,7 +592,7 @@ describe('DataSourceContext', () => {
 
       // Should switch to cloud when authenticated
       expect(dataSourceValue2.currentDataSource).toBe('cloud');
-      expect(MockedSupabaseDb).toHaveBeenCalled();
+      expect(MockedSupabaseDbClass).toHaveBeenCalled();
     });
 
     it('switches from cloud to local when user logs out on mobile', async () => {
@@ -654,7 +622,7 @@ describe('DataSourceContext', () => {
 
       // Should be cloud when authenticated
       expect(dataSourceValue.currentDataSource).toBe('cloud');
-      expect(MockedSupabaseDb).toHaveBeenCalled();
+      expect(MockedSupabaseDbClass).toHaveBeenCalled();
 
       // Change to unauthenticated - should switch to local
       mockUseAuth.mockReturnValue({
@@ -683,8 +651,8 @@ describe('DataSourceContext', () => {
 
       // Should switch to local when logged out
       expect(dataSourceValue2.currentDataSource).toBe('local');
-      expect(MockedAsyncStorageDb).toHaveBeenCalled();
-      expect(MockedDexieDb).not.toHaveBeenCalled();
+      expect(MockedAsyncStorageDbClass).toHaveBeenCalled();
+      expect(MockedDexieDbClass).not.toHaveBeenCalled();
     });
 
     it('maintains correct database state across auth changes on mobile', async () => {
@@ -770,7 +738,7 @@ describe('DataSourceContext', () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       const initError = new Error('Mobile database initialization failed');
 
-      MockedAsyncStorageDb.mockImplementationOnce(() => {
+      MockedAsyncStorageDbClass.mockImplementationOnce(() => {
         throw initError;
       });
 
@@ -859,8 +827,8 @@ describe('DataSourceContext', () => {
 
       // Android should also use local (AsyncStorage) by default
       expect(dataSourceValue.currentDataSource).toBe('local');
-      expect(MockedAsyncStorageDb).toHaveBeenCalled();
-      expect(MockedDexieDb).not.toHaveBeenCalled();
+      expect(MockedAsyncStorageDbClass).toHaveBeenCalled();
+      expect(MockedDexieDbClass).not.toHaveBeenCalled();
     });
   });
 });
