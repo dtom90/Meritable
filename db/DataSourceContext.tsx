@@ -2,8 +2,9 @@ import { View, Text, Platform } from 'react-native';
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DexieDb } from '@/db/dexieDb';
+import { AsyncStorageDb } from '@/db/asyncStorageDb';
 import { SupabaseDb } from '@/db/supabaseDb';
-import { HabitDatabaseInterface } from '@/db/types';
+import { HabitDatabaseInterface } from '@/db/habitDatabase';
 import { useAuth } from '@/db/AuthContext';
 
 export type DataSourceType = 'local' | 'cloud';
@@ -23,7 +24,9 @@ interface DataSourceProviderProps {
 export function DataSourceProvider({ children }: DataSourceProviderProps) {
   const isMobile = Platform.OS !== 'web';
   const [activeDb, setActiveDb] = useState<HabitDatabaseInterface | null>(null);
-  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>('cloud');
+  const [currentDataSource, setCurrentDataSource] = useState<DataSourceType>(
+    isMobile ? 'local' : 'cloud'
+  );
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuth();
@@ -31,10 +34,18 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
   useEffect(() => {
     const initializeDatabase = async () => {
       try {
-        // Use cloud database by default on both mobile and web
-        const db = new SupabaseDb();
-        setCurrentDataSource('cloud');
-        setActiveDb(db);
+        if (isMobile) {
+          // Use local database (AsyncStorage-based) by default on mobile
+          const localDb = new AsyncStorageDb();
+          await localDb.getHabits();
+          setCurrentDataSource('local');
+          setActiveDb(localDb);
+        } else {
+          // Use cloud database by default on web
+          const db = new SupabaseDb();
+          setCurrentDataSource('cloud');
+          setActiveDb(db);
+        }
         setIsInitialized(true);
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -45,15 +56,15 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
     };
 
     initializeDatabase();
-  }, []);
+  }, [isMobile]);
 
-  // Switch database based on authentication state and invalidate queries (web only)
+  // Switch database based on authentication state and invalidate queries
   useEffect(() => {
-    if (!isInitialized || isMobile) return;
+    if (!isInitialized) return;
 
     const switchDatabase = async () => {
       if (isAuthenticated && currentDataSource === 'local') {
-        // Switch to cloud database when user logs in (web only)
+        // Switch to cloud database when user logs in (both mobile and web)
         try {
           const cloudDb = new SupabaseDb();
           setActiveDb(cloudDb);
@@ -64,9 +75,10 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
           console.error('Failed to switch to cloud database:', error);
         }
       } else if (!isAuthenticated && currentDataSource === 'cloud') {
-        // Switch back to local when user logs out (web only)
+        // Switch back to local when user logs out
+        // Use AsyncStorageDb on mobile, DexieDb on web
         try {
-          const localDb = new DexieDb();
+          const localDb = isMobile ? new AsyncStorageDb() : new DexieDb();
           await localDb.getHabits();
           setActiveDb(localDb);
           setCurrentDataSource('local');

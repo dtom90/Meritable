@@ -4,16 +4,19 @@ import { Platform } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DataSourceProvider, useDataSource } from '../DataSourceContext';
 import { DexieDb } from '../dexieDb';
+import { AsyncStorageDb } from '../asyncStorageDb';
 import { SupabaseDb } from '../supabaseDb';
 import { useAuth } from '../AuthContext';
 
 // Mock the database classes
 jest.mock('../dexieDb');
+jest.mock('../asyncStorageDb');
 jest.mock('../supabaseDb');
 jest.mock('../AuthContext');
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const MockedDexieDb = DexieDb as jest.MockedClass<typeof DexieDb>;
+const MockedAsyncStorageDb = AsyncStorageDb as jest.MockedClass<typeof AsyncStorageDb>;
 const MockedSupabaseDb = SupabaseDb as jest.MockedClass<typeof SupabaseDb>;
 
 describe('DataSourceContext', () => {
@@ -66,10 +69,23 @@ describe('DataSourceContext', () => {
       getHabitCompletionsById: jest.fn(),
       deleteHabitCompletion: jest.fn(),
     } as any));
+
+    MockedAsyncStorageDb.mockImplementation(() => ({
+      getHabits: jest.fn().mockResolvedValue([]),
+      createHabit: jest.fn(),
+      updateHabit: jest.fn(),
+      reorderHabits: jest.fn(),
+      deleteHabit: jest.fn(),
+      createHabitCompletion: jest.fn(),
+      updateHabitCompletion: jest.fn(),
+      getHabitCompletionsByDate: jest.fn(),
+      getHabitCompletionsById: jest.fn(),
+      deleteHabitCompletion: jest.fn(),
+    } as any));
   });
 
   const TestComponent = () => {
-    const dataSource = useDataSource();
+    useDataSource();
     return null;
   };
 
@@ -302,7 +318,7 @@ describe('DataSourceContext', () => {
     }, { timeout: 3000 });
   });
 
-  it('does not switch databases on mobile platform', async () => {
+  it('mobile platform uses local storage by default', async () => {
     (Platform.OS as any) = 'ios';
 
     mockUseAuth.mockReturnValue({
@@ -328,37 +344,9 @@ describe('DataSourceContext', () => {
       expect(dataSourceValue.isInitialized).toBe(true);
     });
 
-    // Should initialize with cloud
-    expect(dataSourceValue.currentDataSource).toBe('cloud');
-
-    // Change auth state
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: true,
-      user: { id: '123', email: 'test@example.com' },
-      session: {} as any,
-      isLoading: false,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signInWithGoogle: jest.fn(),
-      signOut: jest.fn(),
-    } as any);
-
-    // Force re-render
-    const { rerender } = renderWithProvider(<TestComponent />);
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <DataSourceProvider>
-          <TestComponent />
-        </DataSourceProvider>
-      </QueryClientProvider>
-    );
-
-    // Should still be cloud (no switching on mobile)
-    await waitFor(() => {
-      expect(dataSourceValue.currentDataSource).toBe('cloud');
-    });
-
-    // DexieDb should not be called for switching
+    // Should initialize with local (AsyncStorage) on mobile
+    expect(dataSourceValue.currentDataSource).toBe('local');
+    expect(MockedAsyncStorageDb).toHaveBeenCalled();
     expect(MockedDexieDb).not.toHaveBeenCalled();
   });
 
@@ -539,6 +527,341 @@ describe('DataSourceContext', () => {
     }, { timeout: 3000 });
 
     consoleErrorSpy.mockRestore();
+  });
+
+  describe('Mobile platform behavior with AsyncStorage', () => {
+    beforeEach(() => {
+      (Platform.OS as any) = 'ios';
+    });
+
+    it('initializes with local database (AsyncStorage) on mobile by default', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        session: null,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue: any;
+      const TestComponent = () => {
+        dataSourceValue = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent />);
+
+      await waitFor(() => {
+        expect(dataSourceValue.isInitialized).toBe(true);
+      });
+
+      // Mobile should use local database (AsyncStorage-based) by default
+      expect(MockedAsyncStorageDb).toHaveBeenCalled();
+      expect(MockedDexieDb).not.toHaveBeenCalled();
+      expect(dataSourceValue.currentDataSource).toBe('local');
+      expect(dataSourceValue.activeDb).not.toBeNull();
+      expect(dataSourceValue.activeDb).toBeDefined();
+    });
+
+    it('switches to cloud database when user logs in on mobile', async () => {
+      // Start unauthenticated - should use local
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        session: null,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue: any;
+      const TestComponent = () => {
+        dataSourceValue = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent />);
+
+      await waitFor(() => {
+        expect(dataSourceValue.isInitialized).toBe(true);
+      });
+
+      // Should be local when not authenticated
+      expect(dataSourceValue.currentDataSource).toBe('local');
+      expect(MockedAsyncStorageDb).toHaveBeenCalled();
+      expect(MockedDexieDb).not.toHaveBeenCalled();
+
+      // Change to authenticated - should switch to cloud
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: '123', email: 'test@example.com' },
+        session: {} as any,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      // Create new provider instance to simulate auth state change
+      let dataSourceValue2: any;
+      const TestComponent2 = () => {
+        dataSourceValue2 = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent2 />);
+
+      await waitFor(() => {
+        expect(dataSourceValue2.isInitialized).toBe(true);
+        expect(dataSourceValue2.currentDataSource).toBe('cloud');
+      });
+
+      // Should switch to cloud when authenticated
+      expect(dataSourceValue2.currentDataSource).toBe('cloud');
+      expect(MockedSupabaseDb).toHaveBeenCalled();
+    });
+
+    it('switches from cloud to local when user logs out on mobile', async () => {
+      // Start authenticated - should use cloud
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: '123', email: 'test@example.com' },
+        session: {} as any,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue: any;
+      const TestComponent = () => {
+        dataSourceValue = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent />);
+
+      await waitFor(() => {
+        expect(dataSourceValue.isInitialized).toBe(true);
+      });
+
+      // Should be cloud when authenticated
+      expect(dataSourceValue.currentDataSource).toBe('cloud');
+      expect(MockedSupabaseDb).toHaveBeenCalled();
+
+      // Change to unauthenticated - should switch to local
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        session: null,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue2: any;
+      const TestComponent2 = () => {
+        dataSourceValue2 = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent2 />);
+
+      await waitFor(() => {
+        expect(dataSourceValue2.isInitialized).toBe(true);
+        expect(dataSourceValue2.currentDataSource).toBe('local');
+      });
+
+      // Should switch to local when logged out
+      expect(dataSourceValue2.currentDataSource).toBe('local');
+      expect(MockedAsyncStorageDb).toHaveBeenCalled();
+      expect(MockedDexieDb).not.toHaveBeenCalled();
+    });
+
+    it('maintains correct database state across auth changes on mobile', async () => {
+      // Test: local -> cloud -> local
+      
+      // 1. Start unauthenticated - should be local
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        session: null,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue1: any;
+      const TestComponent1 = () => {
+        dataSourceValue1 = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent1 />);
+
+      await waitFor(() => {
+        expect(dataSourceValue1.isInitialized).toBe(true);
+        expect(dataSourceValue1.currentDataSource).toBe('local');
+      });
+
+      // 2. Login - should switch to cloud
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: '123', email: 'test@example.com' },
+        session: {} as any,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue2: any;
+      const TestComponent2 = () => {
+        dataSourceValue2 = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent2 />);
+
+      await waitFor(() => {
+        expect(dataSourceValue2.isInitialized).toBe(true);
+        expect(dataSourceValue2.currentDataSource).toBe('cloud');
+      });
+
+      // 3. Logout - should switch back to local
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        session: null,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue3: any;
+      const TestComponent3 = () => {
+        dataSourceValue3 = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent3 />);
+
+      await waitFor(() => {
+        expect(dataSourceValue3.isInitialized).toBe(true);
+        expect(dataSourceValue3.currentDataSource).toBe('local');
+      });
+    });
+
+    it('handles initialization errors gracefully on mobile', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const initError = new Error('Mobile database initialization failed');
+
+      MockedAsyncStorageDb.mockImplementationOnce(() => {
+        throw initError;
+      });
+
+      let dataSourceValue: any;
+      const TestComponent = () => {
+        dataSourceValue = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent />);
+
+      await waitFor(() => {
+        expect(dataSourceValue.isInitialized).toBe(true);
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Database initialization failed:',
+        initError
+      );
+      expect(dataSourceValue.activeDb).toBeNull();
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('switches between local and cloud correctly on mobile', async () => {
+      // Test multiple auth state changes: local -> cloud -> local -> cloud
+      const authStates = [
+        { isAuthenticated: false, user: null, expectedSource: 'local' },
+        { isAuthenticated: true, user: { id: '1', email: 'user1@test.com' }, expectedSource: 'cloud' },
+        { isAuthenticated: false, user: null, expectedSource: 'local' },
+        { isAuthenticated: true, user: { id: '2', email: 'user2@test.com' }, expectedSource: 'cloud' },
+      ];
+
+      for (const authState of authStates) {
+        mockUseAuth.mockReturnValue({
+          isAuthenticated: authState.isAuthenticated,
+          user: authState.user,
+          session: authState.user ? {} as any : null,
+          isLoading: false,
+          signIn: jest.fn(),
+          signUp: jest.fn(),
+          signInWithGoogle: jest.fn(),
+          signOut: jest.fn(),
+        } as any);
+
+        let dataSourceValue: any;
+        const TestComponent = () => {
+          dataSourceValue = useDataSource();
+          return null;
+        };
+
+        renderWithProvider(<TestComponent />);
+
+        await waitFor(() => {
+          expect(dataSourceValue.isInitialized).toBe(true);
+          expect(dataSourceValue.currentDataSource).toBe(authState.expectedSource);
+        });
+      }
+    });
+
+    it('works correctly on Android platform', async () => {
+      (Platform.OS as any) = 'android';
+
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        session: null,
+        isLoading: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signInWithGoogle: jest.fn(),
+        signOut: jest.fn(),
+      } as any);
+
+      let dataSourceValue: any;
+      const TestComponent = () => {
+        dataSourceValue = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent />);
+
+      await waitFor(() => {
+        expect(dataSourceValue.isInitialized).toBe(true);
+      });
+
+      // Android should also use local (AsyncStorage) by default
+      expect(dataSourceValue.currentDataSource).toBe('local');
+      expect(MockedAsyncStorageDb).toHaveBeenCalled();
+      expect(MockedDexieDb).not.toHaveBeenCalled();
+    });
   });
 });
 
