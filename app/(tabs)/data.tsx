@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@/lib/Colors';
 import { NarrowView } from '@/components/NarrowView';
 import { useDataSource } from '@/db/DataSourceContext';
 import CloudAuthSection from '@/components/CloudAuthSection';
+import { isTestFlight } from '@/lib/useIsRegisteredTestDevice';
 
 const SHOW_CLOUD_AUTH_KEY = 'showCloudAuth';
 
@@ -16,11 +16,14 @@ export default function DataPage() {
     const checkStorage = async () => {
       try {
         if (Platform.OS === 'web') {
+          // On web, show cloud auth if local storage value is set
           const value = typeof window !== 'undefined' ? localStorage.getItem(SHOW_CLOUD_AUTH_KEY) : null;
-          setShowCloudAuth(value !== null && value !== '');
+          setShowCloudAuth(value !== null && value === 'true');
         } else {
-          const value = await AsyncStorage.getItem(SHOW_CLOUD_AUTH_KEY);
-          setShowCloudAuth(value !== null && value !== '');
+          // On mobile, show cloud auth if in TestFlight
+          if (isTestFlight()) {
+            setShowCloudAuth(true);
+          }
         }
       } catch (error) {
         // eslint-disable-next-line no-console
