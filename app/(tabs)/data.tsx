@@ -4,7 +4,7 @@ import { Colors } from '@/lib/Colors';
 import { NarrowView } from '@/components/NarrowView';
 import { useDataSource } from '@/db/DataSourceContext';
 import CloudAuthSection from '@/components/CloudAuthSection';
-import { isTestFlight } from '@/lib/useIsRegisteredTestDevice';
+import { isTestFlight } from '@/lib/isTestFlight';
 
 const SHOW_CLOUD_AUTH_KEY = 'showCloudAuth';
 
