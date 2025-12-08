@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useAuth } from '@/db/AuthContext';
 import LoginOverlay from '@/components/LoginOverlay';
+import OAuthErrorModal from '@/components/OAuthErrorModal';
+import SignOutAlertModal from '@/components/SignOutAlertModal';
 
 export default function CloudAuthSection() {
   const { isAuthenticated, user, signOut } = useAuth();
@@ -124,90 +126,42 @@ export default function CloudAuthSection() {
         )}
         
         {isAuthenticated && (
-          <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: Colors.card }}>
-            <Text className="text-sm text-center" style={{ color: Colors.success }}>
-              ✅ Connected to cloud database
+          <>
+            <View className="mt-4 p-3 rounded-lg mb-4" style={{ backgroundColor: Colors.card }}>
+              <Text className="text-sm text-center" style={{ color: Colors.success }}>
+                ✅ Connected to cloud database
+              </Text>
+            </View>
+            <Text className="text-xl font-semibold mb-3" style={{ color: Colors.text }}>
+              Account
             </Text>
-          </View>
-        )}
-      </View>
-
-      {isAuthenticated && (
-        <View className="mb-6 p-4 rounded-lg" style={{ backgroundColor: Colors.surface }}>
-          <Text className="text-xl font-semibold mb-3" style={{ color: Colors.text }}>
-            Account
-          </Text>
-          <Text className="text-base mb-3" style={{ color: Colors.textSecondary }}>
-            Signed in as: {user?.email}
-          </Text>
-          <TouchableOpacity
-            className="w-full h-12 rounded-lg items-center justify-center"
-            style={{ backgroundColor: Colors.error }}
-            onPress={handleSignOut}
-          >
-            <Text className="text-white font-semibold text-base">
-              Sign Out
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Custom OAuth Error Modal */}
-      {oauthError && (
-        <View className="absolute inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-          <View className="rounded-lg p-6 mx-4 max-w-sm w-full" style={{ backgroundColor: Colors.card }}>
-            <Text className="text-xl font-bold mb-3 text-center" style={{ color: Colors.text }}>
-              Login Failed
-            </Text>
-            <Text className="text-base mb-6 text-center" style={{ color: Colors.textSecondary }}>
-              {oauthError}
+            <Text className="text-base mb-3" style={{ color: Colors.textSecondary }}>
+              Signed in as: {user?.email}
             </Text>
             <TouchableOpacity
               className="w-full h-12 rounded-lg items-center justify-center"
-              style={{ backgroundColor: Colors.primary }}
-              onPress={handleCloseOAuthError}
+              style={{ backgroundColor: Colors.error }}
+              onPress={handleSignOut}
             >
               <Text className="text-white font-semibold text-base">
-                OK
+                Sign Out
               </Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      )}
+          </>
+        )}
+      </View>
 
-      {/* Custom Sign Out Alert Modal for Web */}
-      {showSignOutAlert && (
-        <View className="absolute inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-          <View className="rounded-lg p-6 mx-4 max-w-sm w-full" style={{ backgroundColor: Colors.card }}>
-            <Text className="text-xl font-bold mb-3 text-center" style={{ color: Colors.text }}>
-              Sign Out
-            </Text>
-            <Text className="text-base mb-6 text-center" style={{ color: Colors.textSecondary }}>
-              Are you sure you want to sign out?
-            </Text>
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                className="flex-1 h-12 rounded-lg items-center justify-center"
-                style={{ backgroundColor: Colors.textTertiary }}
-                onPress={cancelSignOut}
-              >
-                <Text className="text-white font-semibold text-base">
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 h-12 rounded-lg items-center justify-center"
-                style={{ backgroundColor: Colors.error }}
-                onPress={confirmSignOut}
-              >
-                <Text className="text-white font-semibold text-base">
-                  Sign Out
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
+      <OAuthErrorModal
+        visible={!!oauthError}
+        errorMessage={oauthError || ''}
+        onClose={handleCloseOAuthError}
+      />
+
+      <SignOutAlertModal
+        visible={showSignOutAlert}
+        onConfirm={confirmSignOut}
+        onCancel={cancelSignOut}
+      />
 
       <LoginOverlay
         visible={showLoginOverlay}
