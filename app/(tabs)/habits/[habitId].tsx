@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView } from 'react-native';
+import { View, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import { useListHabits } from '@/db/useHabitDb';
@@ -15,11 +15,9 @@ export default function HabitDetail() {
   
   if (!habit) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: Colors.background }}>
-        <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full">
-          <Text style={{ color: Colors.text }}>Habit not found</Text>
-        </View>
-      </SafeAreaView>
+      <View className="flex-1 pt-[50px] px-5 max-w-[800px] self-center w-full" style={{ backgroundColor: Colors.background }}>
+        <Text style={{ color: Colors.text }}>Habit not found</Text>
+      </View>
     );
   }
 

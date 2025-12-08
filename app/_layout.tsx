@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Platform } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import "./global.css"
 import { Colors } from '@/lib/Colors';
 import { DataSourceProvider } from '@/db/DataSourceContext';
@@ -39,23 +40,25 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthContextProvider>
-        <DataSourceProvider>
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: Colors.background },
-              headerTintColor: Colors.text,
-              headerTitleStyle: { color: Colors.text },
-              contentStyle: { backgroundColor: Colors.background },
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="light" />
-        </DataSourceProvider>
-      </AuthContextProvider>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthContextProvider>
+          <DataSourceProvider>
+            <Stack
+              screenOptions={{
+                headerStyle: { backgroundColor: Colors.background },
+                headerTintColor: Colors.text,
+                headerTitleStyle: { color: Colors.text },
+                contentStyle: { backgroundColor: Colors.background },
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="light" />
+          </DataSourceProvider>
+        </AuthContextProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
