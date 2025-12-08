@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useAuth } from '@/db/AuthContext';
-import LoginOverlay from '@/components/LoginOverlay';
-import OAuthErrorModal from '@/components/OAuthErrorModal';
-import SignOutAlertModal from '@/components/SignOutAlertModal';
+import LoginModal from '@/components/Modals/LoginModal';
+import OAuthErrorModal from '@/components/Modals/OAuthErrorModal';
+import SignOutAlertModal from '@/components/Modals/SignOutAlertModal';
 
 export default function CloudAuthSection() {
   const { isAuthenticated, user, signOut } = useAuth();
@@ -163,7 +163,7 @@ export default function CloudAuthSection() {
         onCancel={cancelSignOut}
       />
 
-      <LoginOverlay
+      <LoginModal
         visible={showLoginOverlay}
         onClose={handleCloseLogin}
         onSuccess={handleLoginSuccess}

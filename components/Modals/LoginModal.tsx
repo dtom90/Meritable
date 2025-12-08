@@ -3,13 +3,13 @@ import { View, Text, TouchableOpacity, Modal, Alert } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useAuth } from '@/db/AuthContext';
 
-interface LoginOverlayProps {
+interface LoginModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function LoginOverlay({ visible, onClose, onSuccess }: LoginOverlayProps) {
+export default function LoginModal({ visible, onClose, onSuccess }: LoginModalProps) {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { signInWithGoogle } = useAuth();
 
@@ -78,3 +78,4 @@ export default function LoginOverlay({ visible, onClose, onSuccess }: LoginOverl
     </Modal>
   );
 }
+
