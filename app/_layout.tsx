@@ -53,6 +53,13 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen 
+                name="privacy" 
+                options={{ 
+                  title: 'Privacy Policy',
+                  headerShown: true,
+                }} 
+              />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="light" />
