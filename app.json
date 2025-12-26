@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Meritable",
-    "slug": "mertiable",
+    "slug": "meritable",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -50,7 +50,6 @@
           "ios": {
             "deploymentTarget": "15.1",
             "useFrameworks": "static",
-            "buildConfiguration": "Debug",
             "compilerFlags": {
               "GCC_C_LANGUAGE_STANDARD": "c17",
               "CLANG_CXX_LANGUAGE_STANDARD": "c++17",
@@ -60,7 +59,8 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "./plugins/withPrivacyManifest.js"
     ],
     "experiments": {
       "typedRoutes": true
