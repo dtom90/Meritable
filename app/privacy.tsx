@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 24, color: Colors.text }}>
-          This Privacy Policy describes how Meritable ("we", "our", or "us") handles your information when you use our habit tracking application (the "App").
+          This Privacy Policy describes how Meritable (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) handles your information when you use our habit tracking application (the &quot;App&quot;).
         </ThemedText>
 
         <ThemedText type="subtitle" style={{ marginTop: 32, marginBottom: 16, color: Colors.text }}>
@@ -48,7 +48,7 @@ export default function PrivacyPolicy() {
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 12, color: Colors.text }}>
-          Your habit data is used solely to provide the App's functionality:
+          Your habit data is used solely to provide the App&apos;s functionality:
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 8, marginLeft: 16, color: Colors.text }}>
@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 12, color: Colors.text }}>
-          <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Data Security:</ThemedText> Since your data is stored locally on your device, its security depends on your device's security measures. We recommend using device passcodes, biometric authentication, and keeping your device's operating system updated.
+          <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Data Security:</ThemedText> Since your data is stored locally on your device, its security depends on your device&apos;s security measures. We recommend using device passcodes, biometric authentication, and keeping your device&apos;s operating system updated.
         </ThemedText>
 
         <ThemedText type="subtitle" style={{ marginTop: 32, marginBottom: 16, color: Colors.text }}>
@@ -112,7 +112,7 @@ export default function PrivacyPolicy() {
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 12, color: Colors.text }}>
-          Your habit data remains private and under your complete control. You can delete it at any time by clearing the App's data through your device settings or by uninstalling the App.
+          Your habit data remains private and under your complete control. You can delete it at any time by clearing the App&apos;s data through your device settings or by uninstalling the App.
         </ThemedText>
 
         <ThemedText type="subtitle" style={{ marginTop: 32, marginBottom: 16, color: Colors.text }}>
@@ -130,14 +130,14 @@ export default function PrivacyPolicy() {
           • <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Modify:</ThemedText> You can edit, delete, or reorder your habits directly within the App
         </ThemedText>
         <ThemedText style={{ marginBottom: 8, marginLeft: 16, color: Colors.text }}>
-          • <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Delete:</ThemedText> You can delete all your data by clearing the App's storage through your device settings, or by uninstalling the App
+          • <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Delete:</ThemedText> You can delete all your data by clearing the App&apos;s storage through your device settings, or by uninstalling the App
         </ThemedText>
         <ThemedText style={{ marginBottom: 8, marginLeft: 16, color: Colors.text }}>
-          • <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Export:</ThemedText> Your data is stored in standard formats (IndexedDB/AsyncStorage) that you can access through your browser's developer tools or device file system if needed
+          • <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Export:</ThemedText> Your data is stored in standard formats (IndexedDB/AsyncStorage) that you can access through your browser&apos;s developer tools or device file system if needed
         </ThemedText>
 
         <ThemedText type="subtitle" style={{ marginTop: 32, marginBottom: 16, color: Colors.text }}>
-          7. Children's Privacy
+          7. Children&apos;s Privacy
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 12, color: Colors.text }}>
@@ -161,7 +161,7 @@ export default function PrivacyPolicy() {
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 12, color: Colors.text }}>
-          <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Device Backups:</ThemedText> If you have enabled device-level backups (such as iCloud Backup on iOS or Google Backup on Android), your App data may be included in those backups according to your device's backup settings. This is controlled by your device's operating system, not by the App.
+          <ThemedText style={{ fontWeight: '600', color: Colors.text }}>Device Backups:</ThemedText> If you have enabled device-level backups (such as iCloud Backup on iOS or Google Backup on Android), your App data may be included in those backups according to your device&apos;s backup settings. This is controlled by your device&apos;s operating system, not by the App.
         </ThemedText>
 
         <ThemedText type="subtitle" style={{ marginTop: 32, marginBottom: 16, color: Colors.text }}>
@@ -169,7 +169,7 @@ export default function PrivacyPolicy() {
         </ThemedText>
 
         <ThemedText style={{ marginBottom: 12, color: Colors.text }}>
-          We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date. You are advised to review this Privacy Policy periodically for any changes.
+          We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last Updated&quot; date. You are advised to review this Privacy Policy periodically for any changes.
         </ThemedText>
 
         <ThemedText type="subtitle" style={{ marginTop: 32, marginBottom: 16, color: Colors.text }}>
