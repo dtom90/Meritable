@@ -16,7 +16,9 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "app.meritable",
-            "CFBundleURLSchemes": ["app.meritable"]
+            "CFBundleURLSchemes": [
+              "app.meritable"
+            ]
           }
         ]
       }
@@ -70,7 +72,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "d05b900b-f5e2-403c-89ec-43b5bddc9609"
+        "projectId": "014aba84-5e99-480a-94e4-57adfd79a9e0"
       }
     },
     "owner": "dtom90"
