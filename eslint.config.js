@@ -11,6 +11,12 @@ module.exports = defineConfig([
     }
   },
   {
+    files: ["metro.config.js"],
+    rules: {
+      "no-extend-native": "off"
+    }
+  },
+  {
     files: ["jest.setup.ts", "**/__tests__/**/*", "**/*.test.*", "**/*.spec.*"],
     languageOptions: {
       globals: {
