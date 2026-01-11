@@ -61,7 +61,7 @@ export default function HomeScreen() {
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate} />
       
-      <NarrowView>
+      <NarrowView disableScroll={isEditing}>
 
         {habits && habits.length > 1 && (
           <View className='flex-row justify-between items-center'>
@@ -72,7 +72,9 @@ export default function HomeScreen() {
         )}
 
         {isEditing ? (
-          <HabitReorderList />
+          <View className="flex-1">
+            <HabitReorderList />
+          </View>
         ) : (
           <HabitCompletions selectedDate={selectedDate} />
         )}
