@@ -19,6 +19,7 @@ export function NarrowView({
           <ScrollView
             className="flex-1"
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
             {children}
           </ScrollView>
