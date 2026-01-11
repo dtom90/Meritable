@@ -48,7 +48,7 @@ function SortableHabitItem({ habit }: { habit: Habit }) {
   );
 }
 
-export default function HabitsListWeb() {
+export default function HabitsReorderListWeb() {
   const { data: habits = [], isLoading } = useListHabits();
   const { mutate: reorderHabits } = useReorderHabits();
 

@@ -10,7 +10,7 @@ import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/habitDatabase';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-export default function HabitsListMobile() {
+export default function HabitsReorderListMobile() {
   const { data: habitsFromDb = [], isLoading } = useListHabits();
   const { mutate: reorderHabits } = useReorderHabits();
 
