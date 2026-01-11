@@ -18,7 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Colors } from '@/lib/Colors';
-import HabitItem from './HabitItem';
+import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/habitDatabase';
 
@@ -38,7 +38,7 @@ function SortableHabitItem({ habit }: { habit: Habit }) {
   };
 
   return (
-    <HabitItem
+    <HabitReorderItem
       ref={setNodeRef as any}
       style={style}
       habit={habit}

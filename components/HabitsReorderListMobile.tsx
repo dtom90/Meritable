@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
 import { Colors } from '@/lib/Colors';
-import HabitItem from './HabitItem';
+import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/habitDatabase';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -26,12 +26,12 @@ export default function HabitsReorderListMobile() {
   );
 
   const renderItem = useCallback(
-    ({ item, drag, isActive }: RenderItemParams<Habit>) => {
+    ({ item: habit, drag, isActive }: RenderItemParams<Habit>) => {
       return (
         <ScaleDecorator>
-          <TouchableOpacity onLongPress={drag} disabled={isActive}>
-            <HabitItem habit={item} isDragging={isActive} />
-          </TouchableOpacity>
+          <Pressable onLongPress={drag} disabled={isActive} delayLongPress={0}>
+            <HabitReorderItem habit={habit} isDragging={isActive} isEditMode={true} />
+          </Pressable>
         </ScaleDecorator>
       );
     },
