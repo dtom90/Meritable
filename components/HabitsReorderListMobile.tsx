@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -29,9 +29,16 @@ export default function HabitsReorderListMobile() {
     ({ item: habit, drag, isActive }: RenderItemParams<Habit>) => {
       return (
         <ScaleDecorator>
-          <Pressable onLongPress={drag} disabled={isActive} delayLongPress={0}>
-            <HabitReorderItem habit={habit} isDragging={isActive} isEditMode={true} />
-          </Pressable>
+          <HabitReorderItem 
+            habit={habit} 
+            isDragging={isActive} 
+            isEditMode={true}
+            dragHandleProps={{
+              onLongPress: drag,
+              disabled: isActive,
+              delayLongPress: 0,
+            }}
+          />
         </ScaleDecorator>
       );
     },

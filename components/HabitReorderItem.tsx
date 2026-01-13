@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, Platform, ViewProps } from 'react-native';
+import { View, Text, Pressable, ViewProps } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { Icon } from 'react-native-paper';
 import { Habit } from '@/db/habitDatabase';
@@ -29,7 +29,7 @@ const HabitReorderItem = React.forwardRef<View, HabitReorderItemProps>(function 
       style={[{ backgroundColor: isDragging ? '#e0e0e0' : Colors.surface }, style]}
       {...props}
     >
-      {Platform.OS === 'web' ? (<Pressable
+      <Pressable
         style={({ pressed }) => [
           { opacity: pressed ? 0.7 : 1 },
           { cursor: 'grab' }
@@ -39,11 +39,6 @@ const HabitReorderItem = React.forwardRef<View, HabitReorderItemProps>(function 
       >
         <Icon source="drag" color={Colors.textSecondary} size={20} />
       </Pressable>
-      ) : (
-        <View>
-          <Icon source="drag" color={Colors.textSecondary} size={20} />
-        </View>
-      )}
       <View className="flex-1 flex-row items-center justify-between">
         <View className="flex-1 flex-row items-center justify-center">
           <Text className="text-lg text-center" style={{ color: Colors.text }}>{habit.name}</Text>
