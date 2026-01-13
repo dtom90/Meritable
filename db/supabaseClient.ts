@@ -11,16 +11,31 @@ if (!supabaseUrl || !supabaseAnonKey) {
   // Don't throw immediately, let the app handle this gracefully
 }
 
+// Create a localStorage adapter for web
+const localStorageAdapter = typeof window !== 'undefined' ? {
+  getItem: (key: string) => {
+    return Promise.resolve(window.localStorage.getItem(key));
+  },
+  setItem: (key: string, value: string) => {
+    window.localStorage.setItem(key, value);
+    return Promise.resolve();
+  },
+  removeItem: (key: string) => {
+    window.localStorage.removeItem(key);
+    return Promise.resolve();
+  },
+} : undefined;
+
 // Create a single, shared Supabase client instance
-// On web, disable storage (no session persistence)
+// On web, use localStorage for session persistence
 // On native, use AsyncStorage for session persistence
 export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     ...(Platform.OS === 'web' 
       ? {
-          // Disable storage on web
-          storage: undefined,
-          persistSession: false,
+          // Use localStorage on web for session persistence
+          storage: localStorageAdapter,
+          persistSession: true,
           // Enable URL detection for OAuth redirects on web
           detectSessionInUrl: true,
         }
