@@ -28,6 +28,14 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return this.isFetchingUser
   }
 
+  /**
+   * Initialize the database by pre-fetching the user.
+   * This prevents the lazy loading spinner when switching to cloud DB.
+   */
+  public async initialize(): Promise<void> {
+    await this.getUser()
+  }
+
   private setFetchingState(isFetching: boolean): void {
     if (this.isFetchingUser !== isFetching) {
       this.isFetchingUser = isFetching

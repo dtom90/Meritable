@@ -11,6 +11,7 @@ import "./global.css"
 import { Colors } from '@/lib/Colors';
 import { DataSourceProvider } from '@/db/DataSourceContext';
 import { AuthContextProvider } from '@/db/AuthContext';
+import Spinner from '@/components/Spinner';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,13 +37,13 @@ export default function RootLayout() {
   }, []);
 
   if (!loaded) {
-    return null;
+    return <Spinner />;
   }
 
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <AuthContextProvider>
+          <AuthContextProvider>
           <DataSourceProvider>
             <Stack
               screenOptions={{
@@ -63,7 +64,7 @@ export default function RootLayout() {
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="light" />
-          </DataSourceProvider>
+        </DataSourceProvider>
         </AuthContextProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

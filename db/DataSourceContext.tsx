@@ -1,5 +1,5 @@
 import { View, Platform } from 'react-native';
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DexieDb } from '@/db/dexieDb';
 import { AsyncStorageDb } from '@/db/asyncStorageDb';
@@ -31,75 +31,130 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isFetchingUser, setIsFetchingUser] = useState(false);
   const queryClient = useQueryClient();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const isMountedRef = useRef(true);
 
+  // Cleanup on unmount
   useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Wait for auth to complete before initializing DB
+  useEffect(() => {
+    if (authLoading) return; // Don't initialize until auth is ready
+
     const initializeDatabase = async () => {
       try {
-        if (isMobile) {
-          // Use local database (AsyncStorage-based) by default on mobile
-          const localDb = new AsyncStorageDb();
-          await localDb.getHabits();
-          setCurrentDataSource('local');
-          setActiveDb(localDb);
+        // Initialize based on auth state from the start
+        if (isAuthenticated) {
+          // User is authenticated, initialize cloud DB directly
+          const cloudDb = new SupabaseDb();
+          cloudDb.setOnFetchingStateChange(setIsFetchingUser);
+          
+          // Pre-fetch user to avoid lazy loading spinner
+          setIsFetchingUser(true);
+          try {
+            await cloudDb.initialize(); // This will trigger getUser() internally
+          } finally {
+            if (isMountedRef.current) {
+              setIsFetchingUser(false);
+            }
+          }
+          
+          if (isMountedRef.current) {
+            setActiveDb(cloudDb);
+            setCurrentDataSource('cloud');
+            setIsInitialized(true);
+            queryClient.invalidateQueries();
+          }
         } else {
-          // Use local database (Dexie-based) by default on web
-          const db = new DexieDb();
-          setCurrentDataSource('local');
-          setActiveDb(db);
+          // User not authenticated, use local DB
+          if (isMobile) {
+            const localDb = new AsyncStorageDb();
+            await localDb.getHabits();
+            if (isMountedRef.current) {
+              setActiveDb(localDb);
+              setCurrentDataSource('local');
+              setIsInitialized(true);
+              queryClient.invalidateQueries();
+            }
+          } else {
+            const db = new DexieDb();
+            if (isMountedRef.current) {
+              setActiveDb(db);
+              setCurrentDataSource('local');
+              setIsInitialized(true);
+              queryClient.invalidateQueries();
+            }
+          }
         }
-        setIsInitialized(true);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Database initialization failed:', error);
         // Set initialized to true to prevent infinite loading
-        setIsInitialized(true);
+        if (isMountedRef.current) {
+          setIsInitialized(true);
+        }
       }
     };
 
     initializeDatabase();
-  }, [isMobile]);
+  }, [authLoading, isAuthenticated, isMobile, queryClient]);
 
-  // Switch database based on authentication state and invalidate queries
+  // Simplified switch effect - only handles auth state changes after initialization
   useEffect(() => {
-    if (!isInitialized) return;
+    if (!isInitialized || authLoading) return;
 
     const switchDatabase = async () => {
       if (isAuthenticated && currentDataSource === 'local') {
-        // Switch to cloud database when user logs in (both mobile and web)
+        // Switch to cloud database when user logs in
         try {
           const cloudDb = new SupabaseDb();
-          // Set up reactive callback for fetching state
           cloudDb.setOnFetchingStateChange(setIsFetchingUser);
-          setActiveDb(cloudDb);
-          setCurrentDataSource('cloud');
-          queryClient.invalidateQueries();
+          
+          setIsFetchingUser(true);
+          try {
+            await cloudDb.initialize(); // Pre-fetch user
+          } finally {
+            if (isMountedRef.current) {
+              setIsFetchingUser(false);
+            }
+          }
+          
+          if (isMountedRef.current) {
+            setActiveDb(cloudDb);
+            setCurrentDataSource('cloud');
+            queryClient.invalidateQueries();
+          }
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('Failed to switch to cloud database:', error);
+          if (isMountedRef.current) {
+            setIsFetchingUser(false);
+          }
         }
       } else if (!isAuthenticated && currentDataSource === 'cloud') {
         // Switch back to local when user logs out
-        // Use AsyncStorageDb on mobile, DexieDb on web
         try {
           const localDb = isMobile ? new AsyncStorageDb() : new DexieDb();
           await localDb.getHabits();
-          setActiveDb(localDb);
-          setCurrentDataSource('local');
-          setIsFetchingUser(false);
-          queryClient.invalidateQueries();
+          if (isMountedRef.current) {
+            setActiveDb(localDb);
+            setCurrentDataSource('local');
+            setIsFetchingUser(false);
+            queryClient.invalidateQueries();
+          }
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('Failed to switch to local database:', error);
         }
-      } else if (isInitialized && activeDb) {
-        // Invalidate queries when authentication state changes (user change, etc.)
-        queryClient.invalidateQueries();
       }
     };
 
     switchDatabase();
-  }, [isAuthenticated, user, isInitialized, currentDataSource, activeDb, queryClient, isMobile]);
+  }, [isAuthenticated, isInitialized, authLoading, currentDataSource, isMobile, queryClient]);
 
   const value: DataSourceContextType = {
     currentDataSource,
@@ -107,24 +162,8 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
     isInitialized,
   };
 
-  // Show loading state while database initializes
-  if (!isInitialized) {
-    return (
-      <DataSourceContext.Provider value={value}>
-        <View style={{ 
-          flex: 1,
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          backgroundColor: '#000'
-        }}>
-          <Spinner />
-        </View>
-      </DataSourceContext.Provider>
-    );
-  }
-
-  // Show spinner when fetching user info
-  if (isFetchingUser) {
+  // Show loading state while auth is loading, database initializes, or fetching user info
+  if (authLoading || !isInitialized || isFetchingUser) {
     return (
       <DataSourceContext.Provider value={value}>
         <View style={{ 
