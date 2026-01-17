@@ -9,6 +9,7 @@ import { NarrowView } from '@/components/NarrowView';
 import AddHabitButton from '@/components/AddHabitButton';
 import { useQueryClient } from '@tanstack/react-query';
 import { useListHabits } from '@/db/useHabitDb';
+import Spinner from '@/components/Spinner';
 
 
 export default function HomeScreen() {
@@ -19,7 +20,7 @@ export default function HomeScreen() {
   const appState = useRef(AppState.currentState);
   const selectedDateRef = useRef(selectedDate);
   const todayRef = useRef(today);
-  const { data: habits } = useListHabits();
+  const { data: habits, isLoading: isLoadingHabits } = useListHabits();
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -71,13 +72,15 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {isEditing ? (
+        {isLoadingHabits ? (
+          <Spinner />
+        ) : isEditing ? (
           <View className="flex-1">
             <HabitReorderList />
           </View>
-        ) : (
-          <HabitCompletions selectedDate={selectedDate} />
-        )}
+        ) : (habits && habits.length > 0 && (
+          <HabitCompletions selectedDate={selectedDate} habits={habits} />
+        ))}
 
         <AddHabitButton withTooltip={false} />
 

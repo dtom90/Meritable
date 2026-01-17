@@ -21,6 +21,7 @@ import { Colors } from '@/lib/Colors';
 import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/habitDatabase';
+import Spinner from './Spinner';
 
 function SortableHabitItem({ habit }: { habit: Habit }) {
   const {
@@ -81,11 +82,7 @@ export default function HabitsReorderListWeb() {
   }, [habits, reorderHabits]);
 
   if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text style={{ color: Colors.text }}>Loading habits...</Text>
-      </View>
-    );
+    return <Spinner />;
   }
 
   if (habits.length === 0) {

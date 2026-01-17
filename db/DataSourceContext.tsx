@@ -1,4 +1,4 @@
-import { View, Text, Platform } from 'react-native';
+import { View, Platform } from 'react-native';
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DexieDb } from '@/db/dexieDb';
@@ -6,6 +6,7 @@ import { AsyncStorageDb } from '@/db/asyncStorageDb';
 import { SupabaseDb } from '@/db/supabaseDb';
 import { HabitDatabaseInterface } from '@/db/habitDatabase';
 import { useAuth } from '@/db/AuthContext';
+import Spinner from '@/components/Spinner';
 
 export type DataSourceType = 'local' | 'cloud';
 
@@ -28,6 +29,7 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
     'local'
   );
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isFetchingUser, setIsFetchingUser] = useState(false);
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuth();
 
@@ -67,6 +69,8 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
         // Switch to cloud database when user logs in (both mobile and web)
         try {
           const cloudDb = new SupabaseDb();
+          // Set up reactive callback for fetching state
+          cloudDb.setOnFetchingStateChange(setIsFetchingUser);
           setActiveDb(cloudDb);
           setCurrentDataSource('cloud');
           queryClient.invalidateQueries();
@@ -82,6 +86,7 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
           await localDb.getHabits();
           setActiveDb(localDb);
           setCurrentDataSource('local');
+          setIsFetchingUser(false);
           queryClient.invalidateQueries();
         } catch (error) {
           // eslint-disable-next-line no-console
@@ -112,9 +117,23 @@ export function DataSourceProvider({ children }: DataSourceProviderProps) {
           alignItems: 'center', 
           backgroundColor: '#000'
         }}>
-          <Text style={{ color: '#fff', fontSize: 16 }}>
-            Initializing...
-          </Text>
+          <Spinner />
+        </View>
+      </DataSourceContext.Provider>
+    );
+  }
+
+  // Show spinner when fetching user info
+  if (isFetchingUser) {
+    return (
+      <DataSourceContext.Provider value={value}>
+        <View style={{ 
+          flex: 1,
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          backgroundColor: '#000'
+        }}>
+          <Spinner />
         </View>
       </DataSourceContext.Provider>
     );

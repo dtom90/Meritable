@@ -6,10 +6,33 @@ export class SupabaseDb extends HabitDatabaseInterface {
   private supabase: any
   private cachedUser: User | null = null
   private userPromise: Promise<User | null> | null = null
+  private isFetchingUser: boolean = false
+  private onFetchingStateChange?: (isFetching: boolean) => void
 
   constructor() {
     super()
     this.supabase = supabaseClient
+  }
+
+  /**
+   * Set a callback to be notified when user fetching state changes
+   */
+  public setOnFetchingStateChange(callback: ((isFetching: boolean) => void) | undefined): void {
+    this.onFetchingStateChange = callback
+  }
+
+  /**
+   * Check if user is currently being fetched
+   */
+  public getIsFetchingUser(): boolean {
+    return this.isFetchingUser
+  }
+
+  private setFetchingState(isFetching: boolean): void {
+    if (this.isFetchingUser !== isFetching) {
+      this.isFetchingUser = isFetching
+      this.onFetchingStateChange?.(isFetching)
+    }
   }
 
   /**
@@ -27,8 +50,12 @@ export class SupabaseDb extends HabitDatabaseInterface {
       return this.userPromise
     }
 
+    // Set loading state
+    this.setFetchingState(true)
+
     // Create a new promise and cache it
     this.userPromise = this.supabase.auth.getUser().then(({ data: { user }, error }: any) => {
+      this.setFetchingState(false)
       if (error) {
         this.userPromise = null
         throw error
@@ -36,6 +63,10 @@ export class SupabaseDb extends HabitDatabaseInterface {
       this.cachedUser = user
       this.userPromise = null
       return user
+    }).catch((error: any) => {
+      this.setFetchingState(false)
+      this.userPromise = null
+      throw error
     })
 
     return this.userPromise

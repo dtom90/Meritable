@@ -9,6 +9,7 @@ import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/habitDatabase';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Spinner from './Spinner';
 
 export default function HabitsReorderListMobile() {
   const { data: habitsFromDb = [], isLoading } = useListHabits();
@@ -46,11 +47,7 @@ export default function HabitsReorderListMobile() {
   );
 
   if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text style={{ color: Colors.text }}>Loading habits...</Text>
-      </View>
-    );
+    return <Spinner />;
   }
 
   if (habitsFromDb.length === 0) {
