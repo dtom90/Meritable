@@ -1,17 +1,49 @@
 import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './habitDatabase'
 import { supabaseClient } from './supabaseClient'
+import { User } from '@supabase/supabase-js'
 
 export class SupabaseDb extends HabitDatabaseInterface {
   private supabase: any
+  private cachedUser: User | null = null
+  private userPromise: Promise<User | null> | null = null
 
   constructor() {
     super()
     this.supabase = supabaseClient
   }
 
+  /**
+   * Get the current user, with caching to avoid repeated API calls.
+   * If multiple calls happen simultaneously, they share the same promise.
+   */
+  private async getUser(): Promise<User | null> {
+    // If we have a cached user, return it immediately
+    if (this.cachedUser) {
+      return this.cachedUser
+    }
+
+    // If there's already a getUser() call in progress, return that promise
+    if (this.userPromise) {
+      return this.userPromise
+    }
+
+    // Create a new promise and cache it
+    this.userPromise = this.supabase.auth.getUser().then(({ data: { user }, error }: any) => {
+      if (error) {
+        this.userPromise = null
+        throw error
+      }
+      this.cachedUser = user
+      this.userPromise = null
+      return user
+    })
+
+    return this.userPromise
+  }
+
   // Habit operations
   async createHabit(habit: { name: string }): Promise<Habit> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     // Get the current highest order value to assign the next order
     const { data: existingHabits } = await this.supabase
@@ -37,7 +69,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async getHabits(): Promise<Habit[]> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     const { data, error } = await this.supabase
       .from('habits')
@@ -51,7 +83,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     const { data, error } = await this.supabase
       .from('habits')
@@ -93,7 +125,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async deleteHabit(id: number): Promise<void> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     // First delete all habit completions for this habit
     const { error: completionsError } = await this.supabase
@@ -116,7 +148,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
 
   // HabitCompletion operations
   async createHabitCompletion(completion: HabitCompletionInput): Promise<HabitCompletion> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     const { data, error } = await this.supabase
       .from('habit_completions')
@@ -132,7 +164,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async updateHabitCompletion(id: number, updates: Partial<HabitCompletionInput>): Promise<HabitCompletion> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     const { data, error } = await this.supabase
       .from('habit_completions')
@@ -150,7 +182,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async getHabitCompletionsByDate(completionDate?: string): Promise<HabitCompletion[]> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     let query = this.supabase
       .from('habit_completions')
@@ -168,7 +200,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async getHabitCompletionsById(habitId: number): Promise<HabitCompletion[]> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     const { data, error } = await this.supabase
       .from('habit_completions')
@@ -181,7 +213,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
   }
 
   async deleteHabitCompletion(id: number): Promise<void> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const user = await this.getUser()
     
     const { error } = await this.supabase
       .from('habit_completions')
