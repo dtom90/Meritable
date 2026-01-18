@@ -10,5 +10,8 @@ export const MockedSupabaseDb = jest.fn().mockImplementation(() => ({
   getHabitCompletionsByDate: jest.fn(),
   getHabitCompletionsById: jest.fn(),
   deleteHabitCompletion: jest.fn(),
+  setOnFetchingStateChange: jest.fn(),
+  initialize: jest.fn().mockResolvedValue(undefined),
+  getIsFetchingUser: jest.fn().mockReturnValue(false),
 }));
 

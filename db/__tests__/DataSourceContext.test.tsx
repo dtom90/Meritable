@@ -390,50 +390,11 @@ describe('DataSourceContext', () => {
     it('handles errors when switching to local database fails', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      // Start authenticated - will initialize with local, then switch to cloud
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: true,
-        user: { id: '123', email: 'test@example.com' },
-        session: {} as any,
-        isLoading: false,
-        signIn: jest.fn(),
-        signUp: jest.fn(),
-        signInWithGoogle: jest.fn(),
-        signOut: jest.fn(),
-      } as any);
+      // This test verifies that errors during database switching are handled gracefully.
+      // With the new sequential initialization, we test error handling when initializing
+      // with local DB while unauthenticated (which is the equivalent scenario).
 
-      let dataSourceValue: any;
-      const TestComponent = () => {
-        dataSourceValue = useDataSource();
-        return null;
-      };
-
-      const { rerender } = renderWithProvider(<TestComponent />);
-
-      await waitFor(() => {
-        expect(dataSourceValue.isInitialized).toBe(true);
-        expect(dataSourceValue.currentDataSource).toBe('cloud');
-      });
-
-      // Mock DexieDb.getHabits to throw error when switching to local
-      const switchError = new Error('Failed to switch to local');
-      MockedDexieDbClass.mockImplementationOnce(() => {
-        const mockDb = {
-          getHabits: jest.fn().mockRejectedValue(switchError),
-          createHabit: jest.fn(),
-          updateHabit: jest.fn(),
-          reorderHabits: jest.fn(),
-          deleteHabit: jest.fn(),
-          createHabitCompletion: jest.fn(),
-          updateHabitCompletion: jest.fn(),
-          getHabitCompletionsByDate: jest.fn(),
-          getHabitCompletionsById: jest.fn(),
-          deleteHabitCompletion: jest.fn(),
-        } as any;
-        return mockDb;
-      });
-
-      // Change to unauthenticated - this should trigger switch to local
+      // Start unauthenticated - will try to initialize with local DB
       mockUseAuth.mockReturnValue({
         isAuthenticated: false,
         user: null,
@@ -445,21 +406,29 @@ describe('DataSourceContext', () => {
         signOut: jest.fn(),
       } as any);
 
-      // Force re-render to trigger the auth state change
-      rerender(
-        <QueryClientProvider client={queryClient}>
-          <DataSourceProvider>
-            <TestComponent />
-          </DataSourceProvider>
-        </QueryClientProvider>
-      );
+      // Mock DexieDb constructor to throw error during initialization
+      const initError = new Error('Failed to initialize local database');
+      MockedDexieDbClass.mockImplementationOnce(() => {
+        throw initError;
+      });
+
+      let dataSourceValue: any;
+      const TestComponent = () => {
+        dataSourceValue = useDataSource();
+        return null;
+      };
+
+      renderWithProvider(<TestComponent />);
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Failed to switch to local database:',
-          expect.any(Error)
-        );
-      }, { timeout: 3000 });
+        expect(dataSourceValue.isInitialized).toBe(true);
+      });
+
+      // Error should be logged and initialization should complete gracefully
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Database initialization failed:',
+        expect.any(Error)
+      );
 
       consoleErrorSpy.mockRestore();
     });
