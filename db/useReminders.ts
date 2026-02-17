@@ -18,8 +18,9 @@ function toDateString(value: string | Date | undefined): string | null {
 
 /**
  * Fetch reminder calendars and then reminders in the given range.
- * Filter to reminders that have a date and are either due on or before selectedDate,
- * or completed on selectedDate.
+ * Filter to:
+ * - Incomplete reminders with due date on or before selectedDate
+ * - Complete reminders with completionDate on selectedDate
  */
 async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]> {
   const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.REMINDER);
@@ -42,12 +43,15 @@ async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]
   return raw.filter((r) => {
     const dueStr = toDateString(r.dueDate);
     const completionStr = toDateString(r.completionDate);
-    const hasDate = dueStr != null || completionStr != null;
-    if (!hasDate) return false;
 
-    const dueOnOrBefore = dueStr != null && dueStr <= selected;
-    const completedOnSelected = r.completed === true && completionStr === selected;
-    return dueOnOrBefore || completedOnSelected;
+    // Incomplete: due date on or before the selected date
+    const incompleteDueOnOrBefore =
+      r.completed !== true && dueStr != null && dueStr <= selected;
+    // Complete: completed on the selected date
+    const completeOnSelected =
+      r.completed === true && completionStr != null && completionStr === selected;
+
+    return incompleteDueOnOrBefore || completeOnSelected;
   });
 }
 
