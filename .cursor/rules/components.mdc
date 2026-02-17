@@ -10,6 +10,7 @@ alwaysApply: false
 
 - **Habit-related**: HabitItem, HabitInputForm, HabitInputModal, HabitTitle, HabitActions, HabitCompletionButton, HabitCompletions, HabitCompletionsCalendar, HabitReorderList
 - **Layout**: HabitsListMobile, HabitsListWeb, NarrowView, WeekHeader, CustomDayHeader
+- **Quick Wins**: QuickWinsList (read-only list of dated iOS Reminders)
 - **UI**: ThemedText, ThemedView, AddHabitButton, LoginOverlay, ExternalLink
 - **Tests**: `__tests__/` next to components
 

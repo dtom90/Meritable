@@ -39,6 +39,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-calendar",
+        {
+          "remindersPermission": "Meritable uses reminders to show Quick Wins for the selected day."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/icon.png",

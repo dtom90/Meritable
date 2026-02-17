@@ -1,24 +1,16 @@
-import { isTestFlight as expoIsTestFlight } from 'expo-testflight';
-
 /**
  * Determines if the app is currently running in TestFlight.
- * 
- * Uses the `expo-testflight` package which checks the app's receipt URL
- * to reliably detect TestFlight environments. This is the standard approach
- * for Expo apps and avoids the memory issues that can occur with manual
- * Constants-based detection.
- * 
- * The package automatically handles:
- * - iOS platform detection (returns false on non-iOS)
- * - Native receipt URL checking (sandboxReceipt indicates TestFlight)
- * - Safe error handling
- * 
+ *
+ * Uses the `expo-testflight` package when the native module is available
+ * (iOS dev/production builds). In Expo Go, web, or when the module is
+ * unavailable, returns false so the app runs without crashing.
+ *
  * @returns `true` if running in TestFlight, `false` otherwise
- * 
+ *
  * @example
  * ```tsx
- * import { isTestFlight } from '@/lib/useIsRegisteredTestDevice';
- * 
+ * import { isTestFlight } from '@/lib/isTestFlight';
+ *
  * if (isTestFlight()) {
  *   // Enable TestFlight-only features
  * }
@@ -26,13 +18,10 @@ import { isTestFlight as expoIsTestFlight } from 'expo-testflight';
  */
 export function isTestFlight(): boolean {
   try {
-    // expo-testflight already handles iOS check internally
-    // It returns false on non-iOS platforms
+    // Lazy require so missing native module (Expo Go, web) fails at call time, not import time
+    const { isTestFlight: expoIsTestFlight } = require('expo-testflight');
     return expoIsTestFlight;
-  } catch (error) {
-    // Fail safe - return false on any error
-    // eslint-disable-next-line no-console
-    console.error('isTestFlight error:', error);
+  } catch {
     return false;
   }
 }

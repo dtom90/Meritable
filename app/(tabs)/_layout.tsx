@@ -40,6 +40,14 @@ export default function TabLayout() {
             }}
           />
           <Tabs.Screen
+            name="quick-wins"
+            options={{
+              title: 'Quick Wins',
+              tabBarIcon: ({ color }) => <Ionicons name="checkmark-done" size={28} color={color} />,
+              href: '/quick-wins',
+            }}
+          />
+          <Tabs.Screen
             name="data"
             options={{
               title: 'Data',

@@ -12,6 +12,7 @@ alwaysApply: false
 - `dexieDb.ts`, `asyncStorageDb.ts`, `supabaseDb.ts` — Implementations (Dexie, AsyncStorage, Supabase)
 - `supabaseClient.ts` — Supabase client config
 - `useHabitDb.ts` — React hook for DB access (use this in UI; do not import concrete DBs)
+- `useReminders.ts` — React hooks for iOS Reminders via expo-calendar (permission, fetch, filter); used by Quick Wins
 - `AuthContext.tsx` — Auth state provider
 - `DataSourceContext.tsx` — Chooses local vs cloud implementation
 - `__tests__/`, `__mocks__/` — Tests and mocks
@@ -29,3 +30,7 @@ alwaysApply: false
 ## Data management
 
 - React Query for server state. Context API for data source selection and auth; components get DB via `useHabitDb()`.
+
+## Reminders (Quick Wins)
+
+- Reminders are read-only and not part of `HabitDatabaseInterface`. `useReminders.ts` wraps expo-calendar for iOS; Quick Wins UI uses `useRemindersPermissions()` and `useQuickWinsReminders()`.

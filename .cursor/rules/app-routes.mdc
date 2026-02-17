@@ -14,6 +14,8 @@ alwaysApply: false
   - `index.tsx` — Home
   - `data.tsx` — Data tab
   - `habits/` — Habits feature
+  - `quick-wins/` — Quick Wins (iOS only; shows dated Reminders for selected day)
+    - `index.tsx` — Quick Wins list
     - `_layout.tsx` — Habits layout
     - `index.tsx` — Habits list
     - `[habitId].tsx` — Habit detail (dynamic)

@@ -58,3 +58,21 @@ export const getDayOfWeek = (
   const localDate = new Date(year, month - 1, day); // month is 0-indexed
   return localDate.toLocaleDateString(locale, options);
 };
+
+/**
+ * Start of the given day (YYYY-MM-DD) in local timezone as a Date.
+ * Used for API calls that expect a date range (e.g. getRemindersAsync).
+ */
+export const startOfDay = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+};
+
+/**
+ * End of the given day (YYYY-MM-DD) in local timezone as a Date (23:59:59.999).
+ * Used for API calls that expect a date range (e.g. getRemindersAsync).
+ */
+export const endOfDay = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 23, 59, 59, 999);
+};
