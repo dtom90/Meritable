@@ -43,7 +43,7 @@ export default function TabLayout() {
             name="quick-wins"
             options={{
               title: 'Quick Wins',
-              tabBarIcon: ({ color }) => <Ionicons name="checkmark-done" size={28} color={color} />,
+              tabBarIcon: ({ color }) => <Ionicons name="checkmark" size={28} color={color} />,
               href: '/quick-wins',
             }}
           />

@@ -55,10 +55,12 @@ export default function QuickWinsScreen() {
     return (
       <>
         <WeekHeader selectedDate={selectedDate} onDateSelect={setSelectedDate} />
-        <NarrowView>
-          <Text style={{ color: Colors.textSecondary }}>
-            Quick Wins is available on iOS.
-          </Text>
+        <NarrowView disableScroll>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Text style={{ color: Colors.textSecondary, textAlign: 'center' }}>
+              Quick Wins is available on iOS.
+            </Text>
+          </View>
         </NarrowView>
       </>
     );
