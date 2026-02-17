@@ -1,0 +1,13 @@
+---
+description: TypeScript conventions and types
+globs: "**/*.ts,**/*.tsx"
+alwaysApply: false
+---
+
+# TypeScript (**.ts, **.tsx)
+
+- **Strict mode** enabled; no implicit any.
+- **Path alias**: `@/*` maps to project root (e.g. `@/components/...`, `@/db/...`).
+- **Data models**: Use interfaces `Habit` and `HabitCompletion` (defined in `db/habitDatabase.ts`). Prefer interfaces for all model types.
+- **Input types**: Use `HabitInput` and `HabitCompletionInput` for create/update (omit id, createdAt, etc.); avoid passing full entities when only partial data is needed.
+- **Database abstraction**: Use abstract classes for the DB interface; implementations extend it. Do not export concrete DB types from the public API.

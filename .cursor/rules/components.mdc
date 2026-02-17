@@ -1,0 +1,25 @@
+---
+description: React Native components and NativeWind
+globs: components/**/*
+alwaysApply: false
+---
+
+# Components (components/)
+
+## File list
+
+- **Habit-related**: HabitItem, HabitInputForm, HabitInputModal, HabitTitle, HabitActions, HabitCompletionButton, HabitCompletions, HabitCompletionsCalendar, HabitReorderList
+- **Layout**: HabitsListMobile, HabitsListWeb, NarrowView, WeekHeader, CustomDayHeader
+- **UI**: ThemedText, ThemedView, AddHabitButton, LoginOverlay, ExternalLink
+- **Tests**: `__tests__/` next to components
+
+## Patterns
+
+- Functional components with hooks. Extract custom hooks for reusable logic.
+- Use ThemedText / ThemedView for themed UI. Context providers (Auth, DataSource) are in `db/`; use `useHabitDb()` for data.
+- When behavior differs by platform, use separate components (e.g. HabitsListMobile vs HabitsListWeb) or `useWindowWidth` for responsive layout.
+- Habit UI lives here; route and data wiring live in `app/(tabs)/habits/`.
+
+## Styling
+
+- NativeWind (Tailwind) only. Use `className`, not StyleSheet. Global styles in `app/global.css`; theme colors in `lib/Colors.ts`. Use `useWindowWidth` for breakpoints.

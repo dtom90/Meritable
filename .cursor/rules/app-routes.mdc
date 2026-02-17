@@ -1,0 +1,32 @@
+---
+description: Expo Router routes and layouts
+globs: app/**/*
+alwaysApply: false
+---
+
+# App routes (app/)
+
+## Route tree
+
+- `_layout.tsx` — Root layout (QueryClient, AuthContext, DataSourceProvider)
+- `(tabs)/` — Tab group
+  - `_layout.tsx` — Tab layout
+  - `index.tsx` — Home
+  - `data.tsx` — Data tab
+  - `habits/` — Habits feature
+    - `_layout.tsx` — Habits layout
+    - `index.tsx` — Habits list
+    - `[habitId].tsx` — Habit detail (dynamic)
+- `auth/` — Authentication routes
+- `+not-found.tsx` — 404
+- `global.css` — Global NativeWind styles
+
+## Routing
+
+- File-based routing with Expo Router. Grouped routes use `(tabs)`; dynamic segment is `[habitId].tsx`.
+- Each segment can have its own `_layout.tsx` for nested layouts.
+- Use `app/global.css` for global styles; avoid page-level StyleSheet or style objects.
+
+## Auth
+
+- Auth UI routes live under `auth/`. Auth state is provided by `AuthContext` (from `db/`); use it for session and login overlay flows.

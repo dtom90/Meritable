@@ -1,0 +1,12 @@
+---
+description: Jest and React Native Testing Library
+globs: "**/__tests__/**,**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx"
+alwaysApply: false
+---
+
+# Testing
+
+- **Runner**: Jest with `jest-expo` preset.
+- **Components**: React Native Testing Library for component tests.
+- **Mocks**: Use `__mocks__/` directories; database and context mocks live in `db/__mocks__/`. Import mocks when testing code that depends on the DB or auth.
+- **Co-location**: Put test files in `__tests__/` next to the code they cover (e.g. `components/__tests__/`, `db/__tests__/`). Keep tests close to the module under test.

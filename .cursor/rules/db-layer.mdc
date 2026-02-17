@@ -1,0 +1,31 @@
+---
+description: Database layer - interface and all implementations
+globs: db/**/*
+alwaysApply: false
+---
+
+# Database layer (db/)
+
+## File list
+
+- `habitDatabase.ts` — `HabitDatabaseInterface` (abstract), `Habit`, `HabitCompletion`, `HabitInput`, `HabitCompletionInput`
+- `dexieDb.ts`, `asyncStorageDb.ts`, `supabaseDb.ts` — Implementations (Dexie, AsyncStorage, Supabase)
+- `supabaseClient.ts` — Supabase client config
+- `useHabitDb.ts` — React hook for DB access (use this in UI; do not import concrete DBs)
+- `AuthContext.tsx` — Auth state provider
+- `DataSourceContext.tsx` — Chooses local vs cloud implementation
+- `__tests__/`, `__mocks__/` — Tests and mocks
+
+## Database abstraction
+
+- Interface-based: all operations go through `HabitDatabaseInterface`. `DataSourceContext` decides which implementation (dexie, asyncStorage, supabase) is used.
+- Any change to the interface or shared types must be reflected in all three implementations.
+- Use `HabitInput` / `HabitCompletionInput` for create/update. Update `db/__mocks__/` when behavior changes.
+
+## Authentication
+
+- Supabase auth. `AuthContext` exposes auth state app-wide. Use the login overlay component for auth flows.
+
+## Data management
+
+- React Query for server state. Context API for data source selection and auth; components get DB via `useHabitDb()`.

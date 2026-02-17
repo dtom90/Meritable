@@ -57,7 +57,7 @@ app-example
 
 # IDEs
 .idea
-.cursor
+.cursor/mcp.json
 
 # Environment variables
 .env
