@@ -31,16 +31,20 @@ try {
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   const newVersion = packageJson.version;
 
-  // Update app.json
+  // Update app.json (version + reset iOS buildNumber)
   const appJsonPath = path.resolve(__dirname, '..', 'app.json');
   const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
   appJson.expo.version = newVersion;
+  if (appJson.expo.ios) {
+    appJson.expo.ios.buildNumber = '0';
+  }
   fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n');
 
   console.log(`\n✓ Version bumped to ${newVersion}`);
   console.log(`  - package.json: ${newVersion}`);
   console.log(`  - package-lock.json: ${newVersion}`);
   console.log(`  - app.json: ${newVersion}`);
+  console.log(`  - app.json ios.buildNumber: 1`);
 } catch (error) {
   console.error('Error bumping version:', error.message);
   process.exit(1);
