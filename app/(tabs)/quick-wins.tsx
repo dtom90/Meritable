@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, Pressable, Platform, AppState, AppStateStatus } from 'react-native';
+import { View, Text, Pressable, Platform, AppState, AppStateStatus, Linking } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import WeekHeader from '@/components/WeekHeader';
 import { NarrowView } from '@/components/NarrowView';
@@ -12,6 +12,7 @@ import {
   quickWinsRemindersQueryKey,
 } from '@/db/useReminders';
 import QuickWinsList from '@/components/QuickWinsList';
+import { Icon } from 'react-native-paper';
 
 export default function QuickWinsScreen() {
   const [today, setToday] = useState(getToday());
@@ -24,6 +25,10 @@ export default function QuickWinsScreen() {
   const [permission, requestPermission] = useRemindersPermissions();
   const permissionGranted = permission?.granted === true;
   const { data: reminders, isLoading } = useQuickWinsReminders(selectedDate, permissionGranted);
+
+  const openRemindersApp = () => {
+    Linking.openURL('x-apple-reminderkit://');
+  };
 
   useEffect(() => {
     selectedDateRef.current = selectedDate;
@@ -70,6 +75,18 @@ export default function QuickWinsScreen() {
     <>
       <WeekHeader selectedDate={selectedDate} onDateSelect={setSelectedDate} />
       <NarrowView>
+        {permissionGranted && (
+          <Pressable
+            onPress={openRemindersApp}
+            className="flex-row items-center gap-2 py-2 mb-2"
+            style={{ alignSelf: 'flex-start' }}
+          >
+            <Icon source="open-in-new" size={20} color={Colors.primary} />
+            <Text style={{ color: Colors.primary, fontWeight: '500' }}>
+              Open Reminders
+            </Text>
+          </Pressable>
+        )}
         {!permission?.granted && permission?.canAskAgain !== false && (
           <View className="mb-4">
             <Text style={{ color: Colors.text, marginBottom: 8 }}>
