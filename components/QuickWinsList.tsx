@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import type { Reminder } from 'expo-calendar';
 import { Colors } from '@/lib/Colors';
 import { Icon } from 'react-native-paper';
@@ -13,9 +13,18 @@ function toDateString(value: string | Date | undefined): string | null {
 interface QuickWinsListProps {
   reminders: Reminder[];
   selectedDate: string;
+  onMarkComplete?: (reminder: Reminder) => void;
+  onMarkIncomplete?: (reminder: Reminder) => void;
+  pendingReminderId?: string | null;
 }
 
-export default function QuickWinsList({ reminders, selectedDate }: QuickWinsListProps) {
+export default function QuickWinsList({
+  reminders,
+  selectedDate,
+  onMarkComplete,
+  onMarkIncomplete,
+  pendingReminderId = null,
+}: QuickWinsListProps) {
   return (
     <View>
       {reminders.map((reminder, index) => {
@@ -27,6 +36,12 @@ export default function QuickWinsList({ reminders, selectedDate }: QuickWinsList
           : dueStr
             ? `Due ${dueStr}`
             : null;
+
+        const canToggle =
+          reminder.id && (onMarkComplete != null || onMarkIncomplete != null);
+        const isPending = Boolean(
+          canToggle && pendingReminderId === reminder.id
+        );
 
         return (
           <View
@@ -54,9 +69,27 @@ export default function QuickWinsList({ reminders, selectedDate }: QuickWinsList
                 </Text>
               )}
             </View>
-            {isCompleted && (
+            {canToggle ? (
+              <TouchableOpacity
+                onPress={() =>
+                  isCompleted
+                    ? onMarkIncomplete?.(reminder)
+                    : onMarkComplete?.(reminder)
+                }
+                disabled={isPending}
+                className="p-2"
+              >
+                {isPending ? (
+                  <Icon source="loading" color={Colors.textSecondary} size={24} />
+                ) : isCompleted ? (
+                  <Icon source="restore" color={Colors.text} size={24} />
+                ) : (
+                  <Icon source="check" color={Colors.success} size={24} />
+                )}
+              </TouchableOpacity>
+            ) : isCompleted ? (
               <Icon source="check" color={Colors.text} size={24} />
-            )}
+            ) : null}
           </View>
         );
       })}

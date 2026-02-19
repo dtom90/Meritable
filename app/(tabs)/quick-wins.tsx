@@ -9,10 +9,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   useRemindersPermissions,
   useQuickWinsReminders,
+  useUpdateReminderCompletion,
   quickWinsRemindersQueryKey,
 } from '@/db/useReminders';
 import QuickWinsList from '@/components/QuickWinsList';
 import { Icon } from 'react-native-paper';
+import type { Reminder } from 'expo-calendar';
 
 export default function QuickWinsScreen() {
   const [today, setToday] = useState(getToday());
@@ -25,6 +27,11 @@ export default function QuickWinsScreen() {
   const [permission, requestPermission] = useRemindersPermissions();
   const permissionGranted = permission?.granted === true;
   const { data: reminders, isLoading } = useQuickWinsReminders(selectedDate, permissionGranted);
+  const updateReminderCompletion = useUpdateReminderCompletion();
+  const pendingReminderId =
+    updateReminderCompletion.isPending && updateReminderCompletion.variables
+      ? updateReminderCompletion.variables.reminderId
+      : null;
 
   const openRemindersApp = () => {
     Linking.openURL('x-apple-reminderkit://');
@@ -110,7 +117,13 @@ export default function QuickWinsScreen() {
             {isLoading ? (
               <Spinner />
             ) : reminders && reminders.length > 0 ? (
-              <QuickWinsList reminders={reminders} selectedDate={selectedDate} />
+              <QuickWinsList
+                reminders={reminders}
+                selectedDate={selectedDate}
+                onMarkComplete={(r: Reminder) => r.id && updateReminderCompletion.mutate({ reminderId: r.id, completed: true })}
+                onMarkIncomplete={(r: Reminder) => r.id && updateReminderCompletion.mutate({ reminderId: r.id, completed: false })}
+                pendingReminderId={pendingReminderId}
+              />
             ) : (
               <Text style={{ color: Colors.textSecondary }}>
                 No dated reminders for this day.

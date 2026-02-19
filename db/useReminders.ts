@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import type { Reminder } from 'expo-calendar';
@@ -58,6 +58,34 @@ async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]
 }
 
 /**
+ * Update a reminder's completion state. Uses current time for completionDate when completing.
+ * Fetches the full reminder first and passes it back with only completed/completionDate changed,
+ * so no other fields (e.g. title) are cleared. iOS only; no-op on other platforms.
+ */
+async function updateReminderCompletionAsync(
+  reminderId: string,
+  completed: boolean
+): Promise<void> {
+  if (Platform.OS !== 'ios') return;
+  const reminder = await Calendar.getReminderAsync(reminderId);
+  const { creationDate, lastModifiedDate, ...rest } = reminder;
+  const base = { ...rest, id: reminderId };
+  if (completed) {
+    await Calendar.updateReminderAsync(reminderId, {
+      ...base,
+      completed: true,
+      completionDate: new Date(),
+    });
+  } else {
+    await Calendar.updateReminderAsync(reminderId, {
+      ...base,
+      completed: false,
+      completionDate: null as unknown as Reminder['completionDate'],
+    });
+  }
+}
+
+/**
  * Permission hook for Reminders (iOS). Re-export from expo-calendar for use in Quick Wins screen.
  */
 export const useRemindersPermissions = Calendar.useRemindersPermissions;
@@ -87,3 +115,25 @@ export function useQuickWinsReminders(selectedDate: string, permissionGranted: b
  * Query key for invalidating Quick Wins reminders (e.g. on AppState foreground).
  */
 export const quickWinsRemindersQueryKey = [QUICK_WINS_REMINDERS_QUERY_KEY];
+
+/**
+ * Mutation hook to mark a reminder complete or incomplete. Uses current time for completionDate when completing.
+ * Only runs on iOS; no-op on other platforms.
+ */
+export function useUpdateReminderCompletion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      reminderId,
+      completed,
+    }: {
+      reminderId: string;
+      completed: boolean;
+    }) => {
+      await updateReminderCompletionAsync(reminderId, completed);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUICK_WINS_REMINDERS_QUERY_KEY] });
+    },
+  });
+}
