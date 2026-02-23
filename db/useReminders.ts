@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import type { Reminder } from 'expo-calendar';
-import { endOfDay } from '@/lib/dateUtils';
+import { endOfDay, getToday } from '@/lib/dateUtils';
 
 const QUICK_WINS_REMINDERS_QUERY_KEY = 'quickWinsReminders';
 
@@ -18,9 +18,11 @@ function toDateString(value: string | Date | undefined): string | null {
 
 /**
  * Fetch reminder calendars and then reminders in the given range.
- * Only reminders with a due date are shown. Of those:
- * - Incomplete: due date on or before selectedDate
- * - Complete: completionDate on selectedDate
+ * Only reminders with a due date are shown. Incomplete reminders by selected date:
+ * - Previous days: overdue only (due before selected date)
+ * - Current date: overdue and due today
+ * - Future days: due on selected date only
+ * Complete: always show when completionDate is on selected date.
  */
 async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]> {
   const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.REMINDER);
@@ -39,6 +41,7 @@ async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]
   );
 
   const selected = selectedDate;
+  const todayStr = getToday();
 
   return raw.filter((r) => {
     const dueStr = toDateString(r.dueDate);
@@ -47,13 +50,23 @@ async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]
     // Only show reminders that have a due date
     if (dueStr == null) return false;
 
-    // Incomplete: due date on or before the selected date
-    const incompleteDueOnOrBefore = r.completed !== true && dueStr <= selected;
     // Complete: completed on the selected date
     const completeOnSelected =
       r.completed === true && completionStr != null && completionStr === selected;
+    if (completeOnSelected) return true;
 
-    return incompleteDueOnOrBefore || completeOnSelected;
+    // Incomplete: filter by relationship of selected date to today
+    if (r.completed === true) return false;
+    if (selected < todayStr) {
+      // Previous days: overdue and due on selected date
+      return dueStr <= selected;
+    }
+    if (selected === todayStr) {
+      // Current date: overdue and due today
+      return dueStr <= selected;
+    }
+    // Future: due on selected date only
+    return dueStr === selected;
   });
 }
 
