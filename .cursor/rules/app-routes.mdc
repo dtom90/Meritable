@@ -14,11 +14,15 @@ alwaysApply: false
   - `index.tsx` — Home
   - `data.tsx` — Data tab
   - `habits/` — Habits feature
-  - `quick-wins/` — Quick Wins (iOS only; shows dated Reminders for selected day)
-    - `index.tsx` — Quick Wins list
-    - `_layout.tsx` — Habits layout
+    - `_layout.tsx` — Habits stack
     - `index.tsx` — Habits list
     - `[habitId].tsx` — Habit detail (dynamic)
+  - `workouts/` — Workouts feature
+    - `_layout.tsx` — Workouts stack
+    - `index.tsx` — Exercise list
+    - `[exerciseId].tsx` — Exercise detail (sets + history)
+  - `quick-wins/` — Quick Wins (iOS only; shows dated Reminders for selected day)
+    - `index.tsx` — Quick Wins list
 - `auth/` — Authentication routes
 - `+not-found.tsx` — 404
 - `global.css` — Global NativeWind styles

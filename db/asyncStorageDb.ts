@@ -1,8 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './habitDatabase';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './habitDatabase';
 
 const HABITS_KEY = 'habits';
 const HABIT_COMPLETIONS_KEY = 'habitCompletions';
+const EXERCISES_KEY = 'exercises';
+const SETS_KEY = 'sets';
 
 class AsyncStorageDb implements HabitDatabaseInterface {
   // Helper methods for AsyncStorage operations
@@ -22,6 +24,24 @@ class AsyncStorageDb implements HabitDatabaseInterface {
 
   private async saveHabitCompletions(completions: HabitCompletion[]): Promise<void> {
     await AsyncStorage.setItem(HABIT_COMPLETIONS_KEY, JSON.stringify(completions));
+  }
+
+  private async loadExercises(): Promise<Exercise[]> {
+    const data = await AsyncStorage.getItem(EXERCISES_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private async saveExercises(exercises: Exercise[]): Promise<void> {
+    await AsyncStorage.setItem(EXERCISES_KEY, JSON.stringify(exercises));
+  }
+
+  private async loadSets(): Promise<Set[]> {
+    const data = await AsyncStorage.getItem(SETS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private async saveSets(sets: Set[]): Promise<void> {
+    await AsyncStorage.setItem(SETS_KEY, JSON.stringify(sets));
   }
 
   // Habit operations
@@ -173,6 +193,62 @@ class AsyncStorageDb implements HabitDatabaseInterface {
     const completions = await this.loadHabitCompletions();
     const filteredCompletions = completions.filter(c => c.id !== id);
     await this.saveHabitCompletions(filteredCompletions);
+  }
+
+  // Exercise operations
+  async createExercise(exercise: { name: string }): Promise<Exercise> {
+    const now = new Date().toISOString();
+    const exercises = await this.loadExercises();
+    const nextOrder = exercises.length > 0 ? Math.max(...exercises.map(e => e.order)) + 1 : 0;
+    const nextId = exercises.length > 0 ? Math.max(...exercises.map(e => e.id)) + 1 : 1;
+    const toAdd: Exercise = { ...exercise, id: nextId, order: nextOrder, created_at: now, updated_at: now };
+    exercises.push(toAdd);
+    await this.saveExercises(exercises);
+    return toAdd;
+  }
+
+  async getExercises(): Promise<Exercise[]> {
+    const exercises = await this.loadExercises();
+    return exercises.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+
+  async updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise> {
+    const now = new Date().toISOString();
+    const exercises = await this.loadExercises();
+    const idx = exercises.findIndex(e => e.id === id);
+    if (idx === -1) throw new Error(`Exercise with id ${id} not found`);
+    const updated: Exercise = { ...exercises[idx], ...updates, updated_at: now };
+    exercises[idx] = updated;
+    await this.saveExercises(exercises);
+    return updated;
+  }
+
+  async deleteExercise(id: number): Promise<void> {
+    const sets = await this.loadSets();
+    await this.saveSets(sets.filter(s => s.exerciseId !== id));
+    const exercises = await this.loadExercises();
+    await this.saveExercises(exercises.filter(e => e.id !== id));
+  }
+
+  // Set operations
+  async createSet(set: SetInput): Promise<Set> {
+    const now = new Date().toISOString();
+    const sets = await this.loadSets();
+    const nextId = sets.length > 0 ? Math.max(...sets.map(s => s.id)) + 1 : 1;
+    const toAdd: Set = { ...set, id: nextId, created_at: now, updated_at: now };
+    sets.push(toAdd);
+    await this.saveSets(sets);
+    return toAdd;
+  }
+
+  async getSetsByExerciseId(exerciseId: number): Promise<Set[]> {
+    const sets = await this.loadSets();
+    return sets.filter(s => s.exerciseId === exerciseId).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+  }
+
+  async deleteSet(id: number): Promise<void> {
+    const sets = await this.loadSets();
+    await this.saveSets(sets.filter(s => s.id !== id));
   }
 }
 

@@ -1,15 +1,23 @@
 import Dexie, { Table } from 'dexie';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './habitDatabase'
+import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './habitDatabase'
 
 class DexieDb extends Dexie implements HabitDatabaseInterface {
   habits!: Table<Habit>;
   habitCompletions!: Table<HabitCompletion>;
+  exercises!: Table<Exercise>;
+  sets!: Table<Set>;
 
   constructor() {
     super('HabitDatabase');
     this.version(1).stores({
       habits: '++id',
       habitCompletions: '++id, habitId, completionDate'
+    });
+    this.version(2).stores({
+      habits: '++id',
+      habitCompletions: '++id, habitId, completionDate',
+      exercises: '++id',
+      sets: '++id, exerciseId, completionDate'
     });
   }
 
@@ -136,6 +144,52 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
 
   async deleteHabitCompletion(id: number): Promise<void> {
     await this.habitCompletions.delete(id);
+  }
+
+  // Exercise operations
+  async createExercise(exercise: { name: string }): Promise<Exercise> {
+    const now = new Date().toISOString();
+    const existing = await this.exercises.toArray();
+    const nextOrder = existing.length > 0 ? Math.max(...existing.map(e => e.order)) + 1 : 0;
+    const toAdd = { ...exercise, order: nextOrder, created_at: now, updated_at: now };
+    const id = await this.exercises.add(toAdd as any);
+    return { ...toAdd, id };
+  }
+
+  async getExercises(): Promise<Exercise[]> {
+    const list = await this.exercises.toArray();
+    return list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+
+  async updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise> {
+    const now = new Date().toISOString();
+    const exercise = await this.exercises.get(id);
+    if (!exercise) throw new Error(`Exercise with id ${id} not found`);
+    const updated = { ...exercise, ...updates, updated_at: now };
+    await this.exercises.update(id, updated);
+    return updated;
+  }
+
+  async deleteExercise(id: number): Promise<void> {
+    await this.sets.where('exerciseId').equals(id).delete();
+    await this.exercises.delete(id);
+  }
+
+  // Set operations
+  async createSet(set: SetInput): Promise<Set> {
+    const now = new Date().toISOString();
+    const toAdd = { ...set, created_at: now, updated_at: now };
+    const id = await this.sets.add(toAdd as any);
+    return { ...toAdd, id };
+  }
+
+  async getSetsByExerciseId(exerciseId: number): Promise<Set[]> {
+    const list = await this.sets.where('exerciseId').equals(exerciseId).toArray();
+    return list.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+  }
+
+  async deleteSet(id: number): Promise<void> {
+    await this.sets.delete(id);
   }
 }
 

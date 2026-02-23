@@ -1,4 +1,4 @@
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput } from './habitDatabase'
+import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './habitDatabase'
 import { supabaseClient } from './supabaseClient'
 import { User } from '@supabase/supabase-js'
 
@@ -261,6 +261,115 @@ export class SupabaseDb extends HabitDatabaseInterface {
       .eq('user_id', user?.id)
 
     if (error) throw error
+  }
+
+  // Exercise operations
+  async createExercise(exercise: { name: string }): Promise<Exercise> {
+    const user = await this.getUser()
+    const { data: existing } = await this.supabase
+      .from('exercises')
+      .select('order')
+      .eq('user_id', user?.id)
+      .order('order', { ascending: false })
+      .limit(1)
+    const nextOrder = existing?.length ? existing[0].order + 1 : 0
+    const { data, error } = await this.supabase
+      .from('exercises')
+      .insert({ name: exercise.name, order: nextOrder, user_id: user?.id })
+      .select()
+      .single()
+    if (error) throw error
+    return mapExerciseRow(data)
+  }
+
+  async getExercises(): Promise<Exercise[]> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('exercises')
+      .select('*')
+      .eq('user_id', user?.id)
+      .order('order', { ascending: true })
+      .order('id', { ascending: true })
+    if (error) throw error
+    return (data || []).map(mapExerciseRow)
+  }
+
+  async updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('exercises')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .select()
+      .single()
+    if (error) throw error
+    return mapExerciseRow(data)
+  }
+
+  async deleteExercise(id: number): Promise<void> {
+    const user = await this.getUser()
+    await this.supabase.from('sets').delete().eq('exercise_id', id).eq('user_id', user?.id)
+    const { error } = await this.supabase.from('exercises').delete().eq('id', id).eq('user_id', user?.id)
+    if (error) throw error
+  }
+
+  // Set operations
+  async createSet(set: SetInput): Promise<Set> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('sets')
+      .insert({
+        exercise_id: set.exerciseId,
+        weight: set.weight,
+        reps: set.reps,
+        completion_date: set.completionDate,
+        user_id: user?.id
+      })
+      .select()
+      .single()
+    if (error) throw error
+    return mapSetRow(data)
+  }
+
+  async getSetsByExerciseId(exerciseId: number): Promise<Set[]> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('sets')
+      .select('*')
+      .eq('exercise_id', exerciseId)
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []).map(mapSetRow)
+  }
+
+  async deleteSet(id: number): Promise<void> {
+    const user = await this.getUser()
+    const { error } = await this.supabase.from('sets').delete().eq('id', id).eq('user_id', user?.id)
+    if (error) throw error
+  }
+}
+
+function mapExerciseRow(row: any): Exercise {
+  return {
+    id: Number(row.id),
+    name: row.name,
+    order: row.order ?? 0,
+    created_at: row.created_at,
+    updated_at: row.updated_at
+  }
+}
+
+function mapSetRow(row: any): Set {
+  return {
+    id: Number(row.id),
+    exerciseId: Number(row.exercise_id),
+    weight: row.weight != null ? Number(row.weight) : null,
+    reps: Number(row.reps),
+    completionDate: row.completion_date ?? row.completionDate,
+    created_at: row.created_at,
+    updated_at: row.updated_at
   }
 }
 
