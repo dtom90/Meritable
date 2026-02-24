@@ -40,19 +40,19 @@ export default function TabLayout() {
             }}
           />
           <Tabs.Screen
-            name="workouts"
-            options={{
-              title: 'Workouts',
-              tabBarIcon: ({ color }) => <Ionicons name="barbell" size={28} color={color} />,
-              href: '/workouts',
-            }}
-          />
-          <Tabs.Screen
             name="quick-wins"
             options={{
               title: 'Quick Wins',
               tabBarIcon: ({ color }) => <Ionicons name="checkmark" size={28} color={color} />,
               href: '/quick-wins',
+            }}
+          />
+          <Tabs.Screen
+            name="workouts"
+            options={{
+              title: 'Workouts',
+              tabBarIcon: ({ color }) => <Ionicons name="barbell" size={28} color={color} />,
+              href: '/workouts',
             }}
           />
           <Tabs.Screen
