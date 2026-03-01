@@ -1,6 +1,7 @@
-import { Text, Pressable } from 'react-native';
+import { Text, Pressable, View } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import type { Exercise } from '@/db/habitDatabase';
+import { Icon } from 'react-native-paper';
 
 type ExerciseListItemProps = {
   exercise: Exercise;
@@ -11,10 +12,13 @@ export function ExerciseListItem({ exercise, onPress }: ExerciseListItemProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="p-4 rounded"
-      style={{ backgroundColor: Colors.card }}
+      className="flex-row items-center p-4 my-4 rounded-lg min-h-[68px]"
+      style={{ backgroundColor: Colors.surface }}
     >
-      <Text style={{ color: Colors.text, fontSize: 17 }}>{exercise.name}</Text>
+      <View className="flex-1 flex-row items-center justify-center">
+        <Text style={{ color: Colors.text, fontSize: 17 }}>{exercise.name}</Text>
+        <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
+      </View>
     </Pressable>
   );
 }

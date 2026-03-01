@@ -148,7 +148,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
               {habitCompletionsMap[habit.id]?.count || 0} / {habit.countTarget}
             </Text>
           )}
-          <Icon source="chevron-right" color={Colors.textSecondary} size={20} />
+          <Icon source="chevron-right" color={isCompleted ? Colors.text : Colors.textSecondary} size={20} />
         </View>
       </TouchableOpacity>
       
