@@ -188,6 +188,15 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     return list.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
   }
 
+  async updateSet(id: number, updates: Partial<SetInput>): Promise<Set> {
+    const now = new Date().toISOString();
+    const set = await this.sets.get(id);
+    if (!set) throw new Error(`Set with id ${id} not found`);
+    const updated = { ...set, ...updates, updated_at: now };
+    await this.sets.update(id, updated);
+    return updated;
+  }
+
   async deleteSet(id: number): Promise<void> {
     await this.sets.delete(id);
   }

@@ -16,5 +16,6 @@ export const MockedDexieDb = jest.fn().mockImplementation(() => ({
   deleteExercise: jest.fn(),
   createSet: jest.fn(),
   getSetsByExerciseId: jest.fn().mockResolvedValue([]),
+  updateSet: jest.fn(),
   deleteSet: jest.fn(),
 }));

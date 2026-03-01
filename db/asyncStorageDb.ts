@@ -246,6 +246,17 @@ class AsyncStorageDb implements HabitDatabaseInterface {
     return sets.filter(s => s.exerciseId === exerciseId).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
   }
 
+  async updateSet(id: number, updates: Partial<SetInput>): Promise<Set> {
+    const now = new Date().toISOString();
+    const sets = await this.loadSets();
+    const idx = sets.findIndex(s => s.id === id);
+    if (idx === -1) throw new Error(`Set with id ${id} not found`);
+    const updated: Set = { ...sets[idx], ...updates, updated_at: now };
+    sets[idx] = updated;
+    await this.saveSets(sets);
+    return updated;
+  }
+
   async deleteSet(id: number): Promise<void> {
     const sets = await this.loadSets();
     await this.saveSets(sets.filter(s => s.id !== id));

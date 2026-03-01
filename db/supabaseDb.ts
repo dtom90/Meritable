@@ -344,6 +344,23 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return (data || []).map(mapSetRow)
   }
 
+  async updateSet(id: number, updates: Partial<SetInput>): Promise<Set> {
+    const user = await this.getUser()
+    const payload: Record<string, unknown> = { updated_at: new Date().toISOString() }
+    if (updates.weight !== undefined) payload.weight = updates.weight
+    if (updates.reps !== undefined) payload.reps = updates.reps
+    if (updates.completionDate !== undefined) payload.completion_date = updates.completionDate
+    const { data, error } = await this.supabase
+      .from('sets')
+      .update(payload)
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .select()
+      .single()
+    if (error) throw error
+    return mapSetRow(data)
+  }
+
   async deleteSet(id: number): Promise<void> {
     const user = await this.getUser()
     const { error } = await this.supabase.from('sets').delete().eq('id', id).eq('user_id', user?.id)

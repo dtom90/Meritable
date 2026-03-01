@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import Spinner from '@/components/Spinner';
 import { SetRow } from './SetRow';
+import { EditSetModal } from './EditSetModal';
 import { getToday } from '@/lib/dateUtils';
 import type { Set } from '@/db/habitDatabase';
 
@@ -36,6 +37,7 @@ function groupSetsByDate(sets: Set[]): [string, Set[]][] {
 
 export function SetHistoryList({ sets, isLoading }: SetHistoryListProps) {
   const byDate = useMemo(() => groupSetsByDate(sets), [sets]);
+  const [editingSet, setEditingSet] = useState<Set | null>(null);
 
   return (
     <>
@@ -60,13 +62,22 @@ export function SetHistoryList({ sets, isLoading }: SetHistoryListProps) {
               </Text>
               <View className="gap-2">
                 {dateSets.map((s) => (
-                  <SetRow key={s.id} set={s} />
+                  <SetRow
+                    key={s.id}
+                    set={s}
+                    onPress={(set) => setEditingSet(set)}
+                  />
                 ))}
               </View>
             </View>
           ))}
         </View>
       )}
+      <EditSetModal
+        visible={editingSet != null}
+        set={editingSet}
+        onClose={() => setEditingSet(null)}
+      />
     </>
   );
 }

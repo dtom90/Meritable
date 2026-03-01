@@ -86,6 +86,28 @@ export const useCreateSet = () => {
   });
 };
 
+export const useUpdateSet = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      exerciseId,
+      updates,
+    }: {
+      id: number;
+      exerciseId: number;
+      updates: Partial<SetInput>;
+    }) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.updateSet(id, updates);
+    },
+    onSuccess: (_, { exerciseId }) => {
+      queryClient.invalidateQueries({ queryKey: [SETS_QUERY_KEY, exerciseId] });
+    },
+  });
+};
+
 export const useDeleteSet = () => {
   const queryClient = useQueryClient();
   const { activeDb } = useDataSource();

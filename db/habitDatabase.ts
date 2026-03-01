@@ -60,5 +60,6 @@ export abstract class HabitDatabaseInterface {
   // Set operations
   abstract createSet(set: SetInput): Promise<Set>
   abstract getSetsByExerciseId(exerciseId: number): Promise<Set[]>
+  abstract updateSet(id: number, updates: Partial<SetInput>): Promise<Set>
   abstract deleteSet(id: number): Promise<void>
 }
