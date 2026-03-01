@@ -35,8 +35,44 @@ function groupSetsByDate(sets: Set[]): [string, Set[]][] {
   return sorted;
 }
 
+/** Volume for Max Volume comparison: treat missing weight as 1 lb. */
+function volumeForMax(s: Set): number {
+  const effectiveWeight = s.weight != null && s.weight > 0 ? s.weight : 1;
+  return effectiveWeight * s.reps;
+}
+
+function getMaxVolumeSetIds(sets: Set[]): number[] {
+  if (sets.length === 0) return [];
+  let maxVolume = -1;
+  const maxVolumeSetIds: number[] = [];
+  for (const s of sets) {
+    const vol = volumeForMax(s);
+    if (vol > maxVolume) {
+      maxVolume = vol;
+      maxVolumeSetIds.length = 0;
+      maxVolumeSetIds.push(s.id);
+    } else if (vol === maxVolume) {
+      maxVolumeSetIds.push(s.id);
+    }
+  }
+  return maxVolumeSetIds;
+}
+
+function getMaxWeightSetIds(sets: Set[]): number[] {
+  const withWeight = sets.filter((s) => s.weight != null && s.weight > 0);
+  if (withWeight.length === 0) return [];
+  const maxWeight = Math.max(...withWeight.map((s) => s.weight!));
+  const atMaxWeight = withWeight.filter((s) => s.weight === maxWeight);
+  const maxRepsAtMaxWeight = Math.max(...atMaxWeight.map((s) => s.reps));
+  return atMaxWeight
+    .filter((s) => s.reps === maxRepsAtMaxWeight)
+    .map((s) => s.id);
+}
+
 export function SetHistoryList({ sets, isLoading }: SetHistoryListProps) {
   const byDate = useMemo(() => groupSetsByDate(sets), [sets]);
+  const maxVolumeSetIds = useMemo(() => getMaxVolumeSetIds(sets), [sets]);
+  const maxWeightSetIds = useMemo(() => getMaxWeightSetIds(sets), [sets]);
   const [editingSet, setEditingSet] = useState<Set | null>(null);
 
   return (
@@ -53,23 +89,25 @@ export function SetHistoryList({ sets, isLoading }: SetHistoryListProps) {
       ) : (
         <View className="gap-4">
           {byDate.map(([date, dateSets]) => (
-            <View key={date} className="gap-2">
-              <Text
-                className="text-sm font-medium"
-                style={{ color: Colors.textSecondary }}
-              >
-                {formatDateHeader(date)}
-              </Text>
-              <View className="gap-2">
-                {dateSets.map((s) => (
-                  <SetRow
-                    key={s.id}
-                    set={s}
-                    onPress={(set) => setEditingSet(set)}
-                  />
-                ))}
+              <View key={date} className="gap-2">
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: Colors.textSecondary }}
+                >
+                  {formatDateHeader(date)}
+                </Text>
+                <View className="gap-2">
+                  {dateSets.map((s) => (
+                    <SetRow
+                      key={s.id}
+                      set={s}
+                      isMaxVolume={maxVolumeSetIds.includes(s.id)}
+                      isMaxWeight={maxWeightSetIds.includes(s.id)}
+                      onPress={(set) => setEditingSet(set)}
+                    />
+                  ))}
+                </View>
               </View>
-            </View>
           ))}
         </View>
       )}
