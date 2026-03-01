@@ -1,20 +1,20 @@
+import { useRouter } from 'expo-router';
 import { View, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import Spinner from '@/components/Spinner';
+import { useListExercises } from '@/db/useWorkoutDb';
 import { ExerciseListItem } from './ExerciseListItem';
 import type { Exercise } from '@/db/habitDatabase';
 
-type ExerciseListProps = {
-  exercises: Exercise[];
-  isLoading: boolean;
-  onPressExercise: (exercise: Exercise) => void;
-};
+export function ExerciseList() {
+  const router = useRouter();
+  const { data: exercises = [], isLoading } = useListExercises();
 
-export function ExerciseList({
-  exercises,
-  isLoading,
-  onPressExercise,
-}: ExerciseListProps) {
+  const handlePressExercise = (exercise: Exercise) => {
+    if (exercise.id != null) {
+      router.push(`/workouts/${exercise.id}`);
+    }
+  };
   if (isLoading) {
     return <Spinner />;
   }
@@ -31,7 +31,7 @@ export function ExerciseList({
         <ExerciseListItem
           key={exercise.id}
           exercise={exercise}
-          onPress={() => onPressExercise(exercise)}
+          onPress={() => handlePressExercise(exercise)}
         />
       ))}
     </View>
