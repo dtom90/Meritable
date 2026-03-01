@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './habitDatabase';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './types';
+import { HabitDatabaseInterface } from './habitDatabase';
 
 const HABITS_KEY = 'habits';
 const HABIT_COMPLETIONS_KEY = 'habitCompletions';

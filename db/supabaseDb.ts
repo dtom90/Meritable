@@ -1,4 +1,5 @@
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './habitDatabase'
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './types';
+import { HabitDatabaseInterface } from './habitDatabase';
 import { supabaseClient } from './supabaseClient'
 import { User } from '@supabase/supabase-js'
 

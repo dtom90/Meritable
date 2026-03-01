@@ -1,5 +1,6 @@
 import Dexie, { Table } from 'dexie';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitDatabaseInterface, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './habitDatabase'
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './types';
+import { HabitDatabaseInterface } from './habitDatabase';
 
 class DexieDb extends Dexie implements HabitDatabaseInterface {
   habits!: Table<Habit>;

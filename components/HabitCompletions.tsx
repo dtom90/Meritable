@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 import { useMemo } from 'react';
 import { Colors } from '@/lib/Colors';
 import { useListHabitCompletionsByDate } from '@/db/useHabitDb';
-import { Habit, HabitCompletion } from '@/db/habitDatabase';
+import { Habit, HabitCompletion } from '@/db/types';
 import HabitCompletionButton from './HabitCompletionButton';
 import Spinner from './Spinner';
 

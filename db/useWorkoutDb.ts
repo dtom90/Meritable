@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ExerciseInput, SetInput } from './habitDatabase';
+import { ExerciseInput, SetInput } from './types';
 import { useDataSource } from '@/db/DataSourceContext';
 
 const EXERCISES_QUERY_KEY = 'exercises';

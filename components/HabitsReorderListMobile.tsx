@@ -7,7 +7,7 @@ import DraggableFlatList, {
 import { Colors } from '@/lib/Colors';
 import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
-import { Habit } from '@/db/habitDatabase';
+import { Habit } from '@/db/types';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Spinner from './Spinner';
 

@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import type { Set } from '@/db/habitDatabase';
+import type { Set } from '@/db/types';
 
 function formatSetRow(s: Set): string {
   if (s.weight != null && s.weight > 0) {

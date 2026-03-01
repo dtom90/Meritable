@@ -1,6 +1,6 @@
 import { Text, Pressable, View } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import type { Exercise } from '@/db/habitDatabase';
+import type { Exercise } from '@/db/types';
 import { Icon } from 'react-native-paper';
 
 type ExerciseListItemProps = {

@@ -5,7 +5,7 @@ import Spinner from '@/components/Spinner';
 import { SetRow } from './SetRow';
 import { EditSetModal } from './EditSetModal';
 import { getToday } from '@/lib/dateUtils';
-import type { Set } from '@/db/habitDatabase';
+import type { Set } from '@/db/types';
 
 type SetHistoryListProps = {
   sets: Set[];

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, ViewProps } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { Icon } from 'react-native-paper';
-import { Habit } from '@/db/habitDatabase';
+import { Habit } from '@/db/types';
 
 interface HabitReorderItemProps extends ViewProps {
   habit: Habit;

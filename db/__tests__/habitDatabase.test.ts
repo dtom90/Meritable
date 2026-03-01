@@ -3,7 +3,8 @@ import 'fake-indexeddb/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DexieDb } from '../dexieDb';
 import { AsyncStorageDb } from '../asyncStorageDb';
-import { Habit, HabitDatabaseInterface } from '../habitDatabase';
+import { Habit } from '../types';
+import { HabitDatabaseInterface } from '../habitDatabase';
 
 // Array of database implementations to test
 const databaseImplementations = [

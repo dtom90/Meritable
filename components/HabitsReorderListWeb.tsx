@@ -20,7 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Colors } from '@/lib/Colors';
 import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
-import { Habit } from '@/db/habitDatabase';
+import { Habit } from '@/db/types';
 import Spinner from './Spinner';
 
 function SortableHabitItem({ habit }: { habit: Habit }) {

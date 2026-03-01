@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useUpdateSet } from '@/db/useWorkoutDb';
-import type { Set } from '@/db/habitDatabase';
+import type { Set } from '@/db/types';
 
 type EditSetModalProps = {
   visible: boolean;

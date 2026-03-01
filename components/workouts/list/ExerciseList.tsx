@@ -4,7 +4,7 @@ import { Colors } from '@/lib/Colors';
 import Spinner from '@/components/Spinner';
 import { useListExercises } from '@/db/useWorkoutDb';
 import { ExerciseListItem } from './ExerciseListItem';
-import type { Exercise } from '@/db/habitDatabase';
+import type { Exercise } from '@/db/types';
 
 export function ExerciseList() {
   const router = useRouter();
