@@ -39,6 +39,8 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       if (dexieDb.isOpen()) {
         await dexieDb.habits.clear();
         await dexieDb.habitCompletions.clear();
+        await dexieDb.exercises.clear();
+        await dexieDb.sets.clear();
         await dexieDb.close();
         await dexieDb.delete(); // Delete the database completely
       }
@@ -46,6 +48,8 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       // Clean up AsyncStorage keys
       await AsyncStorage.removeItem('habits');
       await AsyncStorage.removeItem('habitCompletions');
+      await AsyncStorage.removeItem('exercises');
+      await AsyncStorage.removeItem('sets');
     }
   });
 
@@ -573,6 +577,183 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
     });
   });
 
+  describe('Exercise CRUD Operations', () => {
+    describe('createExercise', () => {
+      it('should create an exercise with auto-generated fields', async () => {
+        const exercise = await db.createExercise({ name: 'Bench Press' });
+
+        expect(exercise.id).toBeDefined();
+        expect(exercise.name).toBe('Bench Press');
+        expect(exercise.order).toBe(0);
+        expect(exercise.created_at).toBeDefined();
+        expect(exercise.updated_at).toBeDefined();
+        expect(typeof exercise.created_at).toBe('string');
+        expect(typeof exercise.updated_at).toBe('string');
+      });
+
+      it('should assign incremental order values to new exercises', async () => {
+        const exercise1 = await db.createExercise({ name: 'Squat' });
+        const exercise2 = await db.createExercise({ name: 'Deadlift' });
+        const exercise3 = await db.createExercise({ name: 'Overhead Press' });
+
+        expect(exercise1.order).toBe(0);
+        expect(exercise2.order).toBe(1);
+        expect(exercise3.order).toBe(2);
+      });
+    });
+
+    describe('getExercises', () => {
+      it('should return empty array when no exercises exist', async () => {
+        const exercises = await db.getExercises();
+        expect(exercises).toEqual([]);
+      });
+
+      it('should return all exercises sorted by order', async () => {
+        await db.createExercise({ name: 'First' });
+        await db.createExercise({ name: 'Second' });
+        await db.createExercise({ name: 'Third' });
+
+        const exercises = await db.getExercises();
+        expect(exercises).toHaveLength(3);
+        expect(exercises[0].name).toBe('First');
+        expect(exercises[1].name).toBe('Second');
+        expect(exercises[2].name).toBe('Third');
+        expect(exercises[0].order).toBe(0);
+        expect(exercises[1].order).toBe(1);
+        expect(exercises[2].order).toBe(2);
+      });
+
+      it('should maintain order after reordering', async () => {
+        const exerciseA = await db.createExercise({ name: 'A' });
+        const exerciseB = await db.createExercise({ name: 'B' });
+        const exerciseC = await db.createExercise({ name: 'C' });
+
+        await db.reorderExercises([
+          { ...exerciseC, order: 0 },
+          { ...exerciseA, order: 1 },
+          { ...exerciseB, order: 2 },
+        ]);
+
+        const exercises = await db.getExercises();
+        expect(exercises[0].name).toBe('C');
+        expect(exercises[1].name).toBe('A');
+        expect(exercises[2].name).toBe('B');
+      });
+    });
+
+    describe('updateExercise', () => {
+      it('should update exercise name', async () => {
+        const exercise = await db.createExercise({ name: 'Old Name' });
+        await new Promise(resolve => setTimeout(resolve, 10));
+        const updated = await db.updateExercise(exercise.id, { name: 'New Name' });
+
+        expect(updated.name).toBe('New Name');
+        expect(updated.id).toBe(exercise.id);
+        expect(updated.updated_at).not.toBe(exercise.updated_at);
+      });
+
+      it('should throw error when updating non-existent exercise', async () => {
+        await expect(db.updateExercise(999, { name: 'Test' })).rejects.toThrow(
+          'Exercise with id 999 not found'
+        );
+      });
+
+      it('should preserve existing fields when updating', async () => {
+        const exercise = await db.createExercise({ name: 'Test' });
+        const updated = await db.updateExercise(exercise.id, { name: 'Updated' });
+
+        expect(updated.name).toBe('Updated');
+        expect(updated.order).toBe(exercise.order);
+      });
+    });
+
+    describe('reorderExercises', () => {
+      it('should reorder exercises correctly', async () => {
+        const exercise1 = await db.createExercise({ name: 'A' });
+        const exercise2 = await db.createExercise({ name: 'B' });
+        const exercise3 = await db.createExercise({ name: 'C' });
+
+        const reordered = await db.reorderExercises([
+          { ...exercise3, order: 0 },
+          { ...exercise1, order: 1 },
+          { ...exercise2, order: 2 },
+        ]);
+
+        expect(reordered).toHaveLength(3);
+        expect(reordered[0].name).toBe('C');
+        expect(reordered[1].name).toBe('A');
+        expect(reordered[2].name).toBe('B');
+
+        const exercises = await db.getExercises();
+        expect(exercises[0].name).toBe('C');
+        expect(exercises[1].name).toBe('A');
+        expect(exercises[2].name).toBe('B');
+      });
+
+      it('should update timestamps when reordering', async () => {
+        const exercise1 = await db.createExercise({ name: 'A' });
+        const exercise2 = await db.createExercise({ name: 'B' });
+        const originalUpdatedAt1 = exercise1.updated_at;
+        const originalUpdatedAt2 = exercise2.updated_at;
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        await db.reorderExercises([
+          { ...exercise2, order: 0 },
+          { ...exercise1, order: 1 },
+        ]);
+
+        const exercises = await db.getExercises();
+        expect(exercises[0].updated_at).not.toBe(originalUpdatedAt2);
+        expect(exercises[1].updated_at).not.toBe(originalUpdatedAt1);
+      });
+    });
+
+    describe('deleteExercise', () => {
+      it('should delete an exercise', async () => {
+        const exercise = await db.createExercise({ name: 'To Delete' });
+        await db.deleteExercise(exercise.id);
+
+        const exercises = await db.getExercises();
+        expect(exercises).toHaveLength(0);
+      });
+
+      it('should delete related sets when deleting exercise', async () => {
+        const exercise = await db.createExercise({ name: 'Test Exercise' });
+        await db.createSet({
+          exerciseId: exercise.id,
+          weight: 100,
+          reps: 8,
+          completionDate: '2024-01-01',
+        });
+
+        await db.deleteExercise(exercise.id);
+
+        const exercises = await db.getExercises();
+        const sets = await db.getSetsByExerciseId(exercise.id);
+
+        expect(exercises).toHaveLength(0);
+        expect(sets).toHaveLength(0);
+      });
+
+      it('should not affect other exercises when deleting one', async () => {
+        await db.createExercise({ name: 'Keep' });
+        const deleteExercise = await db.createExercise({ name: 'Delete' });
+        await db.createExercise({ name: 'Keep Too' });
+
+        await db.deleteExercise(deleteExercise.id);
+
+        const exercises = await db.getExercises();
+        expect(exercises).toHaveLength(2);
+        expect(exercises.map(e => e.name)).toEqual(['Keep', 'Keep Too']);
+      });
+
+      it('should handle deleting non-existent exercise gracefully', async () => {
+        await expect(db.deleteExercise(999)).resolves.not.toThrow();
+      });
+    });
+  });
+
   describe('Integration Tests', () => {
     it('should handle complete CRUD lifecycle for habits', async () => {
       // Create
@@ -620,6 +801,22 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       await db.deleteHabitCompletion(completion.id);
       const remainingCompletions = await db.getHabitCompletionsById(habit.id);
       expect(remainingCompletions).toHaveLength(0);
+    });
+
+    it('should handle complete CRUD lifecycle for exercises', async () => {
+      const exercise = await db.createExercise({ name: 'Bench Press' });
+      expect(exercise.id).toBeDefined();
+
+      const exercises = await db.getExercises();
+      expect(exercises).toHaveLength(1);
+      expect(exercises[0].name).toBe('Bench Press');
+
+      const updated = await db.updateExercise(exercise.id, { name: 'Incline Bench' });
+      expect(updated.name).toBe('Incline Bench');
+
+      await db.deleteExercise(exercise.id);
+      const remainingExercises = await db.getExercises();
+      expect(remainingExercises).toHaveLength(0);
     });
 
     it('should maintain data integrity across operations', async () => {
@@ -716,4 +913,3 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
     });
   });
 });
-
