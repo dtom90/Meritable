@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, Platform, AppState, AppStateStatus, Linking } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import WeekHeader from '@/components/WeekHeader';
-import { NarrowView } from '@/components/NarrowView';
-import Spinner from '@/components/Spinner';
+import WeekHeader from '@/components/common/WeekHeader';
+import { NarrowView } from '@/components/common/NarrowView';
+import Spinner from '@/components/common/Spinner';
 import { getToday } from '@/lib/dateUtils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -12,7 +12,7 @@ import {
   useUpdateReminderCompletion,
   quickWinsRemindersQueryKey,
 } from '@/db/useReminders';
-import QuickWinsList from '@/components/QuickWinsList';
+import QuickWinsList from '@/components/quick-wins/QuickWinsList';
 import { Icon } from 'react-native-paper';
 import type { Reminder } from 'expo-calendar';
 

@@ -8,11 +8,13 @@ alwaysApply: false
 
 ## File list
 
-- **Habit-related**: HabitItem, HabitInputForm, HabitInputModal, HabitTitle, HabitActions, HabitCompletionButton, HabitCompletions, HabitCompletionsList, HabitCompletionsCalendar, HabitReorderList
-- **Layout**: HabitsListMobile, HabitsListWeb, NarrowView, WeekHeader, CustomDayHeader
-- **Quick Wins**: QuickWinsList (read-only list of dated iOS Reminders)
-- **UI**: ThemedText, ThemedView, AddHabitButton, LoginOverlay, ExternalLink
-- **Tests**: `__tests__/` next to components
+- **common/** — Shared UI: Spinner, NarrowView, ThemedView, ThemedText, ExternalLink, WeekHeader, CustomDayHeader. Tests: `common/__tests__/`.
+- **habits/list/** — Habits list page: HabitCompletionsList, HabitCompletions, HabitCompletionButton, HabitReorderList, HabitsReorderListWeb, HabitsReorderListMobile, HabitReorderItem, AddHabitButton, HabitInputModal, HabitInputForm.
+- **habits/detail/** — Habit detail page: HabitTitle, HabitActions, HabitCompletionsCalendar.
+- **quick-wins/** — QuickWinsList (read-only list of dated iOS Reminders).
+- **data/** — CloudAuthSection (data/sync tab).
+- **Modals/** — LoginModal, OAuthErrorModal, SignOutAlertModal.
+- **workouts/** — Workout list and detail components.
 
 ## Patterns
 

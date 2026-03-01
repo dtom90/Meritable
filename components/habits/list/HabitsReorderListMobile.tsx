@@ -8,7 +8,7 @@ import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/types';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Spinner from './Spinner';
+import Spinner from '@/components/common/Spinner';
 
 export default function HabitsReorderListMobile() {
   const { data: habitsFromDb = [], isLoading } = useListHabits();

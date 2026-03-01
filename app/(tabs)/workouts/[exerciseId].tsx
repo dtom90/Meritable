@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/lib/Colors';
-import { NarrowView } from '@/components/NarrowView';
+import { NarrowView } from '@/components/common/NarrowView';
 import { useListExercises, useListSetsByExerciseId } from '@/db/useWorkoutDb';
 import { ExerciseDetailHeader } from '@/components/workouts/detail/ExerciseDetailHeader';
 import { AddSetForm } from '@/components/workouts/detail/AddSetForm';

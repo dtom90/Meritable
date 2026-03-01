@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import Spinner from '@/components/Spinner';
+import Spinner from '@/components/common/Spinner';
 import { SetRow } from './SetRow';
 import { EditSetModal } from './EditSetModal';
 import { getToday } from '@/lib/dateUtils';

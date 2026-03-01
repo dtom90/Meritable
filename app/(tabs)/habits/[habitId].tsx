@@ -2,10 +2,10 @@ import { View, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import { useListHabits } from '@/db/useHabitDb';
-import HabitTitle from '@/components/HabitTitle'
-import HabitActions from '@/components/HabitActions'
-import HabitCompletionsCalendar from '@/components/HabitCompletionsCalendar'
-import { NarrowView } from '@/components/NarrowView';
+import HabitTitle from '@/components/habits/detail/HabitTitle'
+import HabitActions from '@/components/habits/detail/HabitActions'
+import HabitCompletionsCalendar from '@/components/habits/detail/HabitCompletionsCalendar'
+import { NarrowView } from '@/components/common/NarrowView';
 
 
 export default function HabitDetail() {

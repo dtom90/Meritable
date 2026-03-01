@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import WeekHeader from '@/components/WeekHeader';
-import HabitCompletionsList from '@/components/HabitCompletionsList';
+import WeekHeader from '@/components/common/WeekHeader';
+import HabitCompletionsList from '@/components/habits/list/HabitCompletionsList';
 import { getToday } from '@/lib/dateUtils';
 import { useQueryClient } from '@tanstack/react-query';
 

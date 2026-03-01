@@ -26,4 +26,3 @@ it(`renders with custom style prop`, () => {
   expect(tree).toBeDefined();
   // Style prop should work even in Jest (className styles won't be applied, but style prop will)
 });
-

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useListHabitCompletionsByDate } from '@/db/useHabitDb';
 import { Habit, HabitCompletion } from '@/db/types';
 import HabitCompletionButton from './HabitCompletionButton';
-import Spinner from './Spinner';
+import Spinner from '@/components/common/Spinner';
 
 interface HabitCompletionsProps {
   selectedDate: string;

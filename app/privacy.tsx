@@ -1,6 +1,6 @@
 import { ScrollView, Platform } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/common/ThemedView';
+import { ThemedText } from '@/components/common/ThemedText';
 import { Colors } from '@/lib/Colors';
 import { useEffect } from 'react';
 

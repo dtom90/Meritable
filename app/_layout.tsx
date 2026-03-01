@@ -11,7 +11,7 @@ import "./global.css"
 import { Colors } from '@/lib/Colors';
 import { DataSourceProvider } from '@/db/DataSourceContext';
 import { AuthContextProvider } from '@/db/AuthContext';
-import Spinner from '@/components/Spinner';
+import Spinner from '@/components/common/Spinner';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

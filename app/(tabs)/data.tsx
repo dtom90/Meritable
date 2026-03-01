@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import { NarrowView } from '@/components/NarrowView';
+import { NarrowView } from '@/components/common/NarrowView';
 import { useDataSource } from '@/db/DataSourceContext';
-import CloudAuthSection from '@/components/CloudAuthSection';
+import CloudAuthSection from '@/components/data/CloudAuthSection';
 import { isTestFlight } from '@/lib/isTestFlight';
 
 const SHOW_CLOUD_AUTH_KEY = 'showCloudAuth';

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import HabitCompletions from '@/components/HabitCompletions';
-import HabitReorderList from '@/components/HabitReorderList';
-import { NarrowView } from '@/components/NarrowView';
-import AddHabitButton from '@/components/AddHabitButton';
+import HabitCompletions from './HabitCompletions';
+import HabitReorderList from './HabitReorderList';
+import { NarrowView } from '@/components/common/NarrowView';
+import AddHabitButton from './AddHabitButton';
 import { useListHabits } from '@/db/useHabitDb';
-import Spinner from '@/components/Spinner';
+import Spinner from '@/components/common/Spinner';
 
 interface HabitCompletionsListProps {
   selectedDate: string;

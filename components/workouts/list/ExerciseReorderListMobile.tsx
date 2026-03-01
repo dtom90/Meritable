@@ -10,7 +10,7 @@ import { ExerciseListItem } from './ExerciseListItem';
 import { useListExercises, useReorderExercises } from '@/db/useWorkoutDb';
 import type { Exercise } from '@/db/types';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Spinner from '@/components/Spinner';
+import Spinner from '@/components/common/Spinner';
 
 export function ExerciseReorderListMobile() {
   const router = useRouter();

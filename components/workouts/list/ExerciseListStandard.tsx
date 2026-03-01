@@ -5,7 +5,7 @@ import { Colors } from '@/lib/Colors';
 import { ExerciseListItem } from './ExerciseListItem';
 import { useListExercises } from '@/db/useWorkoutDb';
 import type { Exercise } from '@/db/types';
-import Spinner from '@/components/Spinner';
+import Spinner from '@/components/common/Spinner';
 
 /** Standard (non-reorder) exercise list for both web and mobile. */
 export function ExerciseListStandard() {
