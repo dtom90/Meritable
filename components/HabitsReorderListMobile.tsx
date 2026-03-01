@@ -1,10 +1,9 @@
 import React, { useCallback } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import { Colors } from '@/lib/Colors';
 import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/types';

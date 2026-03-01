@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,6 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Colors } from '@/lib/Colors';
 import HabitReorderItem from './HabitReorderItem';
 import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import { Habit } from '@/db/types';
@@ -54,7 +53,9 @@ export default function HabitsReorderListWeb() {
   const { mutate: reorderHabits } = useReorderHabits();
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -93,8 +94,11 @@ export default function HabitsReorderListWeb() {
   }
 
   return (
-    <View style={{ minHeight: 200 }}>
-
+    <ScrollView
+      className="flex-1"
+      showsVerticalScrollIndicator={true}
+      keyboardShouldPersistTaps="handled"
+    >
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -106,7 +110,6 @@ export default function HabitsReorderListWeb() {
           ))}
         </SortableContext>
       </DndContext>
-      
-    </View>
+    </ScrollView>
   );
 }
