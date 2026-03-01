@@ -4,19 +4,25 @@ import { Colors } from '@/lib/Colors';
 import { ExerciseListStandard } from './ExerciseListStandard';
 import { ExerciseReorderListWeb } from './ExerciseReorderListWeb';
 import { ExerciseReorderListMobile } from './ExerciseReorderListMobile';
+import { AddExerciseButton } from './AddExerciseButton';
 import { useListExercises } from '@/db/useWorkoutDb';
 
 export function ExerciseList() {
   const [isEditing, setIsEditing] = useState(false);
   const { data: exercises = [] } = useListExercises();
 
-  const list = isEditing
-    ? Platform.OS === 'web' ? (
+  const list = isEditing ? (
+    <View className="flex-1">
+      {Platform.OS === 'web' ? (
         <ExerciseReorderListWeb />
       ) : (
         <ExerciseReorderListMobile />
-      )
-    : <ExerciseListStandard />;
+      )}
+      <AddExerciseButton />
+    </View>
+  ) : (
+    <ExerciseListStandard />
+  );
 
   return (
     <>

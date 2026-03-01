@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## File list
 
-- **Habit-related**: HabitItem, HabitInputForm, HabitInputModal, HabitTitle, HabitActions, HabitCompletionButton, HabitCompletions, HabitCompletionsCalendar, HabitReorderList
+- **Habit-related**: HabitItem, HabitInputForm, HabitInputModal, HabitTitle, HabitActions, HabitCompletionButton, HabitCompletions, HabitCompletionsList, HabitCompletionsCalendar, HabitReorderList
 - **Layout**: HabitsListMobile, HabitsListWeb, NarrowView, WeekHeader, CustomDayHeader
 - **Quick Wins**: QuickWinsList (read-only list of dated iOS Reminders)
 - **UI**: ThemedText, ThemedView, AddHabitButton, LoginOverlay, ExternalLink
