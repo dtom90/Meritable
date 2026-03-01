@@ -12,7 +12,7 @@ import type { Exercise } from '@/db/types';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Spinner from '@/components/Spinner';
 
-export function ExerciseListMobile() {
+export function ExerciseReorderListMobile() {
   const router = useRouter();
   const { data: exercises = [], isLoading } = useListExercises();
   const { mutate: reorderExercises } = useReorderExercises();

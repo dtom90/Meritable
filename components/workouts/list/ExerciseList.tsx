@@ -1,11 +1,35 @@
-import { Platform } from 'react-native';
-import { ExerciseListWeb } from './ExerciseListWeb';
-import { ExerciseListMobile } from './ExerciseListMobile';
+import { useState } from 'react';
+import { View, Pressable, Text, Platform } from 'react-native';
+import { Colors } from '@/lib/Colors';
+import { ExerciseListStandard } from './ExerciseListStandard';
+import { ExerciseReorderListWeb } from './ExerciseReorderListWeb';
+import { ExerciseReorderListMobile } from './ExerciseReorderListMobile';
+import { useListExercises } from '@/db/useWorkoutDb';
 
 export function ExerciseList() {
-  return Platform.OS === 'web' ? (
-    <ExerciseListWeb />
-  ) : (
-    <ExerciseListMobile />
+  const [isEditing, setIsEditing] = useState(false);
+  const { data: exercises = [] } = useListExercises();
+
+  const list = isEditing
+    ? Platform.OS === 'web' ? (
+        <ExerciseReorderListWeb />
+      ) : (
+        <ExerciseReorderListMobile />
+      )
+    : <ExerciseListStandard />;
+
+  return (
+    <>
+      {exercises.length > 1 && (
+        <View className="flex-row justify-between items-center">
+          <Pressable onPress={() => setIsEditing(!isEditing)}>
+            <Text style={{ color: Colors.primary }}>
+              {isEditing ? 'Done' : 'Edit'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      {list}
+    </>
   );
 }

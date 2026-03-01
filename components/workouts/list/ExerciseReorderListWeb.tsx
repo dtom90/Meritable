@@ -57,17 +57,10 @@ function SortableExerciseItem({
   );
 }
 
-export function ExerciseListWeb() {
+export function ExerciseReorderListWeb() {
   const router = useRouter();
   const { data: exercises = [], isLoading } = useListExercises();
   const { mutate: reorderExercises } = useReorderExercises();
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   const handlePressExercise = useCallback(
     (exercise: Exercise) => {
@@ -76,6 +69,13 @@ export function ExerciseListWeb() {
       }
     },
     [router]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
   const handleDragEnd = useCallback(
@@ -92,7 +92,10 @@ export function ExerciseListWeb() {
 
         if (oldIndex !== -1 && newIndex !== -1) {
           const newItems = arrayMove(exercises, oldIndex, newIndex);
-          const reordered = newItems.map((ex, index) => ({ ...ex, order: index }));
+          const reordered = newItems.map((ex, index) => ({
+            ...ex,
+            order: index,
+          }));
           reorderExercises(reordered);
         }
       }

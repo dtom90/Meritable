@@ -1,6 +1,5 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useMemo } from 'react';
-import { Colors } from '@/lib/Colors';
 import { useListHabitCompletionsByDate } from '@/db/useHabitDb';
 import { Habit, HabitCompletion } from '@/db/types';
 import HabitCompletionButton from './HabitCompletionButton';
