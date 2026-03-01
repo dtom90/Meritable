@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Exercise } from './types';
 import { ExerciseInput, SetInput } from './types';
 import { useDataSource } from '@/db/DataSourceContext';
 
@@ -56,6 +57,20 @@ export const useDeleteExercise = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [SETS_QUERY_KEY] });
+    },
+  });
+};
+
+export const useReorderExercises = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  return useMutation({
+    mutationFn: async (exercises: Exercise[]) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.reorderExercises(exercises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY] });
     },
   });
 };

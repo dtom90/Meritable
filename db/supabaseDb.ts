@@ -315,6 +315,28 @@ export class SupabaseDb extends HabitDatabaseInterface {
     if (error) throw error
   }
 
+  async reorderExercises(exercises: Exercise[]): Promise<Exercise[]> {
+    const user = await this.getUser()
+    const updated: Exercise[] = []
+    for (const exercise of exercises) {
+      if (exercise.id != null) {
+        const { data, error } = await this.supabase
+          .from('exercises')
+          .update({
+            order: exercise.order,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', exercise.id)
+          .eq('user_id', user?.id)
+          .select()
+          .single()
+        if (error) throw error
+        if (data) updated.push(mapExerciseRow(data))
+      }
+    }
+    return updated
+  }
+
   // Set operations
   async createSet(set: SetInput): Promise<Set> {
     const user = await this.getUser()

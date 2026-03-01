@@ -176,6 +176,13 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     await this.exercises.delete(id);
   }
 
+  async reorderExercises(exercises: Exercise[]): Promise<Exercise[]> {
+    const now = new Date().toISOString();
+    const updated = exercises.map((ex) => ({ ...ex, updated_at: now }));
+    await this.exercises.bulkPut(updated);
+    return updated;
+  }
+
   // Set operations
   async createSet(set: SetInput): Promise<Set> {
     const now = new Date().toISOString();

@@ -231,6 +231,13 @@ class AsyncStorageDb implements HabitDatabaseInterface {
     await this.saveExercises(exercises.filter(e => e.id !== id));
   }
 
+  async reorderExercises(exercises: Exercise[]): Promise<Exercise[]> {
+    const now = new Date().toISOString();
+    const reordered = exercises.map((ex, index) => ({ ...ex, order: index, updated_at: now }));
+    await this.saveExercises(reordered);
+    return reordered;
+  }
+
   // Set operations
   async createSet(set: SetInput): Promise<Set> {
     const now = new Date().toISOString();
