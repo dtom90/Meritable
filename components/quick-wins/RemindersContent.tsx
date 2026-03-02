@@ -30,8 +30,8 @@ export default function RemindersContent() {
       <QuickWinsList
         reminders={reminders}
         selectedDate={selectedDate}
-        onMarkComplete={(r: Reminder) => r.id && updateReminderCompletion.mutate({ reminderId: r.id, completed: true })}
-        onMarkIncomplete={(r: Reminder) => r.id && updateReminderCompletion.mutate({ reminderId: r.id, completed: false })}
+        onMarkComplete={(r: Reminder) => r.id && updateReminderCompletion.mutate({ reminderId: r.id, completed: true, selectedDate })}
+        onMarkIncomplete={(r: Reminder) => r.id && updateReminderCompletion.mutate({ reminderId: r.id, completed: false, selectedDate })}
         pendingReminderId={pendingReminderId}
       />
     );

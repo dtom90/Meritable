@@ -76,3 +76,11 @@ export const endOfDay = (dateString: string): Date => {
   const [year, month, day] = dateString.split('-').map(Number);
   return new Date(year, month - 1, day, 23, 59, 59, 999);
 };
+
+/**
+ * Noon (12:00:00) on the given day (YYYY-MM-DD) in local timezone as a Date.
+ */
+export const noonOnDate = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+};

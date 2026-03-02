@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import type { Reminder } from 'expo-calendar';
-import { endOfDay, getToday } from '@/lib/dateUtils';
+import { endOfDay, getToday, noonOnDate } from '@/lib/dateUtils';
 
 const QUICK_WINS_REMINDERS_QUERY_KEY = 'quickWinsReminders';
 
@@ -71,23 +71,26 @@ async function fetchQuickWinsReminders(selectedDate: string): Promise<Reminder[]
 }
 
 /**
- * Update a reminder's completion state. Uses current time for completionDate when completing.
- * Fetches the full reminder first and passes it back with only completed/completionDate changed,
- * so no other fields (e.g. title) are cleared. iOS only; no-op on other platforms.
+ * Update a reminder's completion state. When completing: uses current time if selectedDate is today,
+ * otherwise 12:00 noon in local timezone on selectedDate. Fetches the full reminder first and
+ * passes it back with only completed/completionDate changed. iOS only; no-op on other platforms.
  */
 async function updateReminderCompletionAsync(
   reminderId: string,
-  completed: boolean
+  completed: boolean,
+  selectedDate: string
 ): Promise<void> {
   if (Platform.OS !== 'ios') return;
   const reminder = await Calendar.getReminderAsync(reminderId);
   const { creationDate, lastModifiedDate, ...rest } = reminder;
   const base = { ...rest, id: reminderId };
   if (completed) {
+    const completionDate =
+      selectedDate === getToday() ? new Date() : noonOnDate(selectedDate);
     await Calendar.updateReminderAsync(reminderId, {
       ...base,
       completed: true,
-      completionDate: new Date(),
+      completionDate,
     });
   } else {
     await Calendar.updateReminderAsync(reminderId, {
@@ -139,11 +142,13 @@ export function useUpdateReminderCompletion() {
     mutationFn: async ({
       reminderId,
       completed,
+      selectedDate,
     }: {
       reminderId: string;
       completed: boolean;
+      selectedDate: string;
     }) => {
-      await updateReminderCompletionAsync(reminderId, completed);
+      await updateReminderCompletionAsync(reminderId, completed, selectedDate);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUICK_WINS_REMINDERS_QUERY_KEY] });
