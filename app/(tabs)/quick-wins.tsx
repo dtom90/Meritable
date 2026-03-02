@@ -1,28 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, Pressable, Platform, AppState, AppStateStatus, Linking } from 'react-native';
+import { View, Text, Pressable, Platform, Linking } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import WeekHeader from '@/components/common/WeekHeader';
 import { NarrowView } from '@/components/common/NarrowView';
 import Spinner from '@/components/common/Spinner';
-import { getToday } from '@/lib/dateUtils';
-import { useQueryClient } from '@tanstack/react-query';
+import { useSelectedDate } from '@/lib/selectedDateStore';
 import {
   useRemindersPermissions,
   useQuickWinsReminders,
   useUpdateReminderCompletion,
-  quickWinsRemindersQueryKey,
 } from '@/db/useReminders';
 import QuickWinsList from '@/components/quick-wins/QuickWinsList';
 import { Icon } from 'react-native-paper';
 import type { Reminder } from 'expo-calendar';
 
 export default function QuickWinsScreen() {
-  const [today, setToday] = useState(getToday());
-  const [selectedDate, setSelectedDate] = useState(today);
-  const queryClient = useQueryClient();
-  const appState = useRef(AppState.currentState);
-  const selectedDateRef = useRef(selectedDate);
-  const todayRef = useRef(today);
+  const { selectedDate } = useSelectedDate();
 
   const [permission, requestPermission] = useRemindersPermissions();
   const permissionGranted = permission?.granted === true;
@@ -37,36 +29,10 @@ export default function QuickWinsScreen() {
     Linking.openURL('x-apple-reminderkit://');
   };
 
-  useEffect(() => {
-    selectedDateRef.current = selectedDate;
-  }, [selectedDate]);
-
-  useEffect(() => {
-    todayRef.current = today;
-  }, [today]);
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        const newToday = getToday();
-        if (selectedDateRef.current === todayRef.current) {
-          setSelectedDate(newToday);
-        }
-        setToday(newToday);
-        queryClient.invalidateQueries({ queryKey: quickWinsRemindersQueryKey });
-      }
-      appState.current = nextAppState;
-    });
-    return () => subscription.remove();
-  }, [queryClient]);
-
   if (Platform.OS !== 'ios') {
     return (
       <>
-        <WeekHeader selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+        <WeekHeader />
         <NarrowView disableScroll>
           <View style={{ flex: 1, justifyContent: 'center' }}>
             <Text style={{ color: Colors.textSecondary, textAlign: 'center' }}>
@@ -80,7 +46,7 @@ export default function QuickWinsScreen() {
 
   return (
     <>
-      <WeekHeader selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+      <WeekHeader />
       <NarrowView>
         {permissionGranted && (
           <Pressable

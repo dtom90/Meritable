@@ -4,14 +4,11 @@ import { WeekCalendar, CalendarProvider } from 'react-native-calendars';
 import { Colors } from '@/lib/Colors';
 import { formatDate } from '@/lib/dateUtils';
 import { MarkedDates } from 'react-native-calendars/src/types';
+import { useSelectedDate } from '@/lib/selectedDateStore';
 import CustomDayHeader from './CustomDayHeader';
 
-interface WeekHeaderProps {
-  selectedDate: string;
-  onDateSelect: (date: string) => void;
-}
-
-export default function WeekHeader({ selectedDate, onDateSelect }: WeekHeaderProps) {
+export default function WeekHeader() {
+  const { selectedDate, setSelectedDate } = useSelectedDate();
   const formattedSelectedDate = formatDate(selectedDate);
 
   const markedDates: MarkedDates = {
@@ -24,12 +21,12 @@ export default function WeekHeader({ selectedDate, onDateSelect }: WeekHeaderPro
     <View style={{ backgroundColor: Colors.surface, height: 48, overflow: 'hidden' }}>
       <CalendarProvider
         date={formattedSelectedDate}
-        onDateChanged={(date) => onDateSelect(date)}
+        onDateChanged={(date) => setSelectedDate(date)}
         style={{ height: 48, overflow: 'hidden' }}
       >
         <WeekCalendar
           current={formattedSelectedDate}
-          onDayPress={(day) => onDateSelect(day.dateString)}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
           dayComponent={CustomDayHeader}
           calendarHeight={48}
