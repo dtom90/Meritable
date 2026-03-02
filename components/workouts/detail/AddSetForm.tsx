@@ -27,12 +27,6 @@ export function AddSetForm({ exerciseId }: AddSetFormProps) {
         weight: weightNum,
         reps,
         completionDate: getToday(),
-      },
-      {
-        onSuccess: () => {
-          setWeightInput('');
-          setRepsInput('');
-        },
       }
     );
   };
