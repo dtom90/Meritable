@@ -77,9 +77,6 @@ export function SetHistoryList({ sets, isLoading }: SetHistoryListProps) {
 
   return (
     <>
-      <Text className="text-base mb-2" style={{ color: Colors.textSecondary }}>
-        History
-      </Text>
       {isLoading ? (
         <Spinner />
       ) : sets.length === 0 ? (

@@ -6,28 +6,14 @@ import { ExerciseReorderListWeb } from './ExerciseReorderListWeb';
 import { ExerciseReorderListMobile } from './ExerciseReorderListMobile';
 import { AddExerciseButton } from './AddExerciseButton';
 import { useListExercises } from '@/db/useWorkoutDb';
+import { NarrowView } from '@/components/common/NarrowView';
 
 export function ExerciseList() {
   const [isEditing, setIsEditing] = useState(false);
   const { data: exercises = [] } = useListExercises();
 
-  const list = isEditing ? (
-    <View className="flex-1">
-      {Platform.OS === 'web' ? (
-        <ExerciseReorderListWeb />
-      ) : (
-        <ExerciseReorderListMobile />
-      )}
-      <AddExerciseButton />
-    </View>
-  ) : exercises.length === 0 ? (
-    <AddExerciseButton />
-  ) : (
-    <ExerciseListStandard />
-  );
-
   return (
-    <>
+    <NarrowView>
       {exercises.length > 0 && (
         <View className="flex-row justify-between items-center">
           <Pressable onPress={() => setIsEditing(!isEditing)}>
@@ -37,7 +23,20 @@ export function ExerciseList() {
           </Pressable>
         </View>
       )}
-      {list}
-    </>
+      {isEditing ? (
+        <View className="flex-1">
+          {Platform.OS === 'web' ? (
+            <ExerciseReorderListWeb />
+          ) : (
+            <ExerciseReorderListMobile />
+          )}
+          <AddExerciseButton />
+        </View>
+      ) : exercises.length === 0 ? (
+        <AddExerciseButton />
+      ) : (
+        <ExerciseListStandard />
+      )}
+    </NarrowView>
   );
 }
