@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Spinner from '@/components/common/Spinner';
-import QuickWinsButton from './QuickWinsButton';
+import QuickWinButton from './QuickWinButton';
 import { useTasksForDate } from '@/db/useTasks';
 import { useTaskTagIdsMap, useTagsQuery } from '@/db/useTags';
 import { useSelectedDate } from '@/lib/selectedDateStore';
@@ -92,7 +92,7 @@ export default function QuickWinsList({
       )}
       {tasksFiltered && tasksFiltered.length > 0 ? (
         tasksFiltered.map((task, index) => (
-          <QuickWinsButton
+          <QuickWinButton
             key={task.id ?? `task-${index}`}
             task={task}
             tagNames={task.id != null ? getTagNamesForTask(task.id) : []}

@@ -7,12 +7,12 @@ import { useUpdateTask } from '@/db/useTasks';
 import { getToday } from '@/lib/dateUtils';
 import PillButton from '@/components/common/PillButton';
 
-interface QuickWinsButtonProps {
+interface QuickWinButtonProps {
   task: Task;
   tagNames?: string[];
 }
 
-export default function QuickWinsButton({ task, tagNames = [] }: QuickWinsButtonProps) {
+export default function QuickWinButton({ task, tagNames = [] }: QuickWinButtonProps) {
   const router = useRouter();
   const { selectedDate } = useSelectedDate();
   const updateTask = useUpdateTask();
