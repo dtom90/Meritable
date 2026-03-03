@@ -11,7 +11,7 @@ Meritable is a React Native habit tracking app built with Expo and TypeScript. I
 ## Directory Map
 
 - `app/` — Routes and layouts (see .cursor/rules when editing)
-- `components/` — Reusable UI: `common/`, `habits/list/`, `habits/detail/`, `quick-wins/`, `data/`, `Modals/`, `workouts/` (see .cursor/rules when editing)
+- `components/` — Reusable UI: `common/`, `habits/list/`, `habits/detail/`, `quick-wins/list/`, `quick-wins/detail/`, `data/`, `Modals/`, `workouts/` (see .cursor/rules when editing)
 - `db/` — Data layer and auth (see .cursor/rules when editing)
 - `lib/` — Utils (Colors, dateUtils, useWindowWidth)
 - `assets/` — Fonts, images
