@@ -35,7 +35,7 @@ export default function TabLayout() {
             name="habits"
             options={{
               title: 'Habits',
-              tabBarIcon: ({ color }) => <Ionicons name="list" size={28} color={color} />,
+              tabBarIcon: ({ color }) => <Ionicons name="refresh-outline" size={28} color={color} />,
               href: '/habits',
             }}
           />
