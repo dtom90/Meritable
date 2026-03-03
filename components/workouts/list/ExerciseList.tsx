@@ -28,7 +28,7 @@ export function ExerciseList() {
 
   return (
     <>
-      {exercises.length > 1 && (
+      {exercises.length > 0 && (
         <View className="flex-row justify-between items-center">
           <Pressable onPress={() => setIsEditing(!isEditing)}>
             <Text style={{ color: Colors.primary }}>

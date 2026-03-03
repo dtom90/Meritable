@@ -19,7 +19,7 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
   return (
     <NarrowView disableScroll={isEditing}>
 
-      {habits && habits.length > 1 && (
+      {habits && habits.length > 0 && (
         <View className='flex-row justify-between items-center'>
           <Pressable onPress={() => setIsEditing(!isEditing)}>
             <Text style={{ color: Colors.primary }}>{isEditing ? 'Done' : 'Edit'}</Text>
@@ -30,7 +30,7 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
       {isLoadingHabits ? (
         <Spinner />
       ) : isEditing ? (
-        <View className="flex-1">
+        <View>
           <HabitReorderList />
           <AddHabitButton />
         </View>

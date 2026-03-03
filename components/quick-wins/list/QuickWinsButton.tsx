@@ -2,7 +2,6 @@ import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Task } from '@/db/types';
 import { Colors } from '@/lib/Colors';
-import { Icon } from 'react-native-paper';
 import { useSelectedDate } from '@/lib/selectedDateStore';
 import { useUpdateTask } from '@/db/useTasks';
 import { getToday } from '@/lib/dateUtils';
@@ -46,6 +45,7 @@ export default function QuickWinsButton({ task, tagNames = [] }: QuickWinsButton
     <PillButton
       backgroundColor={backgroundColor}
       onMainPress={canNavigate ? navigateToDetail : undefined}
+      chevronColor={isCompleted ? Colors.text : Colors.textSecondary}
       checkButton={
         canToggle
           ? {
@@ -71,13 +71,6 @@ export default function QuickWinsButton({ task, tagNames = [] }: QuickWinsButton
           >
             {task.title || 'Untitled'}
           </Text>
-          {canNavigate && (
-            <Icon
-              source="chevron-right"
-              color={isCompleted ? Colors.text : Colors.textSecondary}
-              size={20}
-            />
-          )}
         </View>
         {tagNames.length > 0 && (
           <View className="flex-row flex-wrap justify-center gap-1 mt-1">

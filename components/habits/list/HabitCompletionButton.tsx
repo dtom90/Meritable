@@ -1,6 +1,4 @@
 import { useCreateHabitCompletion, useDeleteHabitCompletion, useUpdateHabitCompletion } from '@/db/useHabitDb';
-import { Text } from 'react-native';
-import { Icon } from 'react-native-paper';
 import { Colors } from '@/lib/Colors';
 import { Habit, HabitCompletion } from '@/db/types';
 import { useRouter } from 'expo-router';
@@ -126,16 +124,8 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
             }
           : undefined
       }
-    >
-      <Text className="text-lg text-center mr-1" style={{ color: Colors.text }}>
-        {habit.name}
-      </Text>
-      {hasCountTarget && (
-        <Text className="text-lg text-bold text-center ml-2 mr-2" style={{ color: Colors.text }}>
-          {habitCompletionsMap[habit.id]?.count || 0} / {habit.countTarget}
-        </Text>
-      )}
-      <Icon source="chevron-right" color={isCompleted ? Colors.text : Colors.textSecondary} size={20} />
-    </PillButton>
+      text={habit.name}
+      chevronColor={isCompleted ? Colors.text : Colors.textSecondary}
+    />
   );
 }

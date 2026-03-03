@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, type ViewStyle } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { Colors } from '@/lib/Colors';
 
@@ -19,11 +19,23 @@ export interface PillButtonMultiCountProps {
   loading?: boolean;
 }
 
+/** Props to spread onto the drag handle (e.g. from @dnd-kit useSortable). When set, a standard drag handle is rendered on the left with pl-4 mr-3 spacing. */
+export interface PillButtonDragHandleProps {
+  [key: string]: unknown;
+}
+
 export interface PillButtonProps {
   backgroundColor: string;
   onMainPress?: () => void;
-  children: React.ReactNode;
+  /** Main label; rendered with standard pill button text styling (text-lg, center, theme color). */
+  text?: string;
+  /** Optional extra content (e.g. icon, count) rendered after the text. */
+  children?: React.ReactNode;
   leftContent?: React.ReactNode;
+  /** When set, renders a drag handle on the left with spacing matching habit/workout lists. */
+  dragHandleProps?: PillButtonDragHandleProps | null;
+  /** When onMainPress is set, a chevron-right icon is shown. Use this to override its color (e.g. when completed). */
+  chevronColor?: string;
   checkButton?: PillButtonCheckButtonProps;
   multiCount?: PillButtonMultiCountProps;
 }
@@ -33,11 +45,32 @@ function computeProgressPercentage(currentCount: number, targetCount: number): n
   return Math.min(100, (currentCount / targetCount) * 100);
 }
 
+function DragHandle({ dragHandleProps }: { dragHandleProps: PillButtonDragHandleProps }) {
+  return (
+    <View className="pl-4 mr-3 flex-row items-center" style={{ zIndex: 1 }}>
+      <Pressable
+        style={({ pressed }) =>
+          [
+            { opacity: pressed ? 0.7 : 1 },
+            { cursor: 'grab' as ViewStyle['cursor'] },
+          ] as ViewStyle[]
+        }
+        {...dragHandleProps}
+      >
+        <Icon source="drag" color={Colors.textSecondary} size={20} />
+      </Pressable>
+    </View>
+  );
+}
+
 export default function PillButton({
   backgroundColor,
   onMainPress,
+  text,
   children,
   leftContent,
+  dragHandleProps,
+  chevronColor,
   checkButton,
   multiCount,
 }: PillButtonProps) {
@@ -48,6 +81,13 @@ export default function PillButton({
 
   const MainWrapper = onMainPress != null ? TouchableOpacity : View;
   const mainPressProps = onMainPress != null ? { onPress: onMainPress } : {};
+
+  const leftSlot =
+    dragHandleProps != null ? (
+      <DragHandle dragHandleProps={dragHandleProps} />
+    ) : leftContent != null ? (
+      <View style={{ zIndex: 1 }}>{leftContent}</View>
+    ) : null;
 
   return (
     <View
@@ -67,14 +107,29 @@ export default function PillButton({
           }}
         />
       )}
-      {leftContent != null && <View style={{ zIndex: 1 }}>{leftContent}</View>}
+      {leftSlot}
       <MainWrapper
         {...mainPressProps}
         style={{ backgroundColor: 'transparent', zIndex: 1 }}
         className="flex-1 h-full flex flex-row items-center border-r border-gray-600"
       >
         <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
-        <View className="flex-1 flex flex-row items-center justify-center">{children}</View>
+        <View className="flex-1 flex flex-row items-center justify-center gap-2">
+          {text != null ? (
+            <Text className="text-lg text-center" style={{ color: Colors.text }}>
+              {text}
+            </Text>
+          ) : null}
+          {multiCount != null && (
+            <Text className="text-lg text-bold text-center ml-2 mr-2" style={{ color: Colors.text }}>
+              {multiCount.currentCount} / {multiCount.targetCount}
+            </Text>
+          )}
+          {children}
+          {onMainPress != null && (
+            <Icon source="chevron-right" color={chevronColor ?? Colors.textSecondary} size={20} />
+          )}
+        </View>
       </MainWrapper>
 
       {multiCount != null && (
