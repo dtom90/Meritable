@@ -102,6 +102,17 @@ async function updateReminderCompletionAsync(
 }
 
 /**
+ * React Query hook to fetch a single reminder by ID. Used on the quick-win detail page.
+ */
+export function useReminder(reminderId: string | undefined) {
+  return useQuery({
+    queryKey: ['reminder', reminderId],
+    queryFn: () => Calendar.getReminderAsync(reminderId!),
+    enabled: Platform.OS === 'ios' && Boolean(reminderId),
+  });
+}
+
+/**
  * Permission hook for Reminders (iOS). Re-export from expo-calendar for use in Quick Wins screen.
  */
 export const useRemindersPermissions = Calendar.useRemindersPermissions;
@@ -150,8 +161,9 @@ export function useUpdateReminderCompletion() {
     }) => {
       await updateReminderCompletionAsync(reminderId, completed, selectedDate);
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUICK_WINS_REMINDERS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: ['reminder', variables.reminderId] });
     },
   });
 }

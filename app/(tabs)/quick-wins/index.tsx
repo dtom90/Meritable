@@ -5,7 +5,7 @@ import { NarrowView } from '@/components/common/NarrowView';
 import { useRemindersPermissions } from '@/db/useReminders';
 import OpenRemindersLink from '@/components/quick-wins/OpenRemindersLink';
 import RemindersPermissionBanner from '@/components/quick-wins/RemindersPermissionBanner';
-import RemindersContent from '@/components/quick-wins/RemindersContent';
+import QuickWinsList from '@/components/quick-wins/QuickWinsList';
 
 export default function QuickWinsScreen() {
   const [permission] = useRemindersPermissions();
@@ -30,9 +30,11 @@ export default function QuickWinsScreen() {
     <>
       <WeekHeader />
       <NarrowView>
-        {permissionGranted && <OpenRemindersLink />}
         {!permissionGranted && <RemindersPermissionBanner />}
-        {permissionGranted && <RemindersContent />}
+        {permissionGranted && <>
+          <OpenRemindersLink />
+          <QuickWinsList />
+        </>}
       </NarrowView>
     </>
   );
