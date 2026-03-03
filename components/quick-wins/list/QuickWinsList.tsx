@@ -60,15 +60,15 @@ export default function QuickWinsList({
   return (
     <View>
       {(tagsInUse.length > 0 || selectedTagId != null || tags.length > 0) && (
-        <View className="flex-row items-center gap-2 mb-3">
+        <View className="flex-row items-center gap-3 mb-3">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row items-center gap-2 flex-1"
+            className="flex-row items-center gap-3 flex-1"
           >
             <TouchableOpacity
               onPress={() => onSelectTagId(null)}
-              className="px-3 py-1.5 rounded-full"
+              className="px-3 py-1.5 rounded-full mr-2"
               style={{
                 backgroundColor: selectedTagId === null ? Colors.primary : Colors.card,
               }}
@@ -81,7 +81,7 @@ export default function QuickWinsList({
               <TouchableOpacity
                 key={tag.id}
                 onPress={() => onSelectTagId(tag.id)}
-                className="px-3 py-1.5 rounded-full"
+                className="px-3 py-1.5 rounded-full mr-2"
                 style={{
                   backgroundColor: selectedTagId === tag.id ? Colors.primary : Colors.card,
                 }}
