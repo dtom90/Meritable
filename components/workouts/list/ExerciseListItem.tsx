@@ -9,14 +9,20 @@ type ExerciseListItemProps = ViewProps & {
   onPress: () => void;
   isDragging?: boolean;
   dragHandleProps?: PillButtonDragHandleProps | null;
+  /** When true, row is highlighted (e.g. at least one set completed on selected date). */
+  isCompletedOnSelectedDate?: boolean;
 };
 
 export const ExerciseListItem = React.forwardRef<View, ExerciseListItemProps>(
   function ExerciseListItem(
-    { exercise, onPress, isDragging = false, dragHandleProps, style, ...props },
+    { exercise, onPress, isDragging = false, dragHandleProps, isCompletedOnSelectedDate = false, style, ...props },
     ref
   ) {
-    const backgroundColor = isDragging ? '#e0e0e0' : Colors.card;
+    const backgroundColor = isDragging
+      ? '#e0e0e0'
+      : isCompletedOnSelectedDate
+        ? Colors.success
+        : Colors.card;
 
     return (
       <View

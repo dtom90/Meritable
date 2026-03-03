@@ -4,7 +4,7 @@ import { ExerciseInput, SetInput } from './types';
 import { useDataSource } from '@/db/DataSourceContext';
 
 const EXERCISES_QUERY_KEY = 'exercises';
-const SETS_QUERY_KEY = 'sets';
+export const SETS_QUERY_KEY = 'sets';
 
 export const useListExercises = () => {
   const { activeDb, isInitialized } = useDataSource();
