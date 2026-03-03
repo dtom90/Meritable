@@ -32,8 +32,10 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
       ) : isEditing ? (
         <View className="flex-1">
           <HabitReorderList />
-          <AddHabitButton withTooltip={false} />
+          <AddHabitButton />
         </View>
+      ) : habits && habits.length === 0 ? (
+        <AddHabitButton />
       ) : (habits && habits.length > 0 && (
         <HabitCompletions selectedDate={selectedDate} habits={habits} />
       ))}

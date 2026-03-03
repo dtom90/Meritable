@@ -20,6 +20,8 @@ export function ExerciseList() {
       )}
       <AddExerciseButton />
     </View>
+  ) : exercises.length === 0 ? (
+    <AddExerciseButton />
   ) : (
     <ExerciseListStandard />
   );
