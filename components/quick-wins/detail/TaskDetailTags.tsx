@@ -18,6 +18,14 @@ export function TaskDetailTags({ taskId }: TaskDetailTagsProps) {
     .map((id) => ({ id, name: tags.find((t) => t.id === id)?.name }))
     .filter((x): x is { id: number; name: string } => Boolean(x.name));
 
+  const existingTagsNotOnTask = tags.filter((t) => !tagIds.includes(t.id));
+
+  const handleAddExistingTag = async (tagId: number) => {
+    if (setTaskTags.isPending) return;
+    if (tagIds.includes(tagId)) return;
+    await setTaskTags.mutateAsync({ taskId, tagIds: [...tagIds, tagId] });
+  };
+
   const handleAddTag = async () => {
     const trimmed = newTagName.trim();
     if (!trimmed || setTaskTags.isPending || createTag.isPending) return;
@@ -95,6 +103,32 @@ export function TaskDetailTags({ taskId }: TaskDetailTagsProps) {
           </Text>
         </TouchableOpacity>
       </View>
+      {existingTagsNotOnTask.length > 0 && (
+        <View className="mt-2">
+          <Text className="text-xs mb-1.5" style={{ color: Colors.textSecondary }}>
+            Add existing tag
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="flex-row flex-wrap gap-2"
+          >
+            {existingTagsNotOnTask.map((tag) => (
+              <TouchableOpacity
+                key={tag.id}
+                onPress={() => handleAddExistingTag(tag.id)}
+                disabled={setTaskTags.isPending}
+                className="rounded-full px-3 py-1.5"
+                style={{ backgroundColor: Colors.card }}
+              >
+                <Text className="text-sm" style={{ color: Colors.text }}>
+                  + {tag.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 }
