@@ -9,9 +9,10 @@ import { getToday } from '@/lib/dateUtils';
 
 interface QuickWinsButtonProps {
   task: Task;
+  tagNames?: string[];
 }
 
-export default function QuickWinsButton({ task }: QuickWinsButtonProps) {
+export default function QuickWinsButton({ task, tagNames = [] }: QuickWinsButtonProps) {
   const router = useRouter();
   const { selectedDate } = useSelectedDate();
   const updateTask = useUpdateTask();
@@ -44,7 +45,7 @@ export default function QuickWinsButton({ task }: QuickWinsButtonProps) {
 
   return (
     <View
-      className="flex-row items-center my-4 rounded-lg h-[68px] overflow-hidden"
+      className="flex-row items-center my-4 rounded-lg min-h-[68px] overflow-hidden py-2"
       style={{ backgroundColor, position: 'relative' }}
     >
       <TouchableOpacity
@@ -53,23 +54,50 @@ export default function QuickWinsButton({ task }: QuickWinsButtonProps) {
         className="flex-1 h-full flex flex-row items-center border-r border-gray-600"
       >
         <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
-        <View className="flex-1 flex flex-row items-center justify-center">
-          <Text
-            className="text-lg text-center mr-1"
-            style={{
-              color: Colors.text,
-              textDecorationLine: isCompleted ? 'line-through' : undefined,
-            }}
-            numberOfLines={1}
-          >
-            {task.title || 'Untitled'}
-          </Text>
-          {canNavigate && (
-            <Icon
-              source="chevron-right"
-              color={isCompleted ? Colors.text : Colors.textSecondary}
-              size={20}
-            />
+        <View className="flex-1 flex flex-col items-center justify-center">
+          <View className="flex-row items-center">
+            <Text
+              className="text-lg text-center mr-1"
+              style={{
+                color: Colors.text,
+                textDecorationLine: isCompleted ? 'line-through' : undefined,
+              }}
+              numberOfLines={1}
+            >
+              {task.title || 'Untitled'}
+            </Text>
+            {canNavigate && (
+              <Icon
+                source="chevron-right"
+                color={isCompleted ? Colors.text : Colors.textSecondary}
+                size={20}
+              />
+            )}
+          </View>
+          {tagNames.length > 0 && (
+            <View className="flex-row flex-wrap justify-center gap-1 mt-1">
+              {tagNames.slice(0, 3).map((name) => (
+                <View
+                  key={name}
+                  className="rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: Colors.border }}
+                >
+                  <Text className="text-xs" style={{ color: Colors.textSecondary }}>
+                    {name}
+                  </Text>
+                </View>
+              ))}
+              {tagNames.length > 3 && (
+                <View
+                  className="rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: Colors.border }}
+                >
+                  <Text className="text-xs" style={{ color: Colors.textSecondary }}>
+                    +{tagNames.length - 3}
+                  </Text>
+                </View>
+              )}
+            </View>
           )}
         </View>
       </TouchableOpacity>

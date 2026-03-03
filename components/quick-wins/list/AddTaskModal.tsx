@@ -14,8 +14,16 @@ import {
 } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { useCreateTask } from '@/db/useTasks';
+import { useCreateTag, useSetTaskTags } from '@/db/useTags';
 import { useSelectedDate } from '@/lib/selectedDateStore';
 import { formatDate } from '@/lib/dateUtils';
+
+function parseTagNames(input: string): string[] {
+  return input
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 interface AddTaskModalProps {
   visible: boolean;
@@ -35,14 +43,18 @@ export default function AddTaskModal({
   const { selectedDate } = useSelectedDate();
   const [taskTitle, setTaskTitle] = useState('');
   const [dueDate, setDueDate] = useState(selectedDate);
+  const [tagNamesStr, setTagNamesStr] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const createTask = useCreateTask();
-  const isSubmittingRef = useRef(false);
+  const createTag = useCreateTag();
+  const setTaskTags = useSetTaskTags();
   const titleInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (visible) {
       setTaskTitle('');
       setDueDate(selectedDate);
+      setTagNamesStr('');
       setModalVisible(true);
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -62,23 +74,31 @@ export default function AddTaskModal({
 
   const handleClose = () => onClose();
 
-  const handleSubmit = () => {
-    if (isSubmittingRef.current || createTask.isPending || !taskTitle.trim()) return;
+  const handleSubmit = async () => {
+    if (isSubmitting || createTask.isPending || !taskTitle.trim()) return;
     const normalizedDue = formatDate(dueDate, selectedDate);
-    isSubmittingRef.current = true;
+    setIsSubmitting(true);
     if (Platform.OS !== 'web') Keyboard.dismiss();
-    createTask.mutate(
-      { title: taskTitle.trim(), dueDate: normalizedDue },
-      {
-        onSuccess: () => {
-          isSubmittingRef.current = false;
-          onClose();
-        },
-        onError: () => {
-          isSubmittingRef.current = false;
-        },
+    try {
+      const task = await createTask.mutateAsync({
+        title: taskTitle.trim(),
+        dueDate: normalizedDue,
+      });
+      const tagNames = parseTagNames(tagNamesStr);
+      if (tagNames.length > 0) {
+        const tagIds: number[] = [];
+        for (const name of tagNames) {
+          const tag = await createTag.mutateAsync(name);
+          tagIds.push(tag.id);
+        }
+        await setTaskTags.mutateAsync({ taskId: task.id, tagIds });
       }
-    );
+      onClose();
+    } catch {
+      // leave modal open on error
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -144,7 +164,7 @@ export default function AddTaskModal({
                     autoFocus
                   />
                 </View>
-                <View className="mb-6">
+                <View className="mb-4">
                   <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
                     Due date (YYYY-MM-DD)
                   </Text>
@@ -157,16 +177,29 @@ export default function AddTaskModal({
                     onChangeText={setDueDate}
                   />
                 </View>
+                <View className="mb-6">
+                  <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
+                    Tags (comma-separated)
+                  </Text>
+                  <TextInput
+                    className="p-2.5 rounded"
+                    style={{ backgroundColor: Colors.card, color: Colors.text }}
+                    placeholder="e.g. work, errands"
+                    placeholderTextColor={Colors.textSecondary}
+                    value={tagNamesStr}
+                    onChangeText={setTagNamesStr}
+                  />
+                </View>
                 <TouchableOpacity
                   className="py-3 rounded items-center"
                   style={{
-                    backgroundColor: createTask.isPending ? Colors.textTertiary : Colors.primary,
+                    backgroundColor: isSubmitting ? Colors.textTertiary : Colors.primary,
                   }}
                   onPress={handleSubmit}
-                  disabled={createTask.isPending || !taskTitle.trim()}
+                  disabled={isSubmitting || createTask.isPending || !taskTitle.trim()}
                 >
                   <Text className="text-base font-bold" style={{ color: Colors.text }}>
-                    {createTask.isPending ? 'Adding...' : 'Add Task'}
+                    {isSubmitting ? 'Adding...' : 'Add Task'}
                   </Text>
                 </TouchableOpacity>
               </Animated.View>

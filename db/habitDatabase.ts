@@ -9,6 +9,7 @@ import type {
   SetInput,
   Task,
   TaskInput,
+  Tag,
 } from './types';
 
 export abstract class HabitDatabaseInterface {
@@ -45,4 +46,12 @@ export abstract class HabitDatabaseInterface {
   abstract getTask(id: number): Promise<Task | null>
   abstract updateTask(id: number, updates: Partial<TaskInput>): Promise<Task>
   abstract deleteTask(id: number): Promise<void>
+
+  // Tag operations (Quick Wins)
+  abstract getTags(): Promise<Tag[]>
+  abstract createTag(name: string): Promise<Tag>
+  abstract getTaskTagIds(taskId: number): Promise<number[]>
+  abstract setTaskTags(taskId: number, tagIds: number[]): Promise<void>
+  abstract getTaskTagIdsMap(): Promise<Record<number, number[]>>
+  abstract deleteTag(id: number): Promise<void>
 }

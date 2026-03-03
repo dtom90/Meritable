@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput } from './types';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput, Tag } from './types';
 import { HabitDatabaseInterface } from './habitDatabase';
 
 const HABITS_KEY = 'habits';
@@ -7,6 +7,13 @@ const HABIT_COMPLETIONS_KEY = 'habitCompletions';
 const EXERCISES_KEY = 'exercises';
 const SETS_KEY = 'sets';
 const TASKS_KEY = 'tasks';
+const TAGS_KEY = 'tags';
+const TASK_TAGS_KEY = 'task_tags';
+
+interface TaskTagRow {
+  taskId: number;
+  tagId: number;
+}
 
 class AsyncStorageDb implements HabitDatabaseInterface {
   // Helper methods for AsyncStorage operations
@@ -53,6 +60,24 @@ class AsyncStorageDb implements HabitDatabaseInterface {
 
   private async saveTasks(tasks: Task[]): Promise<void> {
     await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  }
+
+  private async loadTags(): Promise<Tag[]> {
+    const data = await AsyncStorage.getItem(TAGS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private async saveTags(tags: Tag[]): Promise<void> {
+    await AsyncStorage.setItem(TAGS_KEY, JSON.stringify(tags));
+  }
+
+  private async loadTaskTags(): Promise<TaskTagRow[]> {
+    const data = await AsyncStorage.getItem(TASK_TAGS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private async saveTaskTags(rows: TaskTagRow[]): Promise<void> {
+    await AsyncStorage.setItem(TASK_TAGS_KEY, JSON.stringify(rows));
   }
 
   // Habit operations
@@ -312,8 +337,59 @@ class AsyncStorageDb implements HabitDatabaseInterface {
   }
 
   async deleteTask(id: number): Promise<void> {
+    const taskTags = await this.loadTaskTags();
+    await this.saveTaskTags(taskTags.filter((r) => r.taskId !== id));
     const tasks = await this.loadTasks();
-    await this.saveTasks(tasks.filter(t => t.id !== id));
+    await this.saveTasks(tasks.filter((t) => t.id !== id));
+  }
+
+  // Tag operations
+  async getTags(): Promise<Tag[]> {
+    return this.loadTags();
+  }
+
+  async createTag(name: string): Promise<Tag> {
+    const trimmed = name.trim();
+    if (!trimmed) throw new Error('Tag name cannot be empty');
+    const tags = await this.loadTags();
+    const existing = tags.find((t) => t.name === trimmed);
+    if (existing) return existing;
+    const now = new Date().toISOString();
+    const nextId = tags.length > 0 ? Math.max(...tags.map((t) => t.id)) + 1 : 1;
+    const toAdd: Tag = { id: nextId, name: trimmed, created_at: now, updated_at: now };
+    tags.push(toAdd);
+    await this.saveTags(tags);
+    return toAdd;
+  }
+
+  async getTaskTagIds(taskId: number): Promise<number[]> {
+    const rows = await this.loadTaskTags();
+    return rows.filter((r) => r.taskId === taskId).map((r) => r.tagId);
+  }
+
+  async setTaskTags(taskId: number, tagIds: number[]): Promise<void> {
+    const rows = await this.loadTaskTags();
+    const rest = rows.filter((r) => r.taskId !== taskId);
+    const deduped = tagIds.filter((id, i) => tagIds.indexOf(id) === i);
+    const newRows = deduped.map((tagId) => ({ taskId, tagId }));
+    await this.saveTaskTags([...rest, ...newRows]);
+  }
+
+  async getTaskTagIdsMap(): Promise<Record<number, number[]>> {
+    const rows = await this.loadTaskTags();
+    const map: Record<number, number[]> = {};
+    for (const row of rows) {
+      if (!map[row.taskId]) map[row.taskId] = [];
+      map[row.taskId].push(row.tagId);
+    }
+    return map;
+  }
+
+  async deleteTag(id: number): Promise<void> {
+    const taskTags = await this.loadTaskTags();
+    await this.saveTaskTags(taskTags.filter((r) => r.tagId !== id));
+    const tags = await this.loadTags();
+    await this.saveTags(tags.filter((t) => t.id !== id));
   }
 }
 

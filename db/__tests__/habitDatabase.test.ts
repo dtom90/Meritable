@@ -42,6 +42,8 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
         await dexieDb.exercises.clear();
         await dexieDb.sets.clear();
         await dexieDb.tasks.clear();
+        await dexieDb.tags.clear();
+        await dexieDb.task_tags.clear();
         await dexieDb.close();
         await dexieDb.delete(); // Delete the database completely
       }
@@ -52,6 +54,8 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       await AsyncStorage.removeItem('exercises');
       await AsyncStorage.removeItem('sets');
       await AsyncStorage.removeItem('tasks');
+      await AsyncStorage.removeItem('tags');
+      await AsyncStorage.removeItem('task_tags');
     }
   });
 
@@ -1014,6 +1018,137 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
         const tasks = await db.getTasks();
         expect(tasks).toHaveLength(0);
         expect(await db.getTask(created.id)).toBeNull();
+      });
+
+      it('should remove task_tags when task is deleted', async () => {
+        const task = await db.createTask({
+          title: 'Tagged task',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const tag = await db.createTag('work');
+        await db.setTaskTags(task.id, [tag.id]);
+        expect(await db.getTaskTagIds(task.id)).toEqual([tag.id]);
+        await db.deleteTask(task.id);
+        expect(await db.getTaskTagIds(task.id)).toEqual([]);
+        expect(await db.getTask(task.id)).toBeNull();
+      });
+    });
+  });
+
+  describe('Tag and task_tags operations', () => {
+    describe('getTags', () => {
+      it('should return empty array when no tags exist', async () => {
+        const tags = await db.getTags();
+        expect(tags).toEqual([]);
+      });
+    });
+
+    describe('createTag', () => {
+      it('should create a tag with name', async () => {
+        const tag = await db.createTag('work');
+        expect(tag.id).toBeDefined();
+        expect(tag.name).toBe('work');
+        expect(tag.created_at).toBeDefined();
+      });
+
+      it('should return existing tag when creating with same name', async () => {
+        const a = await db.createTag('errands');
+        const b = await db.createTag('errands');
+        expect(a.id).toBe(b.id);
+        expect(a.name).toBe('errands');
+      });
+
+      it('should throw for empty name', async () => {
+        await expect(db.createTag('')).rejects.toThrow();
+        await expect(db.createTag('   ')).rejects.toThrow();
+      });
+    });
+
+    describe('getTaskTagIds and setTaskTags', () => {
+      it('should return empty array when task has no tags', async () => {
+        const task = await db.createTask({
+          title: 'No tags',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        expect(await db.getTaskTagIds(task.id)).toEqual([]);
+      });
+
+      it('should set and get task tags', async () => {
+        const task = await db.createTask({
+          title: 'Tagged',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const t1 = await db.createTag('a');
+        const t2 = await db.createTag('b');
+        await db.setTaskTags(task.id, [t1.id, t2.id]);
+        const ids = await db.getTaskTagIds(task.id);
+        expect(ids).toHaveLength(2);
+        expect(ids).toContain(t1.id);
+        expect(ids).toContain(t2.id);
+      });
+
+      it('should replace tags when setTaskTags called again', async () => {
+        const task = await db.createTask({
+          title: 'Replace',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const t1 = await db.createTag('x');
+        const t2 = await db.createTag('y');
+        await db.setTaskTags(task.id, [t1.id, t2.id]);
+        await db.setTaskTags(task.id, [t2.id]);
+        expect(await db.getTaskTagIds(task.id)).toEqual([t2.id]);
+      });
+    });
+
+    describe('getTaskTagIdsMap', () => {
+      it('should return empty object when no task_tags', async () => {
+        const map = await db.getTaskTagIdsMap();
+        expect(map).toEqual({});
+      });
+
+      it('should return taskId to tagIds for all tasks', async () => {
+        const task1 = await db.createTask({
+          title: 'T1',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const task2 = await db.createTask({
+          title: 'T2',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const tag = await db.createTag('shared');
+        await db.setTaskTags(task1.id, [tag.id]);
+        await db.setTaskTags(task2.id, [tag.id]);
+        const map = await db.getTaskTagIdsMap();
+        expect(map[task1.id]).toEqual([tag.id]);
+        expect(map[task2.id]).toEqual([tag.id]);
+      });
+    });
+
+    describe('deleteTag', () => {
+      it('should delete tag and remove task_tag rows', async () => {
+        const task = await db.createTask({
+          title: 'T',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const tag = await db.createTag('gone');
+        await db.setTaskTags(task.id, [tag.id]);
+        await db.deleteTag(tag.id);
+        expect(await db.getTags()).toHaveLength(0);
+        expect(await db.getTaskTagIds(task.id)).toEqual([]);
       });
     });
   });

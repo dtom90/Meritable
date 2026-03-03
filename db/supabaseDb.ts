@@ -1,4 +1,4 @@
-import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput } from './types';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput, Tag } from './types';
 import { HabitDatabaseInterface } from './habitDatabase';
 import { supabaseClient } from './supabaseClient'
 import { User } from '@supabase/supabase-js'
@@ -452,6 +452,100 @@ export class SupabaseDb extends HabitDatabaseInterface {
     const user = await this.getUser()
     const { error } = await this.supabase.from('tasks').delete().eq('id', id).eq('user_id', user?.id)
     if (error) throw error
+  }
+
+  // Tag operations
+  async getTags(): Promise<Tag[]> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('tags')
+      .select('*')
+      .eq('user_id', user?.id)
+    if (error) throw error
+    return (data || []).map(mapTagRow)
+  }
+
+  async createTag(name: string): Promise<Tag> {
+    const user = await this.getUser()
+    const trimmed = name.trim()
+    if (!trimmed) throw new Error('Tag name cannot be empty')
+    const { data: existing } = await this.supabase
+      .from('tags')
+      .select('*')
+      .eq('user_id', user?.id)
+      .eq('name', trimmed)
+      .maybeSingle()
+    if (existing) return mapTagRow(existing)
+    const { data, error } = await this.supabase
+      .from('tags')
+      .insert({ name: trimmed, user_id: user?.id })
+      .select()
+      .single()
+    if (error) throw error
+    return mapTagRow(data)
+  }
+
+  async getTaskTagIds(taskId: number): Promise<number[]> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('task_tags')
+      .select('tag_id')
+      .eq('task_id', taskId)
+    if (error) throw error
+    const rows = data || []
+    const tagIds = rows.map((r: any) => Number(r.tag_id))
+    const tagIdsFiltered = tagIds.filter((id: number) => !isNaN(id))
+    if (tagIdsFiltered.length !== tagIds.length) return tagIdsFiltered
+    return tagIds
+  }
+
+  async setTaskTags(taskId: number, tagIds: number[]): Promise<void> {
+    const user = await this.getUser()
+    const { error: delError } = await this.supabase
+      .from('task_tags')
+      .delete()
+      .eq('task_id', taskId)
+    if (delError) throw delError
+    const deduped = tagIds.filter((id: number, i: number) => tagIds.indexOf(id) === i)
+    if (deduped.length === 0) return
+    const toInsert = deduped.map((tag_id) => ({ task_id: taskId, tag_id }))
+    const { error: insError } = await this.supabase.from('task_tags').insert(toInsert)
+    if (insError) throw insError
+  }
+
+  async getTaskTagIdsMap(): Promise<Record<number, number[]>> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('task_tags')
+      .select('task_id, tag_id')
+    if (error) throw error
+    const rows = data || []
+    const map: Record<number, number[]> = {}
+    for (const row of rows) {
+      const taskId = Number(row.task_id)
+      const tagId = Number(row.tag_id)
+      if (isNaN(taskId) || isNaN(tagId)) continue
+      if (!map[taskId]) map[taskId] = []
+      map[taskId].push(tagId)
+    }
+    return map
+  }
+
+  async deleteTag(id: number): Promise<void> {
+    const user = await this.getUser()
+    const { error: ttError } = await this.supabase.from('task_tags').delete().eq('tag_id', id)
+    if (ttError) throw ttError
+    const { error } = await this.supabase.from('tags').delete().eq('id', id).eq('user_id', user?.id)
+    if (error) throw error
+  }
+}
+
+function mapTagRow(row: any): Tag {
+  return {
+    id: Number(row.id),
+    name: row.name,
+    created_at: row.created_at,
+    updated_at: row.updated_at
   }
 }
 

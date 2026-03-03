@@ -1,6 +1,11 @@
 import Dexie, { Table } from 'dexie';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput } from './types';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput, Tag } from './types';
 import { HabitDatabaseInterface } from './habitDatabase';
+
+interface TaskTagRow {
+  taskId: number;
+  tagId: number;
+}
 
 class DexieDb extends Dexie implements HabitDatabaseInterface {
   habits!: Table<Habit>;
@@ -8,6 +13,8 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   exercises!: Table<Exercise>;
   sets!: Table<Set>;
   tasks!: Table<Task>;
+  tags!: Table<Tag>;
+  task_tags!: Table<TaskTagRow>;
 
   constructor() {
     super('HabitDatabase');
@@ -27,6 +34,15 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
       exercises: '++id',
       sets: '++id, exerciseId, completionDate',
       tasks: '++id, dueDate, completionDate'
+    });
+    this.version(4).stores({
+      habits: '++id',
+      habitCompletions: '++id, habitId, completionDate',
+      exercises: '++id',
+      sets: '++id, exerciseId, completionDate',
+      tasks: '++id, dueDate, completionDate',
+      tags: '++id, name',
+      task_tags: '[taskId+tagId], taskId, tagId'
     });
   }
 
@@ -244,7 +260,52 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   }
 
   async deleteTask(id: number): Promise<void> {
+    await this.task_tags.where('taskId').equals(id).delete();
     await this.tasks.delete(id);
+  }
+
+  // Tag operations
+  async getTags(): Promise<Tag[]> {
+    return this.tags.toArray();
+  }
+
+  async createTag(name: string): Promise<Tag> {
+    const trimmed = name.trim();
+    if (!trimmed) throw new Error('Tag name cannot be empty');
+    const existing = await this.tags.where('name').equals(trimmed).first();
+    if (existing) return existing;
+    const now = new Date().toISOString();
+    const toAdd = { name: trimmed, created_at: now, updated_at: now };
+    const id = await this.tags.add(toAdd as any);
+    return { ...toAdd, id };
+  }
+
+  async getTaskTagIds(taskId: number): Promise<number[]> {
+    const rows = await this.task_tags.where('taskId').equals(taskId).toArray();
+    return rows.map((r) => r.tagId);
+  }
+
+  async setTaskTags(taskId: number, tagIds: number[]): Promise<void> {
+    await this.task_tags.where('taskId').equals(taskId).delete();
+    const deduped = tagIds.filter((id, i) => tagIds.indexOf(id) === i);
+    if (deduped.length > 0) {
+      await this.task_tags.bulkAdd(deduped.map((tagId) => ({ taskId, tagId })));
+    }
+  }
+
+  async getTaskTagIdsMap(): Promise<Record<number, number[]>> {
+    const rows = await this.task_tags.toArray();
+    const map: Record<number, number[]> = {};
+    for (const row of rows) {
+      if (!map[row.taskId]) map[row.taskId] = [];
+      map[row.taskId].push(row.tagId);
+    }
+    return map;
+  }
+
+  async deleteTag(id: number): Promise<void> {
+    await this.task_tags.where('tagId').equals(id).delete();
+    await this.tags.delete(id);
   }
 }
 

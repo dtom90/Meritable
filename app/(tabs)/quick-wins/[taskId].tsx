@@ -6,6 +6,7 @@ import Spinner from '@/components/common/Spinner';
 import { useTask } from '@/db/useTasks';
 import { TaskDetailHeader } from '@/components/quick-wins/detail/TaskDetailHeader';
 import { TaskDetailDates } from '@/components/quick-wins/detail/TaskDetailDates';
+import { TaskDetailTags } from '@/components/quick-wins/detail/TaskDetailTags';
 
 export default function QuickWinDetailScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
@@ -27,6 +28,7 @@ export default function QuickWinDetailScreen() {
       </View>
       <TaskDetailHeader task={task} />
       <TaskDetailDates task={task} />
+      {task.id != null && <TaskDetailTags taskId={task.id} />}
     </NarrowView>
   );
 }
