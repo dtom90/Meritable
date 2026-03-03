@@ -27,7 +27,6 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
   const currentCompletion = habitCompletionsMap[habit.id];
   const currentCount = currentCompletion?.count ?? 0;
   const hasCountTarget = habit.countTarget != null && habit.countTarget > 0;
-  const backgroundColor = hasCountTarget ? Colors.card : (isCompleted ? Colors.success : Colors.card);
 
   const isMinusDisabled = hasCountTarget
     ? (currentCount === 0 || !isCompleted || !currentCompletion || deleteCompletionMutation.isPending || updateCompletionMutation.isPending)
@@ -104,7 +103,7 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
 
   return (
     <PillButton
-      backgroundColor={backgroundColor}
+      highlightAsCompleted={!hasCountTarget && isCompleted}
       onMainPress={navigateToHabit}
       checkButton={{
         onPress: handleCompletionToggle,
@@ -125,7 +124,6 @@ export default function HabitCompletionButton({ habit, selectedDate, habitComple
           : undefined
       }
       text={habit.name}
-      chevronColor={isCompleted ? Colors.text : Colors.textSecondary}
     />
   );
 }

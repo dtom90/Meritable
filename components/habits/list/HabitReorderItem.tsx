@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, ViewProps } from 'react-native';
-import { Colors } from '@/lib/Colors';
 import { Habit } from '@/db/types';
 import PillButton, { type PillButtonDragHandleProps } from '@/components/common/PillButton';
 
@@ -22,12 +21,10 @@ const HabitReorderItem = React.forwardRef<View, HabitReorderItemProps>(function 
   },
   ref
 ) {
-  const backgroundColor = isDragging ? '#e0e0e0' : Colors.surface;
-
   return (
     <View ref={ref} style={[isDragging && { opacity: 0.5 }, style]} {...props}>
       <PillButton
-        backgroundColor={backgroundColor}
+        isDragging={isDragging}
         dragHandleProps={dragHandleProps ?? undefined}
         text={habit.name}
       />

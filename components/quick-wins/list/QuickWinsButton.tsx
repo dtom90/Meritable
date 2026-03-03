@@ -33,7 +33,6 @@ export default function QuickWinsButton({ task, tagNames = [] }: QuickWinsButton
   const canToggle = Boolean(task.id);
   const canNavigate = Boolean(task.id);
   const isPending = Boolean(canToggle && pendingId === task.id);
-  const backgroundColor = isCompleted ? Colors.success : Colors.card;
 
   const navigateToDetail = () => {
     if (task.id != null) {
@@ -43,9 +42,8 @@ export default function QuickWinsButton({ task, tagNames = [] }: QuickWinsButton
 
   return (
     <PillButton
-      backgroundColor={backgroundColor}
+      highlightAsCompleted={isCompleted}
       onMainPress={canNavigate ? navigateToDetail : undefined}
-      chevronColor={isCompleted ? Colors.text : Colors.textSecondary}
       checkButton={
         canToggle
           ? {

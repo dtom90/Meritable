@@ -25,17 +25,17 @@ export interface PillButtonDragHandleProps {
 }
 
 export interface PillButtonProps {
-  backgroundColor: string;
+  /** When true, background is #e0e0e0 (e.g. drag preview). */
+  isDragging?: boolean;
+  /** When true (and not isDragging), background is Colors.success. */
+  highlightAsCompleted?: boolean;
   onMainPress?: () => void;
   /** Main label; rendered with standard pill button text styling (text-lg, center, theme color). */
   text?: string;
   /** Optional extra content (e.g. icon, count) rendered after the text. */
   children?: React.ReactNode;
-  leftContent?: React.ReactNode;
   /** When set, renders a drag handle on the left with spacing matching habit/workout lists. */
   dragHandleProps?: PillButtonDragHandleProps | null;
-  /** When onMainPress is set, a chevron-right icon is shown. Use this to override its color (e.g. when completed). */
-  chevronColor?: string;
   checkButton?: PillButtonCheckButtonProps;
   multiCount?: PillButtonMultiCountProps;
 }
@@ -63,17 +63,29 @@ function DragHandle({ dragHandleProps }: { dragHandleProps: PillButtonDragHandle
   );
 }
 
+function resolveBackgroundColor(
+  isDragging: boolean,
+  highlightAsCompleted: boolean
+): string {
+  if (isDragging) return '#e0e0e0';
+  if (highlightAsCompleted) return Colors.success;
+  return Colors.card;
+}
+
 export default function PillButton({
-  backgroundColor,
+  isDragging = false,
+  highlightAsCompleted = false,
   onMainPress,
   text,
   children,
-  leftContent,
   dragHandleProps,
-  chevronColor,
   checkButton,
   multiCount,
 }: PillButtonProps) {
+  const resolvedBackgroundColor = resolveBackgroundColor(
+    isDragging,
+    highlightAsCompleted
+  );
   const progressPercentage =
     multiCount != null
       ? computeProgressPercentage(multiCount.currentCount, multiCount.targetCount)
@@ -81,18 +93,18 @@ export default function PillButton({
 
   const MainWrapper = onMainPress != null ? TouchableOpacity : View;
   const mainPressProps = onMainPress != null ? { onPress: onMainPress } : {};
+  const chevronColor =
+    highlightAsCompleted || checkButton?.completed ? Colors.text : Colors.textSecondary;
 
   const leftSlot =
     dragHandleProps != null ? (
       <DragHandle dragHandleProps={dragHandleProps} />
-    ) : leftContent != null ? (
-      <View style={{ zIndex: 1 }}>{leftContent}</View>
     ) : null;
 
   return (
     <View
       className="flex-1 flex-row items-center my-4 rounded-lg min-h-[68px] overflow-hidden"
-      style={{ backgroundColor, position: 'relative' }}
+      style={{ backgroundColor: resolvedBackgroundColor, position: 'relative' }}
     >
       {progressPercentage != null && (
         <View
@@ -127,7 +139,7 @@ export default function PillButton({
           )}
           {children}
           {onMainPress != null && (
-            <Icon source="chevron-right" color={chevronColor ?? Colors.textSecondary} size={20} />
+            <Icon source="chevron-right" color={chevronColor} size={20} />
           )}
         </View>
       </MainWrapper>
