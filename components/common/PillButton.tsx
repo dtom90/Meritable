@@ -32,7 +32,7 @@ export interface PillButtonProps {
   onMainPress?: () => void;
   /** Main label; rendered with standard pill button text styling (text-lg, center, theme color). */
   text?: string;
-  /** Optional extra content (e.g. icon, count) rendered after the text. */
+  /** Optional content rendered below the main title row (e.g. tag pills). */
   children?: React.ReactNode;
   /** When set, renders a drag handle on the left with spacing matching habit/workout lists. */
   dragHandleProps?: PillButtonDragHandleProps | null;
@@ -126,20 +126,24 @@ export default function PillButton({
         className="flex-1 h-full flex flex-row items-center border-r border-gray-600"
       >
         <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
-        <View className="flex-1 flex flex-row items-center justify-center gap-2">
-          {text != null ? (
-            <Text className="text-lg text-center" style={{ color: Colors.text }}>
-              {text}
-            </Text>
-          ) : null}
-          {multiCount != null && (
-            <Text className="text-lg text-bold text-center ml-2 mr-2" style={{ color: Colors.text }}>
-              {multiCount.currentCount} / {multiCount.targetCount}
-            </Text>
-          )}
-          {children}
-          {onMainPress != null && (
-            <Icon source="chevron-right" color={chevronColor} size={20} />
+        <View className="flex-1 flex flex-col items-center justify-center">
+          <View className="flex-row items-center justify-center gap-2">
+            {text != null ? (
+              <Text className="text-lg text-center" style={{ color: Colors.text }}>
+                {text}
+              </Text>
+            ) : null}
+            {multiCount != null && (
+              <Text className="text-lg text-bold text-center ml-2 mr-2" style={{ color: Colors.text }}>
+                {multiCount.currentCount} / {multiCount.targetCount}
+              </Text>
+            )}
+            {onMainPress != null && (
+              <Icon source="chevron-right" color={chevronColor} size={20} />
+            )}
+          </View>
+          {children != null && (
+            <View className="mt-1">{children}</View>
           )}
         </View>
       </MainWrapper>

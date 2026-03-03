@@ -42,6 +42,7 @@ export default function QuickWinButton({ task, tagNames = [] }: QuickWinButtonPr
 
   return (
     <PillButton
+      text={task.title || 'Untitled'}
       highlightAsCompleted={isCompleted}
       onMainPress={canNavigate ? navigateToDetail : undefined}
       checkButton={
@@ -57,45 +58,31 @@ export default function QuickWinButton({ task, tagNames = [] }: QuickWinButtonPr
             : undefined
       }
     >
-      <View className="flex-1 flex flex-col items-center justify-center">
-        <View className="flex-row items-center">
-          <Text
-            className="text-lg text-center mr-1"
-            style={{
-              color: Colors.text,
-              textDecorationLine: isCompleted ? 'line-through' : undefined,
-            }}
-            numberOfLines={1}
-          >
-            {task.title || 'Untitled'}
-          </Text>
+      {tagNames.length > 0 ? (
+        <View className="flex-row flex-wrap justify-center gap-1">
+          {tagNames.slice(0, 3).map((name) => (
+            <View
+              key={name}
+              className="rounded-full px-2 py-0.5"
+              style={{ backgroundColor: Colors.border }}
+            >
+              <Text className="text-xs" style={{ color: Colors.textSecondary }}>
+                {name}
+              </Text>
+            </View>
+          ))}
+          {tagNames.length > 3 && (
+            <View
+              className="rounded-full px-2 py-0.5"
+              style={{ backgroundColor: Colors.border }}
+            >
+              <Text className="text-xs" style={{ color: Colors.textSecondary }}>
+                +{tagNames.length - 3}
+              </Text>
+            </View>
+          )}
         </View>
-        {tagNames.length > 0 && (
-          <View className="flex-row flex-wrap justify-center gap-1 mt-1">
-            {tagNames.slice(0, 3).map((name) => (
-              <View
-                key={name}
-                className="rounded-full px-2 py-0.5"
-                style={{ backgroundColor: Colors.border }}
-              >
-                <Text className="text-xs" style={{ color: Colors.textSecondary }}>
-                  {name}
-                </Text>
-              </View>
-            ))}
-            {tagNames.length > 3 && (
-              <View
-                className="rounded-full px-2 py-0.5"
-                style={{ backgroundColor: Colors.border }}
-              >
-                <Text className="text-xs" style={{ color: Colors.textSecondary }}>
-                  +{tagNames.length - 3}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-      </View>
+      ) : null}
     </PillButton>
   );
 }
