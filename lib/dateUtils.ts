@@ -8,6 +8,32 @@ export const getToday = (): string => {
 };
 
 /**
+ * Normalize a date value (Date or ISO string) to YYYY-MM-DD for comparison.
+ */
+export function toDateString(value: string | Date | undefined): string | null {
+  if (value == null) return null;
+  const d = typeof value === 'string' ? new Date(value) : value;
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('sv-SE');
+}
+
+/**
+ * Format a date value for display (e.g. "Mon, 2 Mar 2025"). Returns "—" if null or invalid.
+ */
+export function formatDateLabel(value: string | Date | undefined): string {
+  const s = toDateString(value);
+  if (!s) return '—';
+  const [year, month, day] = s.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
+  return d.toLocaleDateString('sv-SE', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/**
  * Ensures a date string is in the correct YYYY-MM-DD format expected by react-native-calendars
  * @param date - The date string to format
  * @param fallback - Optional fallback date (defaults to today)

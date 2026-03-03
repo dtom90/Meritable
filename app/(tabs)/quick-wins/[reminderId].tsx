@@ -6,25 +6,7 @@ import { NarrowView } from '@/components/common/NarrowView';
 import Spinner from '@/components/common/Spinner';
 import { useReminder, useUpdateReminderCompletion } from '@/db/useReminders';
 import { useSelectedDate } from '@/lib/selectedDateStore';
-
-function toDateString(value: string | Date | undefined): string | null {
-  if (value == null) return null;
-  const d = typeof value === 'string' ? new Date(value) : value;
-  if (isNaN(d.getTime())) return null;
-  return d.toLocaleDateString('sv-SE');
-}
-
-function formatDateLabel(value: string | Date | undefined): string {
-  const s = toDateString(value);
-  if (!s) return '—';
-  const d = typeof value === 'string' ? new Date(value) : value;
-  return d.toLocaleDateString(undefined, {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
+import { formatDateLabel, toDateString } from '@/lib/dateUtils';
 
 export default function QuickWinDetailScreen() {
   const { reminderId } = useLocalSearchParams<{ reminderId: string }>();

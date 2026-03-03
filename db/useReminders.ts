@@ -2,19 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import type { Reminder } from 'expo-calendar';
-import { endOfDay, getToday, noonOnDate } from '@/lib/dateUtils';
+import { endOfDay, getToday, noonOnDate, toDateString } from '@/lib/dateUtils';
 
 const QUICK_WINS_REMINDERS_QUERY_KEY = 'quickWinsReminders';
-
-/**
- * Normalize a date value (Date or ISO string) to YYYY-MM-DD for comparison.
- */
-function toDateString(value: string | Date | undefined): string | null {
-  if (value == null) return null;
-  const d = typeof value === 'string' ? new Date(value) : value;
-  if (isNaN(d.getTime())) return null;
-  return d.toLocaleDateString('sv-SE');
-}
 
 /**
  * Fetch reminder calendars and then reminders in the given range.
