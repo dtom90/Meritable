@@ -9,9 +9,12 @@ export const getToday = (): string => {
 
 /**
  * Normalize a date value (Date or ISO string) to YYYY-MM-DD for comparison.
+ * YYYY-MM-DD strings are returned as-is (local date); other strings are parsed as Date (UTC).
  */
 export function toDateString(value: string | Date | undefined | null): string | null {
   if (value == null) return null;
+  // Already YYYY-MM-DD: treat as local calendar date, don't parse as UTC
+  if (typeof value === 'string' && isValidDateFormat(value)) return value;
   const d = typeof value === 'string' ? new Date(value) : value;
   if (isNaN(d.getTime())) return null;
   return d.toLocaleDateString('sv-SE');
