@@ -4,7 +4,7 @@ import { Colors } from '@/lib/Colors';
 import { NarrowView } from '@/components/common/NarrowView';
 import { useDataSource } from '@/db/DataSourceContext';
 import CloudAuthSection from '@/components/data/CloudAuthSection';
-import { isTestFlight } from '@/lib/isTestFlight';
+import { isTestFlightOrExpoGo } from '@/lib/isTestFlight';
 
 const SHOW_CLOUD_AUTH_KEY = 'showCloudAuth';
 
@@ -20,8 +20,8 @@ export default function DataPage() {
           const value = typeof window !== 'undefined' ? localStorage.getItem(SHOW_CLOUD_AUTH_KEY) : null;
           setShowCloudAuth(value !== null && value === 'true');
         } else {
-          // On mobile, show cloud auth if in TestFlight
-          if (isTestFlight()) {
+          // On mobile, show cloud auth if in TestFlight or Expo Go
+          if (isTestFlightOrExpoGo()) {
             setShowCloudAuth(true);
           }
         }
