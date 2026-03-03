@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
+import { BackButton } from '@/components/common/BackButton';
 import { useUpdateHabit } from '@/db/useHabitDb';
 import { Habit } from '@/db/types';
 
@@ -57,10 +58,8 @@ export default function HabitTitle({ habit }: { habit: Habit }) {
 
   return (
     <View className="flex-row items-center mb-6">
-      <TouchableOpacity onPress={() => router.push('/(tabs)')} className="mr-4">
-        <Icon source="arrow-left" color={Colors.text} size={24} />
-      </TouchableOpacity>
-      
+      <BackButton onPress={() => router.push('/(tabs)')} />
+
       {isEditing ? (
         <View className="flex-1">
           <View className="flex-row items-center">

@@ -1,20 +1,15 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Icon } from 'react-native-paper';
+import { View, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
+import { BackButton } from '@/components/common/BackButton';
 
 type ExerciseDetailHeaderProps = {
   title: string;
 };
 
 export function ExerciseDetailHeader({ title }: ExerciseDetailHeaderProps) {
-  const router = useRouter();
-
   return (
     <View className="flex-row items-center mb-6">
-      <TouchableOpacity onPress={() => router.back()} className="mr-4">
-        <Icon source="arrow-left" color={Colors.text} size={24} />
-      </TouchableOpacity>
+      <BackButton />
       <Text
         className="flex-1 text-2xl font-bold text-center"
         style={{ color: Colors.text }}

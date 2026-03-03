@@ -1,5 +1,7 @@
+import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { NarrowView } from '@/components/common/NarrowView';
+import { BackButton } from '@/components/common/BackButton';
 import Spinner from '@/components/common/Spinner';
 import { useTask } from '@/db/useTasks';
 import { TaskDetailHeader } from '@/components/quick-wins/detail/TaskDetailHeader';
@@ -20,6 +22,9 @@ export default function QuickWinDetailScreen() {
 
   return (
     <NarrowView>
+      <View className="flex-row items-center mb-4">
+        <BackButton />
+      </View>
       <TaskDetailHeader task={task} />
       <TaskDetailDates task={task} />
     </NarrowView>

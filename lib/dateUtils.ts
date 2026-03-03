@@ -10,7 +10,7 @@ export const getToday = (): string => {
 /**
  * Normalize a date value (Date or ISO string) to YYYY-MM-DD for comparison.
  */
-export function toDateString(value: string | Date | undefined): string | null {
+export function toDateString(value: string | Date | undefined | null): string | null {
   if (value == null) return null;
   const d = typeof value === 'string' ? new Date(value) : value;
   if (isNaN(d.getTime())) return null;
@@ -20,12 +20,12 @@ export function toDateString(value: string | Date | undefined): string | null {
 /**
  * Format a date value for display (e.g. "Mon, 2 Mar 2025"). Returns "—" if null or invalid.
  */
-export function formatDateLabel(value: string | Date | undefined): string {
+export function formatDateLabel(value: string | Date | undefined | null): string {
   const s = toDateString(value);
   if (!s) return '—';
   const [year, month, day] = s.split('-').map(Number);
   const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('sv-SE', {
+  return d.toLocaleDateString(undefined, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
