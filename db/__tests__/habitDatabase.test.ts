@@ -1046,11 +1046,22 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
     });
 
     describe('createTag', () => {
-      it('should create a tag with name', async () => {
+      it('should create a tag with name and order', async () => {
         const tag = await db.createTag('work');
         expect(tag.id).toBeDefined();
         expect(tag.name).toBe('work');
+        expect(tag.order).toBeDefined();
+        expect(typeof tag.order).toBe('number');
         expect(tag.created_at).toBeDefined();
+      });
+
+      it('should assign incrementing order to new tags', async () => {
+        const t1 = await db.createTag('first');
+        const t2 = await db.createTag('second');
+        const t3 = await db.createTag('third');
+        expect(t1.order).toBe(0);
+        expect(t2.order).toBe(1);
+        expect(t3.order).toBe(2);
       });
 
       it('should return existing tag when creating with same name', async () => {
@@ -1063,6 +1074,22 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       it('should throw for empty name', async () => {
         await expect(db.createTag('')).rejects.toThrow();
         await expect(db.createTag('   ')).rejects.toThrow();
+      });
+    });
+
+    describe('reorderTags', () => {
+      it('should persist new order and return tags in that order from getTags', async () => {
+        const tagA = await db.createTag('A');
+        const tagB = await db.createTag('B');
+        const tagC = await db.createTag('C');
+        const reordered = await db.reorderTags([tagC, tagA, tagB]);
+        expect(reordered).toHaveLength(3);
+        expect(reordered[0].order).toBe(0);
+        expect(reordered[1].order).toBe(1);
+        expect(reordered[2].order).toBe(2);
+        const tags = await db.getTags();
+        expect(tags.map((t) => t.name)).toEqual(['C', 'A', 'B']);
+        expect(tags.map((t) => t.order)).toEqual([0, 1, 2]);
       });
     });
 

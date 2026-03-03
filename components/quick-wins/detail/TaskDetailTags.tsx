@@ -14,7 +14,10 @@ export function TaskDetailTags({ taskId }: TaskDetailTagsProps) {
   const createTag = useCreateTag();
   const [newTagName, setNewTagName] = useState('');
 
+  const orderMap = new Map(tags.map((t, i) => [t.id, i]));
   const tagItems = tagIds
+    .slice()
+    .sort((a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0))
     .map((id) => ({ id, name: tags.find((t) => t.id === id)?.name }))
     .filter((x): x is { id: number; name: string } => Boolean(x.name));
 

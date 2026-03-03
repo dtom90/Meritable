@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDataSource } from '@/db/DataSourceContext';
+import type { Tag } from './types';
 
 const TAGS_QUERY_KEY = 'tags';
 const TASK_TAG_IDS_MAP_QUERY_KEY = 'taskTagIdsMap';
@@ -69,6 +70,22 @@ export function useCreateTag() {
     mutationFn: async (name: string) => {
       if (!activeDb) throw new Error('Database not initialized');
       return activeDb.createTag(name);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tagsQueryKey() });
+      queryClient.invalidateQueries({ queryKey: taskTagIdsMapQueryKey() });
+    },
+  });
+}
+
+export function useReorderTags() {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+
+  return useMutation({
+    mutationFn: async (tags: Tag[]) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return activeDb.reorderTags(tags);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagsQueryKey() });

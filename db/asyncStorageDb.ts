@@ -345,7 +345,16 @@ class AsyncStorageDb implements HabitDatabaseInterface {
 
   // Tag operations
   async getTags(): Promise<Tag[]> {
-    return this.loadTags();
+    let tags = await this.loadTags();
+    const needsBackfill = tags.some((t) => (t as Tag & { order?: number }).order === undefined || (t as Tag & { order?: number }).order === null);
+    if (needsBackfill) {
+      tags = tags.map((t, i) => {
+        const tag = t as Tag & { order?: number };
+        return { ...t, order: typeof tag.order === 'number' ? tag.order : i } as Tag;
+      });
+      await this.saveTags(tags);
+    }
+    return tags.slice().sort((a, b) => a.order - b.order);
   }
 
   async createTag(name: string): Promise<Tag> {
@@ -356,10 +365,18 @@ class AsyncStorageDb implements HabitDatabaseInterface {
     if (existing) return existing;
     const now = new Date().toISOString();
     const nextId = tags.length > 0 ? Math.max(...tags.map((t) => t.id)) + 1 : 1;
-    const toAdd: Tag = { id: nextId, name: trimmed, created_at: now, updated_at: now };
+    const nextOrder = tags.length > 0 ? Math.max(...tags.map((t) => t.order)) + 1 : 0;
+    const toAdd: Tag = { id: nextId, name: trimmed, order: nextOrder, created_at: now, updated_at: now };
     tags.push(toAdd);
     await this.saveTags(tags);
     return toAdd;
+  }
+
+  async reorderTags(tags: Tag[]): Promise<Tag[]> {
+    const now = new Date().toISOString();
+    const normalized = tags.map((t, i) => ({ ...t, order: i, updated_at: now }));
+    await this.saveTags(normalized);
+    return normalized;
   }
 
   async getTaskTagIds(taskId: number): Promise<number[]> {

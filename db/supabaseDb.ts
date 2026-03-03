@@ -461,6 +461,7 @@ export class SupabaseDb extends HabitDatabaseInterface {
       .from('tags')
       .select('*')
       .eq('user_id', user?.id)
+      .order('order', { ascending: true })
     if (error) throw error
     return (data || []).map(mapTagRow)
   }
@@ -476,13 +477,34 @@ export class SupabaseDb extends HabitDatabaseInterface {
       .eq('name', trimmed)
       .maybeSingle()
     if (existing) return mapTagRow(existing)
+    const { data: maxOrder } = await this.supabase
+      .from('tags')
+      .select('order')
+      .eq('user_id', user?.id)
+      .order('order', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const nextOrder = maxOrder?.order != null ? Number(maxOrder.order) + 1 : 0
     const { data, error } = await this.supabase
       .from('tags')
-      .insert({ name: trimmed, user_id: user?.id })
+      .insert({ name: trimmed, user_id: user?.id, order: nextOrder })
       .select()
       .single()
     if (error) throw error
     return mapTagRow(data)
+  }
+
+  async reorderTags(tags: Tag[]): Promise<Tag[]> {
+    const user = await this.getUser()
+    for (let i = 0; i < tags.length; i++) {
+      const { error } = await this.supabase
+        .from('tags')
+        .update({ order: i })
+        .eq('id', tags[i].id)
+        .eq('user_id', user?.id)
+      if (error) throw error
+    }
+    return tags.map((t, i) => ({ ...t, order: i }))
   }
 
   async getTaskTagIds(taskId: number): Promise<number[]> {
@@ -544,6 +566,7 @@ function mapTagRow(row: any): Tag {
   return {
     id: Number(row.id),
     name: row.name,
+    order: row.order != null ? Number(row.order) : 0,
     created_at: row.created_at,
     updated_at: row.updated_at
   }

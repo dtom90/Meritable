@@ -26,6 +26,7 @@ export const MockedAsyncStorageDb = jest.fn().mockImplementation(() => ({
   deleteTask: jest.fn(),
   getTags: jest.fn().mockResolvedValue([]),
   createTag: jest.fn(),
+  reorderTags: jest.fn(),
   getTaskTagIds: jest.fn().mockResolvedValue([]),
   setTaskTags: jest.fn().mockResolvedValue(undefined),
   getTaskTagIdsMap: jest.fn().mockResolvedValue({}),

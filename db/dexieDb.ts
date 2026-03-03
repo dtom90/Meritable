@@ -44,6 +44,15 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
       tags: '++id, name',
       task_tags: '[taskId+tagId], taskId, tagId'
     });
+    this.version(5).stores({
+      habits: '++id',
+      habitCompletions: '++id, habitId, completionDate',
+      exercises: '++id',
+      sets: '++id, exerciseId, completionDate',
+      tasks: '++id, dueDate, completionDate',
+      tags: '++id, name, order',
+      task_tags: '[taskId+tagId], taskId, tagId'
+    });
   }
 
   // Implementation of HabitDatabaseInterface methods
@@ -266,18 +275,34 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
 
   // Tag operations
   async getTags(): Promise<Tag[]> {
-    return this.tags.toArray();
+    let all = await this.tags.toArray();
+    const needsBackfill = all.some((t) => t.order === undefined || t.order === null);
+    if (needsBackfill) {
+      const withOrder = all.map((t, i) => ({ ...t, order: 'order' in t && typeof (t as Tag).order === 'number' ? (t as Tag).order : i }));
+      await this.tags.bulkPut(withOrder as Tag[]);
+      all = withOrder as Tag[];
+    }
+    return all.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
   async createTag(name: string): Promise<Tag> {
     const trimmed = name.trim();
     if (!trimmed) throw new Error('Tag name cannot be empty');
     const existing = await this.tags.where('name').equals(trimmed).first();
-    if (existing) return existing;
+    if (existing) return existing as Tag;
+    const all = await this.tags.toArray();
+    const nextOrder = all.length > 0 ? Math.max(0, ...all.map((t) => (t as Tag).order ?? 0)) + 1 : 0;
     const now = new Date().toISOString();
-    const toAdd = { name: trimmed, created_at: now, updated_at: now };
+    const toAdd: Tag = { name: trimmed, order: nextOrder, created_at: now, updated_at: now };
     const id = await this.tags.add(toAdd as any);
     return { ...toAdd, id };
+  }
+
+  async reorderTags(tags: Tag[]): Promise<Tag[]> {
+    const now = new Date().toISOString();
+    const normalized = tags.map((t, i) => ({ ...t, order: i, updated_at: now }));
+    await this.tags.bulkPut(normalized);
+    return normalized;
   }
 
   async getTaskTagIds(taskId: number): Promise<number[]> {

@@ -50,6 +50,7 @@ export abstract class HabitDatabaseInterface {
   // Tag operations (Quick Wins)
   abstract getTags(): Promise<Tag[]>
   abstract createTag(name: string): Promise<Tag>
+  abstract reorderTags(tags: Tag[]): Promise<Tag[]>
   abstract getTaskTagIds(taskId: number): Promise<number[]>
   abstract setTaskTags(taskId: number, tagIds: number[]): Promise<void>
   abstract getTaskTagIdsMap(): Promise<Record<number, number[]>>
