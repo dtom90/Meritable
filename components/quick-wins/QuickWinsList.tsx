@@ -1,40 +1,29 @@
-import { View, Text } from 'react-native';
-import type { Reminder } from 'expo-calendar';
-import { Colors } from '@/lib/Colors';
+import { View } from 'react-native';
 import Spinner from '@/components/common/Spinner';
 import QuickWinsButton from './QuickWinsButton';
-import {
-  useRemindersPermissions,
-  useQuickWinsReminders,
-} from '@/db/useReminders';
+import { useTasksForDate } from '@/db/useTasks';
 import { useSelectedDate } from '@/lib/selectedDateStore';
 
 export default function QuickWinsList() {
   const { selectedDate } = useSelectedDate();
-  const [permission] = useRemindersPermissions();
-  const permissionGranted = permission?.granted === true;
-  const { data: reminders, isLoading } = useQuickWinsReminders(selectedDate, permissionGranted);
+  const { data: tasks, isLoading } = useTasksForDate(selectedDate);
 
   if (isLoading) {
     return <Spinner />;
   }
 
-  if (reminders && reminders.length > 0) {
+  if (tasks && tasks.length > 0) {
     return (
       <View>
-        {reminders.map((reminder: Reminder, index: number) => (
+        {tasks.map((task, index) => (
           <QuickWinsButton
-            key={reminder.id ?? `reminder-${index}`}
-            reminder={reminder}
+            key={task.id ?? `task-${index}`}
+            task={task}
           />
         ))}
       </View>
     );
   }
 
-  return (
-    <Text style={{ color: Colors.textSecondary }}>
-      No dated reminders for this day.
-    </Text>
-  );
+  return <View></View>
 }

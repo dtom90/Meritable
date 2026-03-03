@@ -41,6 +41,7 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
         await dexieDb.habitCompletions.clear();
         await dexieDb.exercises.clear();
         await dexieDb.sets.clear();
+        await dexieDb.tasks.clear();
         await dexieDb.close();
         await dexieDb.delete(); // Delete the database completely
       }
@@ -50,6 +51,7 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       await AsyncStorage.removeItem('habitCompletions');
       await AsyncStorage.removeItem('exercises');
       await AsyncStorage.removeItem('sets');
+      await AsyncStorage.removeItem('tasks');
     }
   });
 
@@ -910,6 +912,109 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
         const allCompletions = await db.getHabitCompletionsByDate('2024-01-01');
         expect(allCompletions).toHaveLength(3);
       }
+    });
+  });
+
+  describe('Task CRUD Operations', () => {
+    describe('createTask', () => {
+      it('should create a task with required fields', async () => {
+        const task = await db.createTask({
+          title: 'Buy milk',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+
+        expect(task.id).toBeDefined();
+        expect(task.title).toBe('Buy milk');
+        expect(task.dueDate).toBe('2025-03-02');
+        expect(task.completed).toBe(false);
+        expect(task.completionDate).toBeNull();
+        expect(task.created_at).toBeDefined();
+        expect(task.updated_at).toBeDefined();
+      });
+    });
+
+    describe('getTasks', () => {
+      it('should return empty array when no tasks exist', async () => {
+        const tasks = await db.getTasks();
+        expect(tasks).toEqual([]);
+      });
+
+      it('should return all tasks', async () => {
+        await db.createTask({
+          title: 'One',
+          dueDate: '2025-03-01',
+          completed: false,
+          completionDate: null,
+        });
+        await db.createTask({
+          title: 'Two',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const tasks = await db.getTasks();
+        expect(tasks).toHaveLength(2);
+      });
+    });
+
+    describe('getTask', () => {
+      it('should return null for non-existent id', async () => {
+        const task = await db.getTask(999);
+        expect(task).toBeNull();
+      });
+
+      it('should return task by id', async () => {
+        const created = await db.createTask({
+          title: 'Find me',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const task = await db.getTask(created.id);
+        expect(task).not.toBeNull();
+        expect(task!.id).toBe(created.id);
+        expect(task!.title).toBe('Find me');
+      });
+    });
+
+    describe('updateTask', () => {
+      it('should update task completion', async () => {
+        const created = await db.createTask({
+          title: 'Complete me',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        const updated = await db.updateTask(created.id, {
+          completed: true,
+          completionDate: '2025-03-02',
+        });
+        expect(updated.completed).toBe(true);
+        expect(updated.completionDate).toBe('2025-03-02');
+      });
+
+      it('should throw for non-existent task', async () => {
+        await expect(
+          db.updateTask(999, { title: 'No' })
+        ).rejects.toThrow();
+      });
+    });
+
+    describe('deleteTask', () => {
+      it('should delete a task', async () => {
+        const created = await db.createTask({
+          title: 'To delete',
+          dueDate: '2025-03-02',
+          completed: false,
+          completionDate: null,
+        });
+        await db.deleteTask(created.id);
+        const tasks = await db.getTasks();
+        expect(tasks).toHaveLength(0);
+        expect(await db.getTask(created.id)).toBeNull();
+      });
     });
   });
 });

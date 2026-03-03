@@ -1,4 +1,4 @@
-import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './types';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput } from './types';
 import { HabitDatabaseInterface } from './habitDatabase';
 import { supabaseClient } from './supabaseClient'
 import { User } from '@supabase/supabase-js'
@@ -388,6 +388,82 @@ export class SupabaseDb extends HabitDatabaseInterface {
     const user = await this.getUser()
     const { error } = await this.supabase.from('sets').delete().eq('id', id).eq('user_id', user?.id)
     if (error) throw error
+  }
+
+  // Task operations
+  async createTask(task: TaskInput): Promise<Task> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .insert({
+        title: task.title,
+        due_date: task.dueDate,
+        completed: task.completed,
+        completion_date: task.completionDate,
+        user_id: user?.id
+      })
+      .select()
+      .single()
+    if (error) throw error
+    return mapTaskRow(data)
+  }
+
+  async getTasks(): Promise<Task[]> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', user?.id)
+    if (error) throw error
+    return (data || []).map(mapTaskRow)
+  }
+
+  async getTask(id: number): Promise<Task | null> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .maybeSingle()
+    if (error) throw error
+    return data ? mapTaskRow(data) : null
+  }
+
+  async updateTask(id: number, updates: Partial<TaskInput>): Promise<Task> {
+    const user = await this.getUser()
+    const payload: Record<string, unknown> = { updated_at: new Date().toISOString() }
+    if (updates.title !== undefined) payload.title = updates.title
+    if (updates.dueDate !== undefined) payload.due_date = updates.dueDate
+    if (updates.completed !== undefined) payload.completed = updates.completed
+    if (updates.completionDate !== undefined) payload.completion_date = updates.completionDate
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .update(payload)
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .select()
+      .single()
+    if (error) throw error
+    return mapTaskRow(data)
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    const user = await this.getUser()
+    const { error } = await this.supabase.from('tasks').delete().eq('id', id).eq('user_id', user?.id)
+    if (error) throw error
+  }
+}
+
+function mapTaskRow(row: any): Task {
+  return {
+    id: Number(row.id),
+    title: row.title,
+    dueDate: row.due_date ?? row.dueDate,
+    completed: Boolean(row.completed),
+    completionDate: row.completion_date ?? null,
+    created_at: row.created_at,
+    updated_at: row.updated_at
   }
 }
 

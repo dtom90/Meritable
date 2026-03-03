@@ -7,6 +7,8 @@ import type {
   ExerciseInput,
   Set,
   SetInput,
+  Task,
+  TaskInput,
 } from './types';
 
 export abstract class HabitDatabaseInterface {
@@ -36,4 +38,11 @@ export abstract class HabitDatabaseInterface {
   abstract getSetsByExerciseId(exerciseId: number): Promise<Set[]>
   abstract updateSet(id: number, updates: Partial<SetInput>): Promise<Set>
   abstract deleteSet(id: number): Promise<void>
+
+  // Task operations (Quick Wins)
+  abstract createTask(task: TaskInput): Promise<Task>
+  abstract getTasks(): Promise<Task[]>
+  abstract getTask(id: number): Promise<Task | null>
+  abstract updateTask(id: number, updates: Partial<TaskInput>): Promise<Task>
+  abstract deleteTask(id: number): Promise<void>
 }

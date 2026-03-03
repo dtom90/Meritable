@@ -1,40 +1,33 @@
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Icon } from 'react-native-paper';
 import { Colors } from '@/lib/Colors';
 import { NarrowView } from '@/components/common/NarrowView';
 import Spinner from '@/components/common/Spinner';
-import { useReminder, useUpdateReminderCompletion } from '@/db/useReminders';
+import { useTask, useUpdateTask } from '@/db/useTasks';
 import { useSelectedDate } from '@/lib/selectedDateStore';
-import { formatDateLabel, toDateString } from '@/lib/dateUtils';
+import { formatDateLabel, getToday } from '@/lib/dateUtils';
 
 export default function QuickWinDetailScreen() {
-  const { reminderId } = useLocalSearchParams<{ reminderId: string }>();
+  const { taskId } = useLocalSearchParams<{ taskId: string }>();
   const router = useRouter();
   const { selectedDate } = useSelectedDate();
-  const { data: reminder, isLoading } = useReminder(reminderId ?? undefined);
-  const updateReminderCompletion = useUpdateReminderCompletion();
+  const id = taskId != null ? Number(taskId) : undefined;
+  const { data: task, isLoading } = useTask(id);
+  const updateTask = useUpdateTask();
 
-  const isCompleted = reminder?.completed === true;
-  const canToggle = Boolean(reminder?.id);
+  const isCompleted = task?.completed === true;
+  const canToggle = Boolean(task?.id);
   const isPending = Boolean(
     canToggle &&
-      updateReminderCompletion.isPending &&
-      updateReminderCompletion.variables?.reminderId === reminder?.id
+      updateTask.isPending &&
+      updateTask.variables?.id === task?.id
   );
   const backgroundColor = isCompleted ? Colors.success : Colors.card;
   const icon = isCompleted ? 'restore' : 'check';
   const iconColor = isCompleted ? Colors.text : Colors.success;
 
-  if (Platform.OS !== 'ios') {
-    return (
-      <View className="flex-1 p-5" style={{ backgroundColor: Colors.background }}>
-        <Text style={{ color: Colors.textSecondary }}>Quick Win detail is available on iOS.</Text>
-      </View>
-    );
-  }
-
-  if (isLoading || !reminder) {
+  if (isLoading || !task) {
     return (
       <NarrowView>
         <Spinner />
@@ -42,23 +35,21 @@ export default function QuickWinDetailScreen() {
     );
   }
 
-  const dueStr = toDateString(reminder.dueDate);
-  const completionStr = toDateString(reminder.completionDate);
-  const notes = (reminder as { notes?: string }).notes;
+  const dueStr = task.dueDate;
+  const completionStr = task.completionDate;
 
   const handleToggle = () => {
-    if (!reminder.id) return;
+    if (task.id == null) return;
     if (isCompleted) {
-      updateReminderCompletion.mutate({
-        reminderId: reminder.id,
-        completed: false,
-        selectedDate,
+      updateTask.mutate({
+        id: task.id,
+        updates: { completed: false, completionDate: null },
       });
     } else {
-      updateReminderCompletion.mutate({
-        reminderId: reminder.id,
-        completed: true,
-        selectedDate,
+      const completionDate = selectedDate === getToday() ? getToday() : selectedDate;
+      updateTask.mutate({
+        id: task.id,
+        updates: { completed: true, completionDate },
       });
     }
   };
@@ -84,7 +75,7 @@ export default function QuickWinDetailScreen() {
               }}
               numberOfLines={2}
             >
-              {reminder.title ?? 'Untitled'}
+              {task.title || 'Untitled'}
             </Text>
             <Icon source="chevron-right" color={isCompleted ? Colors.text : Colors.textSecondary} size={20} />
           </View>
@@ -113,7 +104,7 @@ export default function QuickWinDetailScreen() {
               Due
             </Text>
             <Text className="text-base mt-0.5" style={{ color: Colors.text }}>
-              {formatDateLabel(reminder.dueDate)}
+              {formatDateLabel(task.dueDate)}
             </Text>
           </View>
         )}
@@ -123,17 +114,7 @@ export default function QuickWinDetailScreen() {
               Completed
             </Text>
             <Text className="text-base mt-0.5" style={{ color: Colors.text }}>
-              {formatDateLabel(reminder.completionDate)}
-            </Text>
-          </View>
-        )}
-        {notes != null && String(notes).trim() !== '' && (
-          <View>
-            <Text className="text-sm" style={{ color: Colors.textSecondary }}>
-              Notes
-            </Text>
-            <Text className="text-base mt-0.5" style={{ color: Colors.text }}>
-              {String(notes).trim()}
+              {formatDateLabel(task.completionDate)}
             </Text>
           </View>
         )}

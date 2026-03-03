@@ -21,8 +21,9 @@ alwaysApply: false
     - `_layout.tsx` — Workouts stack
     - `index.tsx` — Exercise list
     - `[exerciseId].tsx` — Exercise detail (sets + history)
-  - `quick-wins/` — Quick Wins (iOS only; shows dated Reminders for selected day)
-    - `index.tsx` — Quick Wins list
+  - `quick-wins/` — Quick Wins (task list for selected day; all platforms)
+    - `index.tsx` — Quick Wins list + Add task
+    - `[taskId].tsx` — Task detail (dynamic)
 - `auth/` — Authentication routes
 - `+not-found.tsx` — 404
 - `global.css` — Global NativeWind styles

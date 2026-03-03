@@ -1,50 +1,44 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import type { Reminder } from 'expo-calendar';
+import type { Task } from '@/db/types';
 import { Colors } from '@/lib/Colors';
 import { Icon } from 'react-native-paper';
 import { useSelectedDate } from '@/lib/selectedDateStore';
-import { useUpdateReminderCompletion } from '@/db/useReminders';
+import { useUpdateTask } from '@/db/useTasks';
+import { getToday } from '@/lib/dateUtils';
 
 interface QuickWinsButtonProps {
-  reminder: Reminder;
+  task: Task;
 }
 
-export default function QuickWinsButton({ reminder }: QuickWinsButtonProps) {
+export default function QuickWinsButton({ task }: QuickWinsButtonProps) {
   const router = useRouter();
   const { selectedDate } = useSelectedDate();
-  const updateReminderCompletion = useUpdateReminderCompletion();
-  const pendingReminderId =
-    updateReminderCompletion.isPending && updateReminderCompletion.variables
-      ? updateReminderCompletion.variables.reminderId
-      : null;
+  const updateTask = useUpdateTask();
+  const pendingId =
+    updateTask.isPending && updateTask.variables ? updateTask.variables.id : null;
 
-  const onMarkComplete = (r: Reminder) =>
-    r.id &&
-    updateReminderCompletion.mutate({
-      reminderId: r.id,
-      completed: true,
-      selectedDate,
-    });
-  const onMarkIncomplete = (r: Reminder) =>
-    r.id &&
-    updateReminderCompletion.mutate({
-      reminderId: r.id,
-      completed: false,
-      selectedDate,
-    });
+  const onMarkComplete = (t: Task) => {
+    if (t.id == null) return;
+    const completionDate = selectedDate === getToday() ? getToday() : selectedDate;
+    updateTask.mutate({ id: t.id, updates: { completed: true, completionDate } });
+  };
+  const onMarkIncomplete = (t: Task) => {
+    if (t.id == null) return;
+    updateTask.mutate({ id: t.id, updates: { completed: false, completionDate: null } });
+  };
 
-  const isCompleted = reminder.completed === true;
-  const canToggle = Boolean(reminder.id);
-  const canNavigate = Boolean(reminder.id);
-  const isPending = Boolean(canToggle && pendingReminderId === reminder.id);
+  const isCompleted = task.completed === true;
+  const canToggle = Boolean(task.id);
+  const canNavigate = Boolean(task.id);
+  const isPending = Boolean(canToggle && pendingId === task.id);
   const backgroundColor = isCompleted ? Colors.success : Colors.card;
   const icon = isCompleted ? 'restore' : 'check';
   const iconColor = isCompleted ? Colors.text : Colors.success;
 
   const navigateToDetail = () => {
-    if (reminder.id) {
-      router.push(`/quick-wins/${reminder.id}`);
+    if (task.id != null) {
+      router.push(`/quick-wins/${task.id}`);
     }
   };
 
@@ -68,7 +62,7 @@ export default function QuickWinsButton({ reminder }: QuickWinsButtonProps) {
             }}
             numberOfLines={1}
           >
-            {reminder.title ?? 'Untitled'}
+            {task.title || 'Untitled'}
           </Text>
           {canNavigate && (
             <Icon
@@ -83,7 +77,7 @@ export default function QuickWinsButton({ reminder }: QuickWinsButtonProps) {
       {canToggle ? (
         <TouchableOpacity
           onPress={() =>
-            isCompleted ? onMarkIncomplete(reminder) : onMarkComplete(reminder)
+            isCompleted ? onMarkIncomplete(task) : onMarkComplete(task)
           }
           disabled={isPending}
           className="h-full w-16 flex items-center justify-center"

@@ -8,11 +8,13 @@ alwaysApply: false
 
 ## File list
 
-- `habitDatabase.ts` — `HabitDatabaseInterface` (abstract), `Habit`, `HabitCompletion`, `HabitInput`, `HabitCompletionInput`
+- `habitDatabase.ts` — `HabitDatabaseInterface` (abstract); types in `types.ts`
+- `types.ts` — `Habit`, `HabitCompletion`, `Exercise`, `Set`, `Task` (Quick Wins) and their Input types
 - `dexieDb.ts`, `asyncStorageDb.ts`, `supabaseDb.ts` — Implementations (Dexie, AsyncStorage, Supabase)
 - `supabaseClient.ts` — Supabase client config
-- `useHabitDb.ts` — React hook for DB access (use this in UI; do not import concrete DBs)
-- `useReminders.ts` — React hooks for iOS Reminders via expo-calendar (permission, fetch, filter, complete/uncomplete); used by Quick Wins
+- `useHabitDb.ts` — React hooks for habits and habit completions (use in UI; do not import concrete DBs)
+- `useTasks.ts` — React hooks for tasks (Quick Wins): `useTasksForDate`, `useTask`, `useCreateTask`, `useUpdateTask`, `useDeleteTask`
+- `useReminders.ts` — Legacy: iOS Reminders via expo-calendar (optional; Quick Wins now uses task table)
 - `AuthContext.tsx` — Auth state provider
 - `DataSourceContext.tsx` — Chooses local vs cloud implementation
 - `__tests__/`, `__mocks__/` — Tests and mocks
@@ -31,6 +33,6 @@ alwaysApply: false
 
 - React Query for server state. Context API for data source selection and auth; components get DB via `useHabitDb()`.
 
-## Reminders (Quick Wins)
+## Tasks (Quick Wins)
 
-- Reminders are not part of `HabitDatabaseInterface`. `useReminders.ts` wraps expo-calendar for iOS (permission, fetch, complete/uncomplete); Quick Wins UI uses `useRemindersPermissions()`, `useQuickWinsReminders()`, and `useUpdateReminderCompletion()`.
+- Tasks are on `HabitDatabaseInterface`: `createTask`, `getTasks`, `getTask`, `updateTask`, `deleteTask`. Use `useTasks.ts` in Quick Wins UI (`useTasksForDate`, `useTask`, `useCreateTask`, `useUpdateTask`).

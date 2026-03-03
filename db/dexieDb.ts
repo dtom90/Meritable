@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './types';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput } from './types';
 import { HabitDatabaseInterface } from './habitDatabase';
 
 class DexieDb extends Dexie implements HabitDatabaseInterface {
@@ -7,6 +7,7 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
   habitCompletions!: Table<HabitCompletion>;
   exercises!: Table<Exercise>;
   sets!: Table<Set>;
+  tasks!: Table<Task>;
 
   constructor() {
     super('HabitDatabase');
@@ -19,6 +20,13 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
       habitCompletions: '++id, habitId, completionDate',
       exercises: '++id',
       sets: '++id, exerciseId, completionDate'
+    });
+    this.version(3).stores({
+      habits: '++id',
+      habitCompletions: '++id, habitId, completionDate',
+      exercises: '++id',
+      sets: '++id, exerciseId, completionDate',
+      tasks: '++id, dueDate, completionDate'
     });
   }
 
@@ -207,6 +215,36 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
 
   async deleteSet(id: number): Promise<void> {
     await this.sets.delete(id);
+  }
+
+  // Task operations
+  async createTask(task: TaskInput): Promise<Task> {
+    const now = new Date().toISOString();
+    const toAdd = { ...task, created_at: now, updated_at: now };
+    const id = await this.tasks.add(toAdd as any);
+    return { ...toAdd, id };
+  }
+
+  async getTasks(): Promise<Task[]> {
+    return this.tasks.toArray();
+  }
+
+  async getTask(id: number): Promise<Task | null> {
+    const task = await this.tasks.get(id);
+    return task ?? null;
+  }
+
+  async updateTask(id: number, updates: Partial<TaskInput>): Promise<Task> {
+    const now = new Date().toISOString();
+    const task = await this.tasks.get(id);
+    if (!task) throw new Error(`Task with id ${id} not found`);
+    const updated = { ...task, ...updates, updated_at: now };
+    await this.tasks.update(id, updated);
+    return updated;
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    await this.tasks.delete(id);
   }
 }
 

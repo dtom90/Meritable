@@ -19,4 +19,9 @@ export const MockedAsyncStorageDb = jest.fn().mockImplementation(() => ({
   getSetsByExerciseId: jest.fn().mockResolvedValue([]),
   updateSet: jest.fn(),
   deleteSet: jest.fn(),
+  createTask: jest.fn(),
+  getTasks: jest.fn().mockResolvedValue([]),
+  getTask: jest.fn().mockResolvedValue(null),
+  updateTask: jest.fn(),
+  deleteTask: jest.fn(),
 }));

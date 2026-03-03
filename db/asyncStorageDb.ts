@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput } from './types';
+import { Habit, HabitCompletion, HabitCompletionInput, HabitInput, Exercise, ExerciseInput, Set, SetInput, Task, TaskInput } from './types';
 import { HabitDatabaseInterface } from './habitDatabase';
 
 const HABITS_KEY = 'habits';
 const HABIT_COMPLETIONS_KEY = 'habitCompletions';
 const EXERCISES_KEY = 'exercises';
 const SETS_KEY = 'sets';
+const TASKS_KEY = 'tasks';
 
 class AsyncStorageDb implements HabitDatabaseInterface {
   // Helper methods for AsyncStorage operations
@@ -43,6 +44,15 @@ class AsyncStorageDb implements HabitDatabaseInterface {
 
   private async saveSets(sets: Set[]): Promise<void> {
     await AsyncStorage.setItem(SETS_KEY, JSON.stringify(sets));
+  }
+
+  private async loadTasks(): Promise<Task[]> {
+    const data = await AsyncStorage.getItem(TASKS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private async saveTasks(tasks: Task[]): Promise<void> {
+    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
   }
 
   // Habit operations
@@ -268,6 +278,42 @@ class AsyncStorageDb implements HabitDatabaseInterface {
   async deleteSet(id: number): Promise<void> {
     const sets = await this.loadSets();
     await this.saveSets(sets.filter(s => s.id !== id));
+  }
+
+  // Task operations
+  async createTask(task: TaskInput): Promise<Task> {
+    const now = new Date().toISOString();
+    const tasks = await this.loadTasks();
+    const nextId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+    const toAdd: Task = { ...task, id: nextId, created_at: now, updated_at: now };
+    tasks.push(toAdd);
+    await this.saveTasks(tasks);
+    return toAdd;
+  }
+
+  async getTasks(): Promise<Task[]> {
+    return this.loadTasks();
+  }
+
+  async getTask(id: number): Promise<Task | null> {
+    const tasks = await this.loadTasks();
+    return tasks.find(t => t.id === id) ?? null;
+  }
+
+  async updateTask(id: number, updates: Partial<TaskInput>): Promise<Task> {
+    const now = new Date().toISOString();
+    const tasks = await this.loadTasks();
+    const idx = tasks.findIndex(t => t.id === id);
+    if (idx === -1) throw new Error(`Task with id ${id} not found`);
+    const updated: Task = { ...tasks[idx], ...updates, updated_at: now };
+    tasks[idx] = updated;
+    await this.saveTasks(tasks);
+    return updated;
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    const tasks = await this.loadTasks();
+    await this.saveTasks(tasks.filter(t => t.id !== id));
   }
 }
 

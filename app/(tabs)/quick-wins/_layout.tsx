@@ -11,7 +11,7 @@ export default function QuickWinsLayout() {
         }}
       />
       <Stack.Screen
-        name="[reminderId]"
+        name="[taskId]"
         options={{
           headerShown: false,
         }}
