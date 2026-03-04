@@ -9,21 +9,9 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
-  TextInput,
-  Keyboard,
 } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import { useCreateTask } from '@/db/useTasks';
-import { useCreateTag, useSetTaskTags } from '@/db/useTags';
-import { useSelectedDate } from '@/lib/selectedDateStore';
-import { formatDate } from '@/lib/dateUtils';
-
-function parseTagNames(input: string): string[] {
-  return input
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
+import AddTaskForm, { AddTaskFormRef } from './AddTaskForm';
 
 interface AddTaskModalProps {
   visible: boolean;
@@ -40,29 +28,22 @@ export default function AddTaskModal({
 }: AddTaskModalProps) {
   const [modalVisible, setModalVisible] = useState(visible);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
-  const { selectedDate } = useSelectedDate();
-  const [taskTitle, setTaskTitle] = useState('');
-  const [dueDate, setDueDate] = useState(selectedDate);
-  const [tagNamesStr, setTagNamesStr] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const createTask = useCreateTask();
-  const createTag = useCreateTag();
-  const setTaskTags = useSetTaskTags();
-  const titleInputRef = useRef<TextInput>(null);
+  const formRef = useRef<AddTaskFormRef>(null);
 
   useEffect(() => {
     if (visible) {
-      setTaskTitle('');
-      setDueDate(selectedDate);
-      setTagNamesStr('');
       setModalVisible(true);
+      let focusTimer: ReturnType<typeof setTimeout> | undefined;
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 300,
         useNativeDriver: true,
-      }).start();
-      const focusTimer = setTimeout(() => titleInputRef.current?.focus(), 350);
-      return () => clearTimeout(focusTimer);
+      }).start(() => {
+        focusTimer = setTimeout(() => formRef.current?.focus(), 350);
+      });
+      return () => {
+        if (focusTimer != null) clearTimeout(focusTimer);
+      };
     } else {
       Animated.timing(slideAnim, {
         toValue: screenHeight,
@@ -70,36 +51,9 @@ export default function AddTaskModal({
         useNativeDriver: true,
       }).start(() => setModalVisible(false));
     }
-  }, [visible, slideAnim, selectedDate]);
+  }, [visible, slideAnim]);
 
   const handleClose = () => onClose();
-
-  const handleSubmit = async () => {
-    if (isSubmitting || createTask.isPending || !taskTitle.trim()) return;
-    const normalizedDue = formatDate(dueDate, selectedDate);
-    setIsSubmitting(true);
-    if (Platform.OS !== 'web') Keyboard.dismiss();
-    try {
-      const task = await createTask.mutateAsync({
-        title: taskTitle.trim(),
-        dueDate: normalizedDue,
-      });
-      const tagNames = parseTagNames(tagNamesStr);
-      if (tagNames.length > 0) {
-        const tagIds: number[] = [];
-        for (const name of tagNames) {
-          const tag = await createTag.mutateAsync(name);
-          tagIds.push(tag.id);
-        }
-        await setTaskTags.mutateAsync({ taskId: task.id, tagIds });
-      }
-      onClose();
-    } catch {
-      // leave modal open on error
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <Modal
@@ -148,60 +102,11 @@ export default function AddTaskModal({
                   </TouchableOpacity>
                 </View>
 
-                <View className="mb-4">
-                  <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
-                    Title
-                  </Text>
-                  <TextInput
-                    ref={titleInputRef}
-                    className="p-2.5 rounded"
-                    style={{ backgroundColor: Colors.card, color: Colors.text }}
-                    placeholder="Task title"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={taskTitle}
-                    onChangeText={setTaskTitle}
-                    onSubmitEditing={handleSubmit}
-                    autoFocus
-                  />
-                </View>
-                <View className="mb-4">
-                  <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
-                    Due date (YYYY-MM-DD)
-                  </Text>
-                  <TextInput
-                    className="p-2.5 rounded"
-                    style={{ backgroundColor: Colors.card, color: Colors.text }}
-                    placeholder={selectedDate}
-                    placeholderTextColor={Colors.textSecondary}
-                    value={dueDate}
-                    onChangeText={setDueDate}
-                  />
-                </View>
-                <View className="mb-6">
-                  <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
-                    Tags (comma-separated)
-                  </Text>
-                  <TextInput
-                    className="p-2.5 rounded"
-                    style={{ backgroundColor: Colors.card, color: Colors.text }}
-                    placeholder="e.g. work, errands"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={tagNamesStr}
-                    onChangeText={setTagNamesStr}
-                  />
-                </View>
-                <TouchableOpacity
-                  className="py-3 rounded items-center"
-                  style={{
-                    backgroundColor: isSubmitting ? Colors.textTertiary : Colors.primary,
-                  }}
-                  onPress={handleSubmit}
-                  disabled={isSubmitting || createTask.isPending || !taskTitle.trim()}
-                >
-                  <Text className="text-base font-bold" style={{ color: Colors.text }}>
-                    {isSubmitting ? 'Adding...' : 'Add Task'}
-                  </Text>
-                </TouchableOpacity>
+                <AddTaskForm
+                  key={visible ? 'open' : 'closed'}
+                  ref={formRef}
+                  onSuccess={handleClose}
+                />
               </Animated.View>
             </TouchableWithoutFeedback>
           </View>
