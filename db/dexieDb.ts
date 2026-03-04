@@ -293,8 +293,8 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     const all = await this.tags.toArray();
     const nextOrder = all.length > 0 ? Math.max(0, ...all.map((t) => (t as Tag).order ?? 0)) + 1 : 0;
     const now = new Date().toISOString();
-    const toAdd: Tag = { name: trimmed, order: nextOrder, created_at: now, updated_at: now };
-    const id = await this.tags.add(toAdd as any);
+    const toAdd: Omit<Tag, 'id'> = { name: trimmed, order: nextOrder, created_at: now, updated_at: now };
+    const id = await this.tags.add(toAdd as Tag);
     return { ...toAdd, id };
   }
 
