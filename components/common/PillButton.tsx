@@ -38,6 +38,8 @@ export interface PillButtonProps {
   dragHandleProps?: PillButtonDragHandleProps | null;
   checkButton?: PillButtonCheckButtonProps;
   multiCount?: PillButtonMultiCountProps;
+  /** When true and highlightAsCompleted, shows a checkmark icon on the right in the main row (no separate button). Used by ExerciseList. */
+  showCompletedCheckIcon?: boolean;
 }
 
 function computeProgressPercentage(currentCount: number, targetCount: number): number {
@@ -81,6 +83,7 @@ export default function PillButton({
   dragHandleProps,
   checkButton,
   multiCount,
+  showCompletedCheckIcon = false,
 }: PillButtonProps) {
   const resolvedBackgroundColor = resolveBackgroundColor(
     isDragging,
@@ -95,6 +98,7 @@ export default function PillButton({
   const mainPressProps = onMainPress != null ? { onPress: onMainPress } : {};
   const chevronColor =
     highlightAsCompleted || checkButton?.completed ? Colors.text : Colors.textSecondary;
+  const hasRightButton = multiCount != null || checkButton != null;
 
   const leftSlot =
     dragHandleProps != null ? (
@@ -123,7 +127,7 @@ export default function PillButton({
       <MainWrapper
         {...mainPressProps}
         style={{ backgroundColor: 'transparent', zIndex: 1 }}
-        className="flex-1 h-full flex flex-row items-center border-r border-gray-600"
+        className={`flex-1 h-full flex flex-row items-center ${hasRightButton ? 'border-r border-gray-600' : ''}`}
       >
         <View className="w-0 sm:w-[52px] h-[52px] transition-all duration-300" />
         <View className="flex-1 flex flex-col items-center justify-center">
@@ -163,7 +167,14 @@ export default function PillButton({
         </TouchableOpacity>
       )}
 
-      {checkButton != null && (
+      {showCompletedCheckIcon ? (
+        <View
+          className="h-full w-16 flex items-center justify-center"
+          style={{ backgroundColor: 'transparent', zIndex: 1, opacity: highlightAsCompleted ? 1 : 0 }}
+        >
+          <Icon source="check" color={Colors.text} size={24} />
+        </View>
+      ) : checkButton != null ? (
         <TouchableOpacity
           onPress={checkButton.onPress}
           disabled={checkButton.disabled}
@@ -196,7 +207,7 @@ export default function PillButton({
             />
           )}
         </TouchableOpacity>
-      )}
+      ) : null}
     </View>
   );
 }

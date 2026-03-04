@@ -29,6 +29,7 @@ export const ExerciseListItem = React.forwardRef<View, ExerciseListItemProps>(
           onMainPress={onPress}
           dragHandleProps={dragHandleProps ?? undefined}
           text={exercise.name}
+          showCompletedCheckIcon
         />
       </View>
     );
