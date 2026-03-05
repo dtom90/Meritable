@@ -105,6 +105,7 @@ export function EditSetModal({ visible, set: setToEdit, onClose }: EditSetModalP
                   value={weightInput}
                   onChangeText={setWeightInput}
                   keyboardType="decimal-pad"
+                  onSubmitEditing={handleSave}
                 />
               </View>
               <View className="gap-2">
@@ -122,6 +123,7 @@ export function EditSetModal({ visible, set: setToEdit, onClose }: EditSetModalP
                   value={repsInput}
                   onChangeText={setRepsInput}
                   keyboardType="number-pad"
+                  onSubmitEditing={handleSave}
                 />
               </View>
               <View className="gap-2">
@@ -138,6 +140,7 @@ export function EditSetModal({ visible, set: setToEdit, onClose }: EditSetModalP
                   placeholderTextColor={Colors.textSecondary}
                   value={dateInput}
                   onChangeText={setDateInput}
+                  onSubmitEditing={handleSave}
                 />
               </View>
               <View className="flex-row gap-2 justify-end mt-2">

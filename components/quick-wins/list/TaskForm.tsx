@@ -137,6 +137,7 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
           placeholderTextColor={Colors.textSecondary}
           value={dueDate}
           onChangeText={setDueDate}
+          onSubmitEditing={handleSubmit}
         />
       </View>
       <View className="mb-6">
