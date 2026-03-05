@@ -1,8 +1,9 @@
-import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import PillButton from '@/components/common/PillButton';
 import { useUpdateTask } from '@/db/useTasks';
 import { useSelectedDate } from '@/lib/selectedDateStore';
 import { getToday } from '@/lib/dateUtils';
+import EditTaskModal from '@/components/quick-wins/list/EditTaskModal';
 import type { Task } from '@/db/types';
 
 type TaskDetailHeaderProps = {
@@ -10,7 +11,7 @@ type TaskDetailHeaderProps = {
 };
 
 export function TaskDetailHeader({ task }: TaskDetailHeaderProps) {
-  const router = useRouter();
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const { selectedDate } = useSelectedDate();
   const updateTask = useUpdateTask();
 
@@ -39,20 +40,27 @@ export function TaskDetailHeader({ task }: TaskDetailHeaderProps) {
   };
 
   return (
-    <PillButton
-      text={task.title || 'Untitled'}
-      highlightAsCompleted={isCompleted}
-      onMainPress={() => router.back()}
-      checkButton={
-        canToggle
-          ? {
-              onPress: handleToggle,
-              disabled: isPending,
-              loading: isPending,
-              completed: isCompleted,
-            }
-          : undefined
-      }
-    />
+    <>
+      <PillButton
+        text={task.title || 'Untitled'}
+        highlightAsCompleted={isCompleted}
+        onMainPress={() => setEditModalVisible(true)}
+        checkButton={
+          canToggle
+            ? {
+                onPress: handleToggle,
+                disabled: isPending,
+                loading: isPending,
+                completed: isCompleted,
+              }
+            : undefined
+        }
+      />
+      <EditTaskModal
+        task={task}
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+      />
+    </>
   );
 }

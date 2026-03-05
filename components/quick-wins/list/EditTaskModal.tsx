@@ -12,20 +12,21 @@ import {
 } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import TaskForm, { TaskFormRef } from './TaskForm';
+import type { Task } from '@/db/types';
 
-interface AddTaskModalProps {
+interface EditTaskModalProps {
+  task: Task;
   visible: boolean;
   onClose: () => void;
-  title?: string;
 }
 
 const { height: screenHeight } = Dimensions.get('window');
 
-export default function AddTaskModal({
+export default function EditTaskModal({
+  task,
   visible,
   onClose,
-  title = 'Add Task',
-}: AddTaskModalProps) {
+}: EditTaskModalProps) {
   const [modalVisible, setModalVisible] = useState(visible);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const formRef = useRef<TaskFormRef>(null);
@@ -89,7 +90,7 @@ export default function AddTaskModal({
               >
                 <View className="flex-row items-center justify-between mb-6">
                   <Text className="text-xl font-bold" style={{ color: Colors.text }}>
-                    {title}
+                    Edit Task
                   </Text>
                   <TouchableOpacity
                     onPress={handleClose}
@@ -105,6 +106,7 @@ export default function AddTaskModal({
                 <TaskForm
                   key={visible ? 'open' : 'closed'}
                   ref={formRef}
+                  task={task}
                   onSuccess={handleClose}
                 />
               </Animated.View>
