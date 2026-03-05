@@ -40,6 +40,8 @@ export interface PillButtonProps {
   multiCount?: PillButtonMultiCountProps;
   /** When true and highlightAsCompleted, shows a checkmark icon on the right in the main row (no separate button). Used by ExerciseList. */
   showCompletedCheckIcon?: boolean;
+  /** When set and onMainPress is set, overrides the right-chevron icon (e.g. "pencil"). Must be a react-native-paper icon name. */
+  rightIcon?: string;
 }
 
 function computeProgressPercentage(currentCount: number, targetCount: number): number {
@@ -84,6 +86,7 @@ export default function PillButton({
   checkButton,
   multiCount,
   showCompletedCheckIcon = false,
+  rightIcon,
 }: PillButtonProps) {
   const resolvedBackgroundColor = resolveBackgroundColor(
     isDragging,
@@ -143,7 +146,11 @@ export default function PillButton({
               </Text>
             )}
             {onMainPress != null && (
-              <Icon source="chevron-right" color={chevronColor} size={20} />
+              <Icon
+                source={rightIcon ?? 'chevron-right'}
+                color={chevronColor}
+                size={20}
+              />
             )}
           </View>
           {children != null && (

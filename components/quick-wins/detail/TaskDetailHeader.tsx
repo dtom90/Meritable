@@ -45,6 +45,7 @@ export function TaskDetailHeader({ task }: TaskDetailHeaderProps) {
         text={task.title || 'Untitled'}
         highlightAsCompleted={isCompleted}
         onMainPress={() => setEditModalVisible(true)}
+        rightIcon="pencil"
         checkButton={
           canToggle
             ? {
