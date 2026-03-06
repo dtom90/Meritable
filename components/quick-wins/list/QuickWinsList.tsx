@@ -43,14 +43,14 @@ export default function QuickWinsList({
     return tags.filter((tag) => tagIdSet.has(tag.id));
   }, [tasks, taskTagIdsMap, tags]);
 
-  const getTagNamesForTask = (taskId: number): string[] => {
-    const ids = taskTagIdsMap[taskId] ?? [];
+  const getTaskTags = (taskId: number): { names: string[]; ids: number[] } => {
+    const ids = (taskTagIdsMap[taskId] ?? []).slice();
     const orderMap = new Map(tags.map((t, i) => [t.id, i]));
-    return ids
-      .slice()
-      .sort((a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0))
+    ids.sort((a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0));
+    const names = ids
       .map((id) => tags.find((t) => t.id === id)?.name)
       .filter((n): n is string => Boolean(n));
+    return { names, ids };
   };
 
   if (isLoading || mapLoading) {
@@ -114,7 +114,8 @@ export default function QuickWinsList({
           <QuickWinButton
             key={task.id ?? `task-${index}`}
             task={task}
-            tagNames={task.id != null ? getTagNamesForTask(task.id) : []}
+            taskTags={task.id != null ? getTaskTags(task.id) : { names: [], ids: [] }}
+            selectedTagId={selectedTagId}
           />
         ))
       ) : (

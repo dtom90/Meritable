@@ -9,10 +9,22 @@ import PillButton from '@/components/common/PillButton';
 
 interface QuickWinButtonProps {
   task: Task;
-  tagNames?: string[];
+  taskTags?: { names: string[]; ids: number[] };
+  selectedTagId?: number | null;
 }
 
-export default function QuickWinButton({ task, tagNames = [] }: QuickWinButtonProps) {
+export default function QuickWinButton({
+  task,
+  taskTags = { names: [], ids: [] },
+  selectedTagId = null,
+}: QuickWinButtonProps) {
+  const { names: tagNames, ids: tagIds } = taskTags;
+  const overflowSelected =
+    selectedTagId != null && tagIds.indexOf(selectedTagId) >= 3;
+  const pillStyle = (selected: boolean) => ({
+    backgroundColor: selected ? Colors.primary : Colors.border,
+    color: selected ? Colors.text : Colors.textSecondary,
+  });
   const router = useRouter();
   const { selectedDate } = useSelectedDate();
   const updateTask = useUpdateTask();
@@ -60,23 +72,23 @@ export default function QuickWinButton({ task, tagNames = [] }: QuickWinButtonPr
     >
       {tagNames.length > 0 ? (
         <View className="flex-row flex-wrap justify-center gap-1">
-          {tagNames.slice(0, 3).map((name) => (
-            <View
-              key={name}
-              className="rounded-full px-2 py-0.5"
-              style={{ backgroundColor: Colors.border }}
-            >
-              <Text className="text-xs" style={{ color: Colors.textSecondary }}>
-                {name}
-              </Text>
-            </View>
-          ))}
+          {tagNames.slice(0, 3).map((name, i) => {
+            const sel = selectedTagId === tagIds[i];
+            return (
+              <View
+                key={name}
+                className="rounded-full px-2 py-0.5"
+                style={pillStyle(sel)}
+              >
+                <Text className="text-xs" style={pillStyle(sel)}>
+                  {name}
+                </Text>
+              </View>
+            );
+          })}
           {tagNames.length > 3 && (
-            <View
-              className="rounded-full px-2 py-0.5"
-              style={{ backgroundColor: Colors.border }}
-            >
-              <Text className="text-xs" style={{ color: Colors.textSecondary }}>
+            <View className="rounded-full px-2 py-0.5" style={pillStyle(overflowSelected)}>
+              <Text className="text-xs" style={pillStyle(overflowSelected)}>
                 +{tagNames.length - 3}
               </Text>
             </View>
