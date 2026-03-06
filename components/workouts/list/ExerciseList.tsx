@@ -10,10 +10,10 @@ import { NarrowView } from '@/components/common/NarrowView';
 
 export function ExerciseList() {
   const [isEditing, setIsEditing] = useState(false);
-  const { data: exercises = [] } = useListExercises();
+  const { data: exercises = [], refetch, isFetching } = useListExercises();
 
   return (
-    <NarrowView>
+    <NarrowView refreshing={isFetching} onRefresh={() => { void refetch(); }}>
       {exercises.length > 0 && (
         <View className="flex-row justify-between items-center">
           <Pressable onPress={() => setIsEditing(!isEditing)}>

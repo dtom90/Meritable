@@ -1,12 +1,16 @@
 import { Colors } from '@/lib/Colors';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 
-export function NarrowView({ 
-  children, 
-  disableScroll = false 
-}: { 
+export function NarrowView({
+  children,
+  disableScroll = false,
+  refreshing,
+  onRefresh,
+}: {
   children: React.ReactNode;
   disableScroll?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void | Promise<void>;
 }) {
   return (
     <View className="flex-1 w-full items-center" style={{ backgroundColor: Colors.background }}>
@@ -20,6 +24,16 @@ export function NarrowView({
             className="flex-1"
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl
+                  refreshing={refreshing ?? false}
+                  onRefresh={onRefresh}
+                  tintColor={Colors.primary}
+                  colors={[Colors.primary]}
+                />
+              ) : undefined
+            }
           >
             {children}
           </ScrollView>

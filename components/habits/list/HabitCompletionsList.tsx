@@ -14,10 +14,14 @@ interface HabitCompletionsListProps {
 
 export default function HabitCompletionsList({ selectedDate }: HabitCompletionsListProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const { data: habits, isLoading: isLoadingHabits } = useListHabits();
+  const { data: habits, isLoading: isLoadingHabits, refetch, isFetching } = useListHabits();
 
   return (
-    <NarrowView disableScroll={isEditing}>
+    <NarrowView
+      disableScroll={isEditing}
+      refreshing={isFetching}
+      onRefresh={() => { void refetch(); }}
+    >
 
       {habits && habits.length > 0 && (
         <View className='flex-row justify-between items-center'>
