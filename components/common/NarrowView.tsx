@@ -20,9 +20,11 @@ export function NarrowView({
     return () => clearTimeout(t);
   }, []);
 
+  const contentPadding = 16; // same as p-4, applied as scroll content padding to avoid gap at header/tabs
+
   return (
     <View className="flex-1 w-full items-center" style={{ backgroundColor: Colors.background }}>
-      <View className='max-w-3xl w-full p-4 flex-1'>
+      <View className="max-w-3xl w-full flex-1" style={disableScroll ? { padding: contentPadding } : undefined}>
         {disableScroll ? (
           <View className="flex-1">
             {children}
@@ -30,6 +32,11 @@ export function NarrowView({
         ) : (
           <ScrollView
             className="flex-1"
+            contentContainerStyle={{
+              paddingHorizontal: contentPadding,
+              paddingTop: contentPadding,
+              paddingBottom: contentPadding,
+            }}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             refreshControl={
