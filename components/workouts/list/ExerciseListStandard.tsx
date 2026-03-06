@@ -41,6 +41,17 @@ export function ExerciseListStandard() {
     return set;
   }, [setQueries, exercises, selectedDateStr]);
 
+  const setCountByExerciseId = useMemo(() => {
+    const counts = new Map<number, number>();
+    setQueries.forEach((q, i) => {
+      const ex = exercises[i];
+      if (ex?.id == null || !q.data) return;
+      const count = q.data.filter((s) => (s.completionDate ?? '') === selectedDateStr).length;
+      if (count > 0) counts.set(ex.id, count);
+    });
+    return counts;
+  }, [setQueries, exercises, selectedDateStr]);
+
   const handlePressExercise = useCallback(
     (exercise: Exercise) => {
       if (exercise.id != null) {
@@ -64,12 +75,13 @@ export function ExerciseListStandard() {
 
   return (
     <View className="gap-2">
-      {exercises.map((exercise) => (
+      {exercises.map((exercise, i) => (
         <ExerciseListItem
           key={exercise.id}
           exercise={exercise}
           onPress={() => handlePressExercise(exercise)}
           isCompletedOnSelectedDate={exercise.id != null && exerciseIdsWithSetOnDate.has(exercise.id)}
+          setCount={exercise.id != null ? setCountByExerciseId.get(exercise.id) : undefined}
         />
       ))}
     </View>
