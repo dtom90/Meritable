@@ -74,7 +74,7 @@ export function ExerciseListStandard() {
   }
 
   return (
-    <View className="gap-2">
+    <View>
       {exercises.map((exercise, i) => (
         <ExerciseListItem
           key={exercise.id}
