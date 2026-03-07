@@ -35,7 +35,7 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
       {isLoadingHabits ? (
         <Spinner />
       ) : isEditing ? (
-        <View>
+        <View className="flex-1">
           {Platform.OS === 'web' ? (
             <HabitsReorderListWeb />
           ) : (
