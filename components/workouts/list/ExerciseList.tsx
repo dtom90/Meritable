@@ -13,7 +13,11 @@ export function ExerciseList() {
   const { data: exercises = [], refetch, isFetching } = useListExercises();
 
   return (
-    <NarrowView refreshing={isFetching} onRefresh={() => { void refetch(); }}>
+    <NarrowView
+      disableScroll={isEditing}
+      refreshing={isFetching}
+      onRefresh={() => { void refetch(); }}
+    >
       {exercises.length > 0 && (
         <View className="flex-row justify-between items-center">
           <Pressable onPress={() => setIsEditing(!isEditing)}>
