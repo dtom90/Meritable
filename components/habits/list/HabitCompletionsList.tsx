@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { View, Pressable, Text } from 'react-native';
+import { View, Pressable, Text, Platform } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import HabitCompletions from './HabitCompletions';
-import HabitReorderList from './HabitReorderList';
+import HabitsReorderListWeb from './HabitsReorderListWeb';
+import HabitsReorderListMobile from './HabitsReorderListMobile';
 import { NarrowView } from '@/components/common/NarrowView';
 import AddHabitButton from './AddHabitButton';
 import { useListHabits } from '@/db/useHabitDb';
@@ -35,7 +36,11 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
         <Spinner />
       ) : isEditing ? (
         <View>
-          <HabitReorderList />
+          {Platform.OS === 'web' ? (
+            <HabitsReorderListWeb />
+          ) : (
+            <HabitsReorderListMobile />
+          )}
           <AddHabitButton />
         </View>
       ) : habits && habits.length === 0 ? (
