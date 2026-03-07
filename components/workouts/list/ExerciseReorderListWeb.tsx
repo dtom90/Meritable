@@ -116,7 +116,7 @@ export function ExerciseReorderListWeb() {
   }
 
   return (
-    <View className="gap-2" style={{ minHeight: 200 }}>
+    <View>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

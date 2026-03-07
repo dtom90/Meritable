@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -13,6 +13,8 @@ import Spinner from '@/components/common/Spinner';
 export default function HabitsReorderListMobile() {
   const { data: habitsFromDb = [], isLoading } = useListHabits();
   const { mutate: reorderHabits } = useReorderHabits();
+  const EXTRA_HEIGHT = 16;
+  const [contentHeight, setContentHeight] = useState(EXTRA_HEIGHT);
 
   const handleDragEnd = useCallback(
     ({ data }: { data: Habit[] }) => {
@@ -54,10 +56,17 @@ export default function HabitsReorderListMobile() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView
+      style={
+        contentHeight > 0
+          ? { height: contentHeight }
+          : { flex: 1 }
+      }
+    >
       <DraggableFlatList
         data={habitsFromDb}
         onDragEnd={handleDragEnd}
+        onContentSizeChange={(_w, h) => setContentHeight(h + EXTRA_HEIGHT)}
         keyExtractor={(item) => item.id?.toString() || ''}
         renderItem={renderItem}
       />

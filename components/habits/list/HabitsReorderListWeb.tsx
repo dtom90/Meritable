@@ -95,7 +95,6 @@ export default function HabitsReorderListWeb() {
 
   return (
     <ScrollView
-      className="flex-1"
       showsVerticalScrollIndicator={true}
       keyboardShouldPersistTaps="handled"
     >

@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { View, Text } from 'react-native';
+import { Text } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -16,6 +16,8 @@ export function ExerciseReorderListMobile() {
   const router = useRouter();
   const { data: exercises = [], isLoading } = useListExercises();
   const { mutate: reorderExercises } = useReorderExercises();
+  const EXTRA_HEIGHT = 16;
+  const [contentHeight, setContentHeight] = useState(EXTRA_HEIGHT);
 
   const handlePressExercise = useCallback(
     (exercise: Exercise) => {
@@ -67,10 +69,17 @@ export function ExerciseReorderListMobile() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView
+      style={
+        contentHeight > 0
+          ? { height: contentHeight }
+          : { flex: 1 }
+      }
+    >
       <DraggableFlatList
         data={exercises}
         onDragEnd={handleDragEnd}
+        onContentSizeChange={(_w, h) => setContentHeight(h + EXTRA_HEIGHT)}
         keyExtractor={(item) => item.id?.toString() ?? ''}
         renderItem={renderItem}
       />

@@ -28,7 +28,7 @@ export function ExerciseList() {
         </View>
       )}
       {isEditing ? (
-        <View className="flex-1">
+        <View>
           {Platform.OS === 'web' ? (
             <ExerciseReorderListWeb />
           ) : (
