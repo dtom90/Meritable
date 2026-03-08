@@ -17,19 +17,20 @@ export default function WeekHeader() {
     },
   };
 
+  const weekHeaderHeight = 56;
   return (
-    <View style={{ backgroundColor: Colors.surface, height: 48, overflow: 'hidden' }}>
+    <View style={{ backgroundColor: Colors.surface, height: weekHeaderHeight, overflow: 'hidden' }}>
       <CalendarProvider
         date={formattedSelectedDate}
         onDateChanged={(date) => setSelectedDate(date)}
-        style={{ height: 48, overflow: 'hidden' }}
+        style={{ height: weekHeaderHeight, overflow: 'hidden' }}
       >
         <WeekCalendar
           current={formattedSelectedDate}
           onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
           dayComponent={CustomDayHeader}
-          calendarHeight={48}
+          calendarHeight={weekHeaderHeight}
           allowShadow={false}
           theme={{
             backgroundColor: Colors.surface,
@@ -49,7 +50,7 @@ export default function WeekHeader() {
           }}
           firstDay={6}
           hideDayNames={true}
-          style={{ height: 48, overflow: 'hidden' }}
+          style={{ height: weekHeaderHeight, overflow: 'hidden' }}
         />
       </CalendarProvider>
     </View>
