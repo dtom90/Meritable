@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Spinner from '@/components/common/Spinner';
 import QuickWinButton from './QuickWinButton';
 import TagOrderModal from './TagOrderModal';
 import { useTasksForDate } from '@/db/useTasks';
-import { useTaskTagIdsMap, useTagsQuery } from '@/db/useTags';
+import { useTaskTagIdsMap, useTagsQuery, useCreateTag } from '@/db/useTags';
 import { useSelectedDate } from '@/lib/selectedDateStore';
 import { Colors } from '@/lib/Colors';
+import { BACKLOG_TAG_NAME } from '@/lib/constants';
+import { filterTasksForQuickWinsList } from './filterTasksForQuickWinsList';
 
 type QuickWinsListProps = {
   selectedTagId: number | null;
@@ -18,31 +20,62 @@ export default function QuickWinsList({
   onSelectTagId,
 }: QuickWinsListProps) {
   const [tagOrderModalVisible, setTagOrderModalVisible] = useState(false);
+  const hasEnsuredBacklog = useRef(false);
   const { selectedDate } = useSelectedDate();
   const { data: tasks, isLoading } = useTasksForDate(selectedDate);
   const { data: taskTagIdsMap = {}, isLoading: mapLoading } = useTaskTagIdsMap();
   const { data: tags = [] } = useTagsQuery();
+  const createTag = useCreateTag();
 
-  const tasksFiltered = useMemo(() => {
-    if (!tasks) return [];
-    if (selectedTagId == null) return tasks;
-    return tasks.filter((t) => {
-      const ids = t.id != null ? taskTagIdsMap[t.id] : undefined;
-      return ids?.includes(selectedTagId) ?? false;
-    });
-  }, [tasks, selectedTagId, taskTagIdsMap]);
+  const backlogTag = useMemo(
+    () => tags.find((t) => t.name === BACKLOG_TAG_NAME),
+    [tags]
+  );
 
+  // Ensure the Backlog tag is created if it doesn't exist
+  useEffect(() => {
+    if (tags.length === 0 || hasEnsuredBacklog.current) return;
+    if (tags.some((t) => t.name === BACKLOG_TAG_NAME)) {
+      hasEnsuredBacklog.current = true;
+      return;
+    }
+    hasEnsuredBacklog.current = true;
+    createTag.mutate(BACKLOG_TAG_NAME);
+  }, [tags, createTag]);
+
+  // Filter tasks based on selected tag and Backlog rules
+  const tasksFiltered = useMemo(
+    () =>
+      filterTasksForQuickWinsList(
+        tasks,
+        taskTagIdsMap,
+        backlogTag ?? undefined,
+        selectedTagId
+      ),
+    [tasks, selectedTagId, taskTagIdsMap, backlogTag]
+  );
+
+  // Get tags in use (excluding Backlog if selected)
   const tagsInUse = useMemo(() => {
-    if (!tasks?.length) return [];
     const tagIdSet = new Set<number>();
-    for (const t of tasks) {
-      if (t.id != null && taskTagIdsMap[t.id]) {
-        for (const id of taskTagIdsMap[t.id]) tagIdSet.add(id);
+    if (tasks?.length) {
+      for (const t of tasks) {
+        if (t.id != null && taskTagIdsMap[t.id]) {
+          for (const id of taskTagIdsMap[t.id]) tagIdSet.add(id);
+        }
       }
     }
-    return tags.filter((tag) => tagIdSet.has(tag.id));
-  }, [tasks, taskTagIdsMap, tags]);
+    const inUse = tags.filter((tag) => tagIdSet.has(tag.id));
+    if (backlogTag) {
+      return [
+        ...inUse.filter((t) => t.id !== backlogTag.id),
+        backlogTag
+      ];
+    }
+    return inUse;
+  }, [tasks, taskTagIdsMap, tags, backlogTag]);
 
+  // Get tags for a task
   const getTaskTags = (taskId: number): { names: string[]; ids: number[] } => {
     const ids = (taskTagIdsMap[taskId] ?? []).slice();
     const orderMap = new Map(tags.map((t, i) => [t.id, i]));
