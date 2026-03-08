@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { View, Pressable, Text, Platform } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import { ExerciseListStandard } from './ExerciseListStandard';
-import { ExerciseReorderListWeb } from './ExerciseReorderListWeb';
-import { ExerciseReorderListMobile } from './ExerciseReorderListMobile';
 import { AddExerciseButton } from './AddExerciseButton';
-import { useListExercises } from '@/db/useWorkoutDb';
+import { useListExercises, useReorderExercises } from '@/db/useWorkoutDb';
 import { NarrowView } from '@/components/common/NarrowView';
+import { ReorderEditLayout } from '@/components/common/ReorderEditLayout';
 
 export function ExerciseList() {
   const [isEditing, setIsEditing] = useState(false);
-  const { data: exercises = [], refetch, isFetching } = useListExercises();
+  const { data: exercises = [], isLoading: isLoadingExercises, refetch, isFetching } = useListExercises();
+  const { mutate: reorderExercises } = useReorderExercises();
 
   return (
     <NarrowView
@@ -28,14 +28,15 @@ export function ExerciseList() {
         </View>
       )}
       {isEditing ? (
-        <View>
-          {Platform.OS === 'web' ? (
-            <ExerciseReorderListWeb />
-          ) : (
-            <ExerciseReorderListMobile />
-          )}
-          <AddExerciseButton />
-        </View>
+        <ReorderEditLayout
+          footer={<AddExerciseButton />}
+          data={exercises}
+          getItemId={(ex) => ex.id?.toString() ?? ''}
+          getItemLabel={(ex) => ex.name}
+          onReorder={(reordered) =>
+            reorderExercises(reordered.map((ex, i) => ({ ...ex, order: i })))}
+          loading={isLoadingExercises}
+        />
       ) : exercises.length === 0 ? (
         <AddExerciseButton />
       ) : (

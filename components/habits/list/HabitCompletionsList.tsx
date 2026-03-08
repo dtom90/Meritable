@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { View, Pressable, Text, Platform } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { Colors } from '@/lib/Colors';
 import HabitCompletions from './HabitCompletions';
-import HabitsReorderListWeb from './HabitsReorderListWeb';
-import HabitsReorderListMobile from './HabitsReorderListMobile';
 import { NarrowView } from '@/components/common/NarrowView';
+import { ReorderEditLayout } from '@/components/common/ReorderEditLayout';
 import AddHabitButton from './AddHabitButton';
-import { useListHabits } from '@/db/useHabitDb';
+import { useListHabits, useReorderHabits } from '@/db/useHabitDb';
 import Spinner from '@/components/common/Spinner';
 
 interface HabitCompletionsListProps {
@@ -15,7 +14,8 @@ interface HabitCompletionsListProps {
 
 export default function HabitCompletionsList({ selectedDate }: HabitCompletionsListProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const { data: habits, isLoading: isLoadingHabits, refetch, isFetching } = useListHabits();
+  const { data: habits = [], isLoading: isLoadingHabits, refetch, isFetching } = useListHabits();
+  const { mutate: reorderHabits } = useReorderHabits();
 
   return (
     <NarrowView
@@ -35,14 +35,15 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
       {isLoadingHabits ? (
         <Spinner />
       ) : isEditing ? (
-        <View>
-          {Platform.OS === 'web' ? (
-            <HabitsReorderListWeb />
-          ) : (
-            <HabitsReorderListMobile />
-          )}
-          <AddHabitButton />
-        </View>
+        <ReorderEditLayout
+          footer={<AddHabitButton />}
+          data={habits}
+          getItemId={(h) => h.id?.toString() || ''}
+          getItemLabel={(h) => h.name}
+          onReorder={(reordered) =>
+            reorderHabits(reordered.map((h, i) => ({ ...h, order: i })))}
+          loading={isLoadingHabits}
+        />
       ) : habits && habits.length === 0 ? (
         <AddHabitButton />
       ) : (habits && habits.length > 0 && (

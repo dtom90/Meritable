@@ -24,7 +24,17 @@ export function NarrowView({
 
   return (
     <View className="flex-1 w-full items-center" style={{ backgroundColor: Colors.background }}>
-      <View className="max-w-3xl w-full flex-1" style={disableScroll ? { padding: contentPadding } : undefined}>
+      <View
+        className="max-w-3xl w-full flex-1"
+        style={
+          disableScroll
+            ? {
+                paddingHorizontal: contentPadding,
+                paddingTop: contentPadding,
+              }
+            : undefined
+        }
+      >
         {disableScroll ? (
           <View className="flex-1">
             {children}
