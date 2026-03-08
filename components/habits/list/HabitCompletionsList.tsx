@@ -44,11 +44,11 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
             reorderHabits(reordered.map((h, i) => ({ ...h, order: i })))}
           loading={isLoadingHabits}
         />
-      ) : habits && habits.length === 0 ? (
-        <AddHabitButton />
-      ) : (habits && habits.length > 0 && (
+      ) : (<>
         <HabitCompletions selectedDate={selectedDate} habits={habits} />
-      ))}
+        <AddHabitButton />
+      </>
+      )}
 
     </NarrowView>
   );
