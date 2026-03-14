@@ -9,7 +9,7 @@ import { TaskDetailTags } from '@/components/quick-wins/detail/TaskDetailTags';
 import type { Task } from '@/db/types';
 
 export interface TaskFormRef {
-  focus: () => void;
+  focus: (field?: 'title' | 'date') => void;
 }
 
 interface TaskFormProps {
@@ -46,9 +46,16 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
   const createTag = useCreateTag();
   const setTaskTags = useSetTaskTags();
   const titleInputRef = useRef<TextInput>(null);
+  const dateInputRef = useRef<TextInput>(null);
 
   useImperativeHandle(ref, () => ({
-    focus: () => titleInputRef.current?.focus(),
+    focus: (field?: 'title' | 'date') => {
+      if (field === 'date') {
+        dateInputRef.current?.focus();
+      } else {
+        titleInputRef.current?.focus();
+      }
+    },
   }));
 
   const handleSubmit = async () => {
@@ -131,6 +138,7 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
           Due date (YYYY-MM-DD)
         </Text>
         <TextInput
+          ref={dateInputRef}
           className="p-2.5 rounded"
           style={{ backgroundColor: Colors.card, color: Colors.text }}
           placeholder={selectedDate}

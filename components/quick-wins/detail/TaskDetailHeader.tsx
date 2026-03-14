@@ -1,17 +1,15 @@
-import { useState } from 'react';
 import PillButton from '@/components/common/PillButton';
 import { useUpdateTask } from '@/db/useTasks';
 import { useSelectedDate } from '@/lib/selectedDateStore';
 import { getToday } from '@/lib/dateUtils';
-import EditTaskModal from '@/components/quick-wins/list/EditTaskModal';
 import type { Task } from '@/db/types';
 
 type TaskDetailHeaderProps = {
   task: Task;
+  onOpenEdit: () => void;
 };
 
-export function TaskDetailHeader({ task }: TaskDetailHeaderProps) {
-  const [editModalVisible, setEditModalVisible] = useState(false);
+export function TaskDetailHeader({ task, onOpenEdit }: TaskDetailHeaderProps) {
   const { selectedDate } = useSelectedDate();
   const updateTask = useUpdateTask();
 
@@ -44,7 +42,7 @@ export function TaskDetailHeader({ task }: TaskDetailHeaderProps) {
       <PillButton
         text={task.title || 'Untitled'}
         highlightAsCompleted={isCompleted}
-        onMainPress={() => setEditModalVisible(true)}
+        onMainPress={onOpenEdit}
         rightIcon="pencil"
         checkButton={
           canToggle
@@ -56,11 +54,6 @@ export function TaskDetailHeader({ task }: TaskDetailHeaderProps) {
               }
             : undefined
         }
-      />
-      <EditTaskModal
-        task={task}
-        visible={editModalVisible}
-        onClose={() => setEditModalVisible(false)}
       />
     </>
   );

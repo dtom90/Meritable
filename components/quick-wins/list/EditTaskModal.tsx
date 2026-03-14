@@ -18,6 +18,8 @@ interface EditTaskModalProps {
   task: Task;
   visible: boolean;
   onClose: () => void;
+  /** When opening, focus this field instead of title. */
+  focusField?: 'title' | 'date';
 }
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -26,6 +28,7 @@ export default function EditTaskModal({
   task,
   visible,
   onClose,
+  focusField = 'title',
 }: EditTaskModalProps) {
   const [modalVisible, setModalVisible] = useState(visible);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
@@ -40,7 +43,10 @@ export default function EditTaskModal({
         duration: 300,
         useNativeDriver: true,
       }).start(() => {
-        focusTimer = setTimeout(() => formRef.current?.focus(), 350);
+        focusTimer = setTimeout(
+          () => formRef.current?.focus(focusField),
+          350
+        );
       });
       return () => {
         if (focusTimer != null) clearTimeout(focusTimer);
