@@ -1,10 +1,20 @@
 import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Keyboard, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Pressable,
+  Keyboard,
+  Platform,
+  StyleSheet,
+} from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import { Colors } from '@/lib/Colors';
 import { useCreateTask, useUpdateTask } from '@/db/useTasks';
 import { useCreateTag, useSetTaskTags, useTaskTagIds, useTagsQuery } from '@/db/useTags';
 import { useSelectedDate } from '@/lib/selectedDateStore';
-import { formatDate, toDateString } from '@/lib/dateUtils';
+import { formatDate, toDateString, isValidDateFormat } from '@/lib/dateUtils';
 import { TaskDetailTags } from '@/components/quick-wins/detail/TaskDetailTags';
 import type { Task } from '@/db/types';
 
@@ -25,6 +35,7 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
   const [dueDate, setDueDate] = useState(
     isEdit ? (toDateString(task.dueDate) ?? task.dueDate) : selectedDate
   );
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [tagNames, setTagNames] = useState<string[]>([]);
   const [tagNamesInitialized, setTagNamesInitialized] = useState(!isEdit);
 
@@ -46,12 +57,11 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
   const createTag = useCreateTag();
   const setTaskTags = useSetTaskTags();
   const titleInputRef = useRef<TextInput>(null);
-  const dateInputRef = useRef<TextInput>(null);
 
   useImperativeHandle(ref, () => ({
     focus: (field?: 'title' | 'date') => {
       if (field === 'date') {
-        dateInputRef.current?.focus();
+        setShowDatePicker(true);
       } else {
         titleInputRef.current?.focus();
       }
@@ -116,7 +126,7 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
       : 'Add Task';
 
   return (
-    <>
+    <View style={styles.formWrap}>
       <View className="mb-4">
         <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
           Title
@@ -129,24 +139,63 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
           placeholderTextColor={Colors.textSecondary}
           value={taskTitle}
           onChangeText={setTaskTitle}
+          onFocus={() => setShowDatePicker(false)}
           onSubmitEditing={handleSubmit}
           autoFocus
         />
       </View>
-      <View className="mb-4">
+      <View className="mb-4" style={styles.dueDateSection}>
         <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
-          Due date (YYYY-MM-DD)
+          Due date
         </Text>
-        <TextInput
-          ref={dateInputRef}
-          className="p-2.5 rounded"
-          style={{ backgroundColor: Colors.card, color: Colors.text }}
-          placeholder={selectedDate}
-          placeholderTextColor={Colors.textSecondary}
-          value={dueDate}
-          onChangeText={setDueDate}
-          onSubmitEditing={handleSubmit}
-        />
+        <TouchableOpacity
+          className="p-2.5 rounded mb-2"
+          style={{ backgroundColor: Colors.card }}
+          onPress={() => setShowDatePicker((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Text style={{ color: Colors.text }}>{dueDate}</Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <View
+            className="mb-2 overflow-hidden rounded"
+            style={[styles.calendarWrap, { backgroundColor: Colors.card }]}
+          >
+            <Calendar
+              current={isValidDateFormat(dueDate) ? dueDate : selectedDate}
+              onDayPress={(day) => {
+                setDueDate(day.dateString);
+                setShowDatePicker(false);
+              }}
+              theme={{
+                backgroundColor: Colors.card,
+                calendarBackground: Colors.card,
+                textSectionTitleColor: Colors.textSecondary,
+                selectedDayBackgroundColor: Colors.primary,
+                selectedDayTextColor: Colors.text,
+                todayTextColor: Colors.primary,
+                monthTextColor: Colors.text,
+                dayTextColor: Colors.text,
+                textDisabledColor: Colors.textTertiary,
+                arrowColor: Colors.primary,
+                textDayFontSize: 14,
+                textMonthFontSize: 16,
+                textDayHeaderFontSize: 12,
+              }}
+              markedDates={
+                isValidDateFormat(dueDate)
+                  ? {
+                      [dueDate]: {
+                        selected: true,
+                        selectedColor: Colors.primary,
+                        selectedTextColor: Colors.text,
+                      },
+                    }
+                  : {}
+              }
+            />
+          </View>
+        )}
       </View>
       <View className="mb-6">
         <TaskDetailTags value={tagNames} onChange={setTagNames} />
@@ -168,8 +217,28 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
           {submitLabel}
         </Text>
       </TouchableOpacity>
-    </>
+      {showDatePicker && (
+        <Pressable
+          style={[StyleSheet.absoluteFill, styles.overlay]}
+          onPress={() => setShowDatePicker(false)}
+          accessibilityLabel="Dismiss calendar"
+        />
+      )}
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  formWrap: {
+    position: 'relative',
+  },
+  overlay: {
+    zIndex: 10,
+  },
+  dueDateSection: {
+    zIndex: 11,
+  },
+  calendarWrap: {},
 });
 
 TaskForm.displayName = 'TaskForm';
