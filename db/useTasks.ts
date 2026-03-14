@@ -125,8 +125,9 @@ export function useDeleteTask() {
       if (!activeDb) throw new Error('Database not initialized');
       await activeDb.deleteTask(id);
     },
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: [TASKS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: ['task', id] });
     },
   });
 }

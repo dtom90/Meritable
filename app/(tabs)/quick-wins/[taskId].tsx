@@ -9,6 +9,7 @@ import EditTaskModal from '@/components/quick-wins/list/EditTaskModal';
 import { TaskDetailHeader } from '@/components/quick-wins/detail/TaskDetailHeader';
 import { TaskDetailDates } from '@/components/quick-wins/detail/TaskDetailDates';
 import { TaskDetailTags } from '@/components/quick-wins/detail/TaskDetailTags';
+import DeleteTaskButton from '@/components/quick-wins/detail/DeleteTaskButton';
 
 export default function QuickWinDetailScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
@@ -41,6 +42,11 @@ export default function QuickWinDetailScreen() {
         onOpenEdit={() => openEditModal('date')}
       />
       {task.id != null && <TaskDetailTags taskId={task.id} />}
+      {task.id != null && (
+        <View className="mt-12">
+          <DeleteTaskButton taskId={task.id} />
+        </View>
+      )}
       <EditTaskModal
         task={task}
         visible={editModalVisible}
