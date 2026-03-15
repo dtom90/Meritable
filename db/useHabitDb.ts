@@ -30,12 +30,25 @@ export const useCreateHabit = () => {
 
 export const useListHabits = () => {
   const { activeDb, isInitialized } = useDataSource();
-  
+
   return useQuery({
     queryKey: [HABITS_QUERY_KEY],
     queryFn: () => {
       if (!activeDb) throw new Error('Database not initialized');
       return activeDb.getHabits();
+    },
+    enabled: isInitialized && !!activeDb,
+  });
+};
+
+export const useListArchivedHabits = () => {
+  const { activeDb, isInitialized } = useDataSource();
+
+  return useQuery({
+    queryKey: [HABITS_QUERY_KEY, 'archived'],
+    queryFn: () => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return activeDb.getArchivedHabits();
     },
     enabled: isInitialized && !!activeDb,
   });
@@ -94,7 +107,7 @@ export const useReorderHabits = () => {
 export const useDeleteHabit = () => {
   const queryClient = useQueryClient();
   const { activeDb } = useDataSource();
-  
+
   return useMutation({
     mutationFn: async (habitId: number) => {
       if (!activeDb) throw new Error('Database not initialized');
@@ -104,6 +117,38 @@ export const useDeleteHabit = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [HABIT_COMPLETIONS_QUERY_KEY] });
+    },
+  });
+};
+
+export const useArchiveHabit = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+
+  return useMutation({
+    mutationFn: async (habitId: number) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.updateHabit(habitId, { archived: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'archived'] });
+    },
+  });
+};
+
+export const useUnarchiveHabit = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+
+  return useMutation({
+    mutationFn: async (habitId: number) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.updateHabit(habitId, { archived: false });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'archived'] });
     },
   });
 };

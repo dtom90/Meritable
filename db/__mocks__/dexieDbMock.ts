@@ -1,6 +1,7 @@
 // Mock Dexie database for testing
 export const MockedDexieDb = jest.fn().mockImplementation(() => ({
   getHabits: jest.fn().mockResolvedValue([]),
+  getArchivedHabits: jest.fn().mockResolvedValue([]),
   createHabit: jest.fn(),
   updateHabit: jest.fn(),
   reorderHabits: jest.fn(),

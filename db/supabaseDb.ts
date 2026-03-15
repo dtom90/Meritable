@@ -110,13 +110,29 @@ export class SupabaseDb extends HabitDatabaseInterface {
 
   async getHabits(): Promise<Habit[]> {
     const user = await this.getUser()
-    
+
     const { data, error } = await this.supabase
       .from('habits')
       .select('*')
       .eq('user_id', user?.id)
+      .or('archived.is.null,archived.eq.false')
       .order('order', { ascending: true })
-      .order('id', { ascending: true }) // Fallback for habits without order
+      .order('id', { ascending: true })
+
+    if (error) throw error
+    return data || []
+  }
+
+  async getArchivedHabits(): Promise<Habit[]> {
+    const user = await this.getUser()
+
+    const { data, error } = await this.supabase
+      .from('habits')
+      .select('*')
+      .eq('user_id', user?.id)
+      .eq('archived', true)
+      .order('order', { ascending: true })
+      .order('id', { ascending: true })
 
     if (error) throw error
     return data || []

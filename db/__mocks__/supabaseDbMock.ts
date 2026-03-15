@@ -1,6 +1,7 @@
 // Mock Supabase database for testing
 export const MockedSupabaseDb = jest.fn().mockImplementation(() => ({
   getHabits: jest.fn().mockResolvedValue([]),
+  getArchivedHabits: jest.fn().mockResolvedValue([]),
   createHabit: jest.fn(),
   updateHabit: jest.fn(),
   reorderHabits: jest.fn(),

@@ -111,13 +111,22 @@ class AsyncStorageDb implements HabitDatabaseInterface {
 
   async getHabits(): Promise<Habit[]> {
     const habits = await this.loadHabits();
-    // Sort by order field to maintain custom ordering
-    // Fallback to id for habits without order field
-    return habits.sort((a, b) => {
+    const active = habits.filter((h) => h.archived !== true);
+    return active.sort((a, b) => {
       if (a.order !== undefined && b.order !== undefined) {
         return a.order - b.order;
       }
-      // If order is missing, sort by id as fallback
+      return (a.id || 0) - (b.id || 0);
+    });
+  }
+
+  async getArchivedHabits(): Promise<Habit[]> {
+    const habits = await this.loadHabits();
+    const archived = habits.filter((h) => h.archived === true);
+    return archived.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
       return (a.id || 0) - (b.id || 0);
     });
   }

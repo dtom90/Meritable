@@ -155,6 +155,54 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
           expect(habits[1].id).toBeLessThan(habits[2].id);
         }
       });
+
+      it('should not return archived habits', async () => {
+        const habit = await db.createHabit({ name: 'Active' });
+        await db.updateHabit(habit.id, { archived: true });
+
+        const habits = await db.getHabits();
+        expect(habits).toHaveLength(0);
+      });
+    });
+
+    describe('getArchivedHabits', () => {
+      it('should return empty array when no archived habits exist', async () => {
+        await db.createHabit({ name: 'Active Only' });
+        const archived = await db.getArchivedHabits();
+        expect(archived).toEqual([]);
+      });
+
+      it('should return only archived habits sorted by order', async () => {
+        const a = await db.createHabit({ name: 'Active' });
+        const b = await db.createHabit({ name: 'To Archive 1' });
+        const c = await db.createHabit({ name: 'To Archive 2' });
+        await db.updateHabit(b.id, { archived: true });
+        await db.updateHabit(c.id, { archived: true });
+
+        const archived = await db.getArchivedHabits();
+        expect(archived).toHaveLength(2);
+        expect(archived.map((h) => h.name).sort()).toEqual(['To Archive 1', 'To Archive 2']);
+
+        const active = await db.getHabits();
+        expect(active).toHaveLength(1);
+        expect(active[0].name).toBe('Active');
+      });
+
+      it('should return habit after archive and not after unarchive', async () => {
+        const habit = await db.createHabit({ name: 'Flip' });
+        expect(await db.getHabits()).toHaveLength(1);
+        expect(await db.getArchivedHabits()).toHaveLength(0);
+
+        await db.updateHabit(habit.id, { archived: true });
+        expect(await db.getHabits()).toHaveLength(0);
+        expect(await db.getArchivedHabits()).toHaveLength(1);
+        expect((await db.getArchivedHabits())[0].name).toBe('Flip');
+
+        await db.updateHabit(habit.id, { archived: false });
+        expect(await db.getHabits()).toHaveLength(1);
+        expect(await db.getArchivedHabits()).toHaveLength(0);
+        expect((await db.getHabits())[0].name).toBe('Flip');
+      });
     });
 
     describe('updateHabit', () => {
