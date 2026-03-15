@@ -11,7 +11,7 @@ export default function HabitActions({ habitId, habit }: { habitId: number; habi
 
   return (
     <View className="p-6 rounded-lg" style={{ backgroundColor: Colors.surface }}>
-      <View className="space-y-3">
+      <View className="gap-3">
         {!isArchived && <CountTargetInput habitId={habitId} habit={habit} />}
         {isArchived ? (
           <UnarchiveHabitButton habitId={habitId} />
