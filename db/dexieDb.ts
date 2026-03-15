@@ -103,6 +103,11 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     });
   }
 
+  async getHabit(id: number): Promise<Habit | null> {
+    const habit = await this.habits.get(id);
+    return habit ?? null;
+  }
+
   async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
     const now = new Date().toISOString();
     const habit = await this.habits.get(id);

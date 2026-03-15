@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { View, Pressable, Text, TouchableOpacity } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Colors } from '@/lib/Colors';
 import HabitCompletions from './HabitCompletions';
 import { NarrowView } from '@/components/common/NarrowView';
 import { ReorderEditLayout } from '@/components/common/ReorderEditLayout';
 import AddHabitButton from './AddHabitButton';
+import PillButton from '@/components/common/PillButton';
 import {
   useListHabits,
   useListArchivedHabits,
   useReorderHabits,
-  useUnarchiveHabit,
 } from '@/db/useHabitDb';
 import Spinner from '@/components/common/Spinner';
 import type { Habit } from '@/db/types';
@@ -26,10 +27,9 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
   const { data: habits = [], isLoading: isLoadingHabits, refetch, isFetching } = useListHabits();
   const { data: archivedHabits = [], isLoading: isLoadingArchived, refetch: refetchArchived } = useListArchivedHabits();
   const { mutate: reorderHabits } = useReorderHabits();
-  const { mutate: unarchiveHabit } = useUnarchiveHabit();
+  const router = useRouter();
 
   const showActive = filter === 'active';
-  const habitsToShow = showActive ? habits : archivedHabits;
   const isLoading = showActive ? isLoadingHabits : isLoadingArchived;
 
   const handleRefresh = () => {
@@ -51,11 +51,7 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
         ) : (
           <View />
         )}
-        <Pressable
-          onPress={() => setFilter(showActive ? 'archived' : 'active')}
-          className="px-3 py-2 rounded-lg"
-          style={{ backgroundColor: Colors.card }}
-        >
+        <Pressable onPress={() => setFilter(showActive ? 'archived' : 'active')}>
           <Text style={{ color: Colors.primary }}>
             {showActive ? 'Archived' : 'Active'}
           </Text>
@@ -82,7 +78,7 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
           </>
         )
       ) : (
-        <ArchivedHabitsList habits={archivedHabits} onUnarchive={(id) => unarchiveHabit(id)} />
+        <ArchivedHabitsList habits={archivedHabits} onPressHabit={(id) => router.push(`/habits/${id}`)} />
       )}
     </NarrowView>
   );
@@ -90,10 +86,10 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
 
 function ArchivedHabitsList({
   habits,
-  onUnarchive,
+  onPressHabit,
 }: {
   habits: Habit[];
-  onUnarchive: (id: number) => void;
+  onPressHabit: (id: number) => void;
 }) {
   if (habits.length === 0) {
     return (
@@ -107,22 +103,11 @@ function ArchivedHabitsList({
   return (
     <View>
       {habits.map((habit) => (
-        <View
+        <PillButton
           key={habit.id}
-          className="flex-row items-center justify-between p-4 rounded-lg mb-2"
-          style={{ backgroundColor: Colors.card }}
-        >
-          <Text className="text-lg flex-1" style={{ color: Colors.text }}>
-            {habit.name}
-          </Text>
-          <TouchableOpacity
-            onPress={() => habit.id != null && onUnarchive(habit.id)}
-            className="px-4 py-2 rounded-lg"
-            style={{ backgroundColor: Colors.primary }}
-          >
-            <Text style={{ color: Colors.surface }}>Unarchive</Text>
-          </TouchableOpacity>
-        </View>
+          text={habit.name}
+          onMainPress={() => habit.id != null && onPressHabit(habit.id)}
+        />
       ))}
     </View>
   );

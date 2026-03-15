@@ -138,6 +138,20 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return data || []
   }
 
+  async getHabit(id: number): Promise<Habit | null> {
+    const user = await this.getUser()
+
+    const { data, error } = await this.supabase
+      .from('habits')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .maybeSingle()
+
+    if (error) throw error
+    return data
+  }
+
   async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
     const user = await this.getUser()
     

@@ -131,6 +131,12 @@ class AsyncStorageDb implements HabitDatabaseInterface {
     });
   }
 
+  async getHabit(id: number): Promise<Habit | null> {
+    const habits = await this.loadHabits();
+    const habit = habits.find((h) => h.id === id);
+    return habit ?? null;
+  }
+
   async updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit> {
     const now = new Date().toISOString();
     const habits = await this.loadHabits();

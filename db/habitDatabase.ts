@@ -17,6 +17,7 @@ export abstract class HabitDatabaseInterface {
   abstract createHabit(habit: { name: string }): Promise<Habit>
   abstract getHabits(): Promise<Habit[]>
   abstract getArchivedHabits(): Promise<Habit[]>
+  abstract getHabit(id: number): Promise<Habit | null>
   abstract updateHabit(id: number, updates: Partial<HabitInput>): Promise<Habit>
   abstract reorderHabits(habits: Habit[]): Promise<Habit[]>
   abstract deleteHabit(id: number): Promise<void>

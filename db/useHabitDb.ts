@@ -54,6 +54,19 @@ export const useListArchivedHabits = () => {
   });
 };
 
+export const useHabit = (habitId: number | undefined) => {
+  const { activeDb, isInitialized } = useDataSource();
+
+  return useQuery({
+    queryKey: [HABITS_QUERY_KEY, 'habit', habitId],
+    queryFn: async () => {
+      if (!activeDb || habitId == null) return null;
+      return await activeDb.getHabit(habitId);
+    },
+    enabled: isInitialized && !!activeDb && habitId != null,
+  });
+};
+
 export const useUpdateHabit = () => {
   const queryClient = useQueryClient();
   const { activeDb } = useDataSource();
@@ -63,8 +76,9 @@ export const useUpdateHabit = () => {
       if (!activeDb) throw new Error('Database not initialized');
       return await activeDb.updateHabit(id, updates);
     },
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'habit', id] });
     },
   });
 };
@@ -130,9 +144,10 @@ export const useArchiveHabit = () => {
       if (!activeDb) throw new Error('Database not initialized');
       return await activeDb.updateHabit(habitId, { archived: true });
     },
-    onSuccess: () => {
+    onSuccess: (_, habitId) => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'archived'] });
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'habit', habitId] });
     },
   });
 };
@@ -146,9 +161,10 @@ export const useUnarchiveHabit = () => {
       if (!activeDb) throw new Error('Database not initialized');
       return await activeDb.updateHabit(habitId, { archived: false });
     },
-    onSuccess: () => {
+    onSuccess: (_, habitId) => {
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'archived'] });
+      queryClient.invalidateQueries({ queryKey: [HABITS_QUERY_KEY, 'habit', habitId] });
     },
   });
 };
