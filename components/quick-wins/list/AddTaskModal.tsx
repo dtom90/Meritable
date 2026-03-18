@@ -17,6 +17,7 @@ interface AddTaskModalProps {
   visible: boolean;
   onClose: () => void;
   title?: string;
+  initialTagIds?: number[];
 }
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -25,6 +26,7 @@ export default function AddTaskModal({
   visible,
   onClose,
   title = 'Add Task',
+  initialTagIds,
 }: AddTaskModalProps) {
   const [modalVisible, setModalVisible] = useState(visible);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
@@ -103,9 +105,10 @@ export default function AddTaskModal({
                 </View>
 
                 <TaskForm
-                  key={visible ? 'open' : 'closed'}
+                  key={`${visible ? 'open' : 'closed'}-${(initialTagIds ?? []).join(',')}`}
                   ref={formRef}
                   onSuccess={handleClose}
+                  initialTagIds={initialTagIds}
                 />
               </Animated.View>
             </TouchableWithoutFeedback>

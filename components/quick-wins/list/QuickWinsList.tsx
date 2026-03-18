@@ -6,8 +6,15 @@ import QuickWinsTagFilter from './QuickWinsTagFilter';
 import QuickWinsTaskList from './QuickWinsTaskList';
 import { useQuickWinsList } from './useQuickWinsList';
 
-export default function QuickWinsList() {
-  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+type QuickWinsListProps = {
+  selectedTagId: number | null;
+  onSelectTagId: (id: number | null) => void;
+};
+
+export default function QuickWinsList({
+  selectedTagId,
+  onSelectTagId,
+}: QuickWinsListProps) {
   const [tagOrderModalVisible, setTagOrderModalVisible] = useState(false);
   const {
     tasksFiltered,
@@ -26,7 +33,7 @@ export default function QuickWinsList() {
       <QuickWinsTagFilter
         tagsInUse={tagsInUse}
         selectedTagId={selectedTagId}
-        onSelectTagId={setSelectedTagId}
+        onSelectTagId={onSelectTagId}
         onReorderPress={() => setTagOrderModalVisible(true)}
         showReorderButton={tags.length > 0}
       />

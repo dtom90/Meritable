@@ -25,9 +25,11 @@ export interface TaskFormRef {
 interface TaskFormProps {
   task?: Task;
   onSuccess?: () => void;
+  initialTagIds?: number[];
 }
 
-const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, ref) => {
+const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(
+  ({ task, onSuccess, initialTagIds }, ref) => {
   const { selectedDate } = useSelectedDate();
   const isEdit = task != null;
 
@@ -37,7 +39,7 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tagNames, setTagNames] = useState<string[]>([]);
-  const [tagNamesInitialized, setTagNamesInitialized] = useState(!isEdit);
+  const [tagNamesInitialized, setTagNamesInitialized] = useState(false);
 
   const { data: tagIds = [] } = useTaskTagIds(isEdit ? task!.id : undefined);
   const { data: tags = [] } = useTagsQuery();
@@ -50,6 +52,24 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
     setTagNames(names);
     setTagNamesInitialized(true);
   }, [isEdit, tagIds, tags]);
+
+  useEffect(() => {
+    if (isEdit) return;
+    if (tagNamesInitialized) return;
+    if (!initialTagIds || initialTagIds.length === 0) {
+      setTagNamesInitialized(true);
+      return;
+    }
+    if (tags.length === 0) {
+      setTagNamesInitialized(true);
+      return;
+    }
+    const initialNames = initialTagIds
+      .map((id) => tags.find((t) => t.id === id)?.name)
+      .filter((n): n is string => Boolean(n));
+    setTagNames(initialNames);
+    setTagNamesInitialized(true);
+  }, [isEdit, initialTagIds, tagNamesInitialized, tags]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createTask = useCreateTask();
@@ -102,8 +122,13 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
         if (tagNames.length > 0) {
           const tagIdsToSet: number[] = [];
           for (const name of tagNames) {
-            const tag = await createTag.mutateAsync(name);
-            tagIdsToSet.push(tag.id);
+            const existing = tags.find((t) => t.name === name);
+            if (existing) {
+              tagIdsToSet.push(existing.id);
+            } else {
+              const tag = await createTag.mutateAsync(name);
+              tagIdsToSet.push(tag.id);
+            }
           }
           await setTaskTags.mutateAsync({ taskId: newTask.id, tagIds: tagIdsToSet });
         }
@@ -210,7 +235,8 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
           isSubmitting ||
           pending ||
           !taskTitle.trim() ||
-          (isEdit && !tagNamesInitialized)
+          ((isEdit || (initialTagIds != null && initialTagIds.length > 0)) &&
+            !tagNamesInitialized)
         }
       >
         <Text className="text-base font-bold" style={{ color: Colors.text }}>
@@ -226,7 +252,8 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(({ task, onSuccess }, re
       )}
     </View>
   );
-});
+  }
+);
 
 const styles = StyleSheet.create({
   formWrap: {
