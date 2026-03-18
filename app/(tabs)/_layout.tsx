@@ -32,19 +32,19 @@ export default function TabLayout() {
             }}
           />
           <Tabs.Screen
-            name="habits"
-            options={{
-              title: 'Habits',
-              tabBarIcon: ({ color }) => <Ionicons name="refresh-outline" size={28} color={color} />,
-              href: '/habits',
-            }}
-          />
-          <Tabs.Screen
             name="quick-wins"
             options={{
               title: 'Quick Wins',
               tabBarIcon: ({ color }) => <Ionicons name="checkmark" size={28} color={color} />,
               href: '/quick-wins',
+            }}
+          />
+          <Tabs.Screen
+            name="habits"
+            options={{
+              title: 'Habits',
+              tabBarIcon: ({ color }) => <Ionicons name="refresh-outline" size={28} color={color} />,
+              href: '/habits',
             }}
           />
           <Tabs.Screen
