@@ -19,7 +19,7 @@ export default function ArchiveHabitButton({ habitId }: { habitId: number }) {
       try {
         await archiveHabitMutation.mutateAsync(habitId);
         setShowArchiveAlert(false);
-        router.replace('/(tabs)');
+        router.replace('/habits');
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error archiving habit:', error);
