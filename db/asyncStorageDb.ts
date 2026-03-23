@@ -387,6 +387,25 @@ class AsyncStorageDb implements HabitDatabaseInterface {
     return toAdd;
   }
 
+  async updateTag(id: number, name: string): Promise<Tag> {
+    const trimmedName = name.trim();
+    if (!trimmedName) throw new Error('Tag name cannot be empty');
+    const tags = await this.loadTags();
+    const idx = tags.findIndex((t) => t.id === id);
+    if (idx === -1) throw new Error('Tag not found');
+    const current = tags[idx];
+    if (current.name === trimmedName) return current;
+    if (tags.some((t) => t.id !== id && t.name === trimmedName)) {
+      throw new Error('A tag with this name already exists');
+    }
+    const now = new Date().toISOString();
+    const updated: Tag = { ...current, name: trimmedName, updated_at: now };
+    const next = [...tags];
+    next[idx] = updated;
+    await this.saveTags(next);
+    return updated;
+  }
+
   async reorderTags(tags: Tag[]): Promise<Tag[]> {
     const now = new Date().toISOString();
     const normalized = tags.map((t, i) => ({ ...t, order: i, updated_at: now }));

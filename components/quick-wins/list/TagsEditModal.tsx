@@ -1,22 +1,14 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Colors } from '@/lib/Colors';
-import { useTagsQuery, useReorderTags } from '@/db/useTags';
 import TagsReorderList from './TagsReorderList';
 
-type TagOrderModalProps = {
+type TagsEditModalProps = {
   visible: boolean;
   onClose: () => void;
 };
 
-export default function TagOrderModal({ visible, onClose }: TagOrderModalProps) {
-  const { data: tags = [], isLoading } = useTagsQuery();
-  const { mutate: reorderTags } = useReorderTags();
-
-  const handleReorder = (reordered: Parameters<typeof reorderTags>[0]) => {
-    reorderTags(reordered);
-  };
-
+export default function TagsEditModal({ visible, onClose }: TagsEditModalProps) {
   return (
     <Modal
       visible={visible}
@@ -47,7 +39,7 @@ export default function TagOrderModal({ visible, onClose }: TagOrderModalProps) 
             >
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-lg font-semibold" style={{ color: Colors.text }}>
-                  Tag order
+                  Edit tags
                 </Text>
                 <TouchableOpacity
                   onPress={onClose}
@@ -59,11 +51,7 @@ export default function TagOrderModal({ visible, onClose }: TagOrderModalProps) 
                   </Text>
                 </TouchableOpacity>
               </View>
-              <TagsReorderList
-                tags={tags}
-                onReorder={handleReorder}
-                isLoading={isLoading}
-              />
+              <TagsReorderList />
               <TouchableOpacity
                 onPress={onClose}
                 className="mt-4 py-3 rounded items-center"

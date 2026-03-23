@@ -65,7 +65,7 @@ export default function QuickWinsTagFilter({
           style={{ backgroundColor: Colors.border }}
         >
           <Text className="text-sm" style={{ color: Colors.textSecondary }}>
-            Reorder tags
+            Edit tags
           </Text>
         </TouchableOpacity>
       )}

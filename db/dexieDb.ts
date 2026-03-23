@@ -312,6 +312,22 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
     return { ...toAdd, id };
   }
 
+  async updateTag(id: number, name: string): Promise<Tag> {
+    const trimmedName = name.trim();
+    if (!trimmedName) throw new Error('Tag name cannot be empty');
+    const current = await this.tags.get(id);
+    if (!current) throw new Error('Tag not found');
+    if (current.name === trimmedName) return current as Tag;
+    const conflict = await this.tags.where('name').equals(trimmedName).first();
+    if (conflict && conflict.id !== id) {
+      throw new Error('A tag with this name already exists');
+    }
+    const now = new Date().toISOString();
+    const updated: Tag = { ...(current as Tag), name: trimmedName, updated_at: now };
+    await this.tags.put(updated);
+    return updated;
+  }
+
   async reorderTags(tags: Tag[]): Promise<Tag[]> {
     const now = new Date().toISOString();
     const normalized = tags.map((t, i) => ({ ...t, order: i, updated_at: now }));

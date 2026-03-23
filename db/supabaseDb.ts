@@ -524,6 +524,33 @@ export class SupabaseDb extends HabitDatabaseInterface {
     return mapTagRow(data)
   }
 
+  async updateTag(id: number, name: string): Promise<Tag> {
+    const user = await this.getUser()
+    const trimmedName = name.trim()
+    if (!trimmedName) throw new Error('Tag name cannot be empty')
+    const { data: current, error: fetchError } = await this.supabase
+      .from('tags')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .maybeSingle()
+    if (fetchError) throw fetchError
+    if (!current) throw new Error('Tag not found')
+    if (current.name === trimmedName) return mapTagRow(current)
+    const { data, error } = await this.supabase
+      .from('tags')
+      .update({ name: trimmedName })
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .select()
+      .single()
+    if (error) {
+      if (error.code === '23505') throw new Error('A tag with this name already exists')
+      throw error
+    }
+    return mapTagRow(data)
+  }
+
   async reorderTags(tags: Tag[]): Promise<Tag[]> {
     const user = await this.getUser()
     for (let i = 0; i < tags.length; i++) {

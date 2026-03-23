@@ -1125,6 +1125,37 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
       });
     });
 
+    describe('updateTag', () => {
+      it('should rename a tag and persist', async () => {
+        const tag = await db.createTag('alpha');
+        const updated = await db.updateTag(tag.id, 'beta');
+        expect(updated.name).toBe('beta');
+        expect(updated.id).toBe(tag.id);
+        const tags = await db.getTags();
+        expect(tags.find((t) => t.id === tag.id)?.name).toBe('beta');
+      });
+
+      it('should no-op when name unchanged (after trim)', async () => {
+        const tag = await db.createTag('same');
+        const updated = await db.updateTag(tag.id, '  same  ');
+        expect(updated.name).toBe('same');
+      });
+
+      it('should throw when another tag has the name', async () => {
+        const a = await db.createTag('keep');
+        const b = await db.createTag('other');
+        await expect(db.updateTag(a.id, 'other')).rejects.toThrow();
+        expect((await db.getTags()).find((t) => t.id === a.id)?.name).toBe('keep');
+        expect(b.name).toBe('other');
+      });
+
+      it('should throw for empty name', async () => {
+        const tag = await db.createTag('x');
+        await expect(db.updateTag(tag.id, '')).rejects.toThrow();
+        await expect(db.updateTag(tag.id, '   ')).rejects.toThrow();
+      });
+    });
+
     describe('reorderTags', () => {
       it('should persist new order and return tags in that order from getTags', async () => {
         const tagA = await db.createTag('A');

@@ -78,6 +78,22 @@ export function useCreateTag() {
   });
 }
 
+export function useUpdateTag() {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: number; name: string }) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return activeDb.updateTag(id, name);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tagsQueryKey() });
+      queryClient.invalidateQueries({ queryKey: taskTagIdsMapQueryKey() });
+    },
+  });
+}
+
 export function useReorderTags() {
   const queryClient = useQueryClient();
   const { activeDb } = useDataSource();

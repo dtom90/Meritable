@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Platform, ScrollView } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -25,14 +25,23 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TagReorderItem from './TagReorderItem';
 import type { Tag } from '@/db/types';
 import Spinner from '@/components/common/Spinner';
+import { useReorderTags, useTagsQuery } from '@/db/useTags';
 
-type TagsReorderListProps = {
+type TagsReorderListContentProps = {
   tags: Tag[];
-  onReorder: (tags: Tag[]) => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 };
 
-function SortableTagItem({ tag }: { tag: Tag }) {
+function SortableTagItem({
+  tag,
+  editingTagId,
+  setEditingTagId,
+}: {
+  tag: Tag;
+  editingTagId: number | null;
+  setEditingTagId: (id: number | null) => void;
+}) {
+  const dragFrozen = editingTagId != null;
   const {
     attributes,
     listeners,
@@ -40,7 +49,7 @@ function SortableTagItem({ tag }: { tag: Tag }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: tag.id.toString() });
+  } = useSortable({ id: tag.id.toString(), disabled: dragFrozen });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -54,11 +63,15 @@ function SortableTagItem({ tag }: { tag: Tag }) {
       tag={tag}
       isDragging={isDragging}
       dragHandleProps={{ ...attributes, ...listeners }}
+      onEditingChange={setEditingTagId}
+      dragFrozen={dragFrozen}
     />
   );
 }
 
-function TagsReorderListWeb({ tags, onReorder, isLoading }: TagsReorderListProps) {
+function TagsReorderListWeb({ tags, isLoading }: TagsReorderListContentProps) {
+  const { mutate: reorderTags } = useReorderTags();
+  const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -72,11 +85,11 @@ function TagsReorderListWeb({ tags, onReorder, isLoading }: TagsReorderListProps
         const newIndex = tags.findIndex((t) => t.id.toString() === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
           const reordered = arrayMove(tags, oldIndex, newIndex).map((t, i) => ({ ...t, order: i }));
-          onReorder(reordered);
+          reorderTags(reordered);
         }
       }
     },
-    [tags, onReorder]
+    [tags, reorderTags]
   );
 
   if (isLoading) return <Spinner />;
@@ -94,7 +107,12 @@ function TagsReorderListWeb({ tags, onReorder, isLoading }: TagsReorderListProps
           strategy={verticalListSortingStrategy}
         >
           {tags.map((tag) => (
-            <SortableTagItem key={tag.id} tag={tag} />
+            <SortableTagItem
+              key={tag.id}
+              tag={tag}
+              editingTagId={editingTagId}
+              setEditingTagId={setEditingTagId}
+            />
           ))}
         </SortableContext>
       </DndContext>
@@ -102,30 +120,40 @@ function TagsReorderListWeb({ tags, onReorder, isLoading }: TagsReorderListProps
   );
 }
 
-function TagsReorderListMobile({ tags, onReorder, isLoading }: TagsReorderListProps) {
+function TagsReorderListMobile({ tags, isLoading }: TagsReorderListContentProps) {
+  const { mutate: reorderTags } = useReorderTags();
+  const [editingTagId, setEditingTagId] = useState<number | null>(null);
+  const dragFrozen = editingTagId != null;
+
   const renderItem = useCallback(
     ({ item: tag, drag, isActive }: RenderItemParams<Tag>) => (
       <ScaleDecorator>
         <TagReorderItem
           tag={tag}
           isDragging={isActive}
-          dragHandleProps={{
-            onLongPress: drag,
-            disabled: isActive,
-            delayLongPress: 0,
-          }}
+          dragHandleProps={
+            dragFrozen
+              ? null
+              : {
+                  onLongPress: drag,
+                  disabled: isActive,
+                  delayLongPress: 0,
+                }
+          }
+          onEditingChange={setEditingTagId}
+          dragFrozen={dragFrozen}
         />
       </ScaleDecorator>
     ),
-    []
+    [dragFrozen]
   );
 
   const handleDragEnd = useCallback(
     ({ data }: { data: Tag[] }) => {
       const reordered = data.map((t, i) => ({ ...t, order: i }));
-      onReorder(reordered);
+      reorderTags(reordered);
     },
-    [onReorder]
+    [reorderTags]
   );
 
   if (isLoading) return <Spinner />;
@@ -143,10 +171,12 @@ function TagsReorderListMobile({ tags, onReorder, isLoading }: TagsReorderListPr
   );
 }
 
-export default function TagsReorderList(props: TagsReorderListProps) {
+export default function TagsReorderList() {
+  const { data: tags = [], isLoading } = useTagsQuery();
+  const contentProps: TagsReorderListContentProps = { tags, isLoading };
   return Platform.OS === 'web' ? (
-    <TagsReorderListWeb {...props} />
+    <TagsReorderListWeb {...contentProps} />
   ) : (
-    <TagsReorderListMobile {...props} />
+    <TagsReorderListMobile {...contentProps} />
   );
 }

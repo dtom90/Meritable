@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import Spinner from '@/components/common/Spinner';
-import TagOrderModal from './TagOrderModal';
+import TagsEditModal from './TagsEditModal';
 import QuickWinsTagFilter from './QuickWinsTagFilter';
 import QuickWinsTaskList from './QuickWinsTaskList';
 import { useQuickWinsList } from './useQuickWinsList';
@@ -37,7 +37,7 @@ export default function QuickWinsList({
         onReorderPress={() => setTagOrderModalVisible(true)}
         showReorderButton={tags.length > 0}
       />
-      <TagOrderModal
+      <TagsEditModal
         visible={tagOrderModalVisible}
         onClose={() => setTagOrderModalVisible(false)}
       />
