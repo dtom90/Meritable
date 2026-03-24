@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { Colors } from '@/lib/Colors';
 import TagsEditList from './TagsEditList';
 import TagsReorderPanel from './TagsReorderPanel';
 
@@ -31,43 +30,26 @@ export default function TagsEditModal({ visible, onClose }: TagsEditModalProps) 
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: Colors.overlay,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 24,
-          }}
-        >
+        <View className="flex-1 items-center justify-center bg-[rgba(0,0,0,0.5)] p-6">
           <TouchableWithoutFeedback>
             <View
-              className="min-h-0"
-              style={{
-                backgroundColor: Colors.surface,
-                borderRadius: 16,
-                padding: 20,
-                width: '100%',
-                maxWidth: 400,
-                maxHeight: '80%',
-              }}
+              className="min-h-0 w-full max-w-[400px] max-h-[80%] rounded-2xl bg-[#1C1C1E] p-5"
             >
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-lg font-semibold" style={{ color: Colors.text }}>
+                <Text className="text-lg font-semibold text-white">
                   Edit tags
                 </Text>
                 <TouchableOpacity
                   onPress={onClose}
-                  className="w-8 h-8 items-center justify-center rounded-full"
-                  style={{ backgroundColor: Colors.border }}
+                  className="h-8 w-8 items-center justify-center rounded-full bg-[#38383A]"
                 >
-                  <Text className="text-lg font-bold" style={{ color: Colors.textSecondary }}>
+                  <Text className="text-lg font-bold text-[#8E8E93]">
                     ×
                   </Text>
                 </TouchableOpacity>
               </View>
               <Pressable onPress={() => setReorderMode((v) => !v)} className="mb-2 self-start">
-                <Text style={{ color: Colors.primary }}>
+                <Text className="text-[#0A84FF]">
                   {reorderMode ? 'Done' : 'Reorder'}
                 </Text>
               </Pressable>
@@ -76,10 +58,9 @@ export default function TagsEditModal({ visible, onClose }: TagsEditModalProps) 
               </View>
               <TouchableOpacity
                 onPress={onClose}
-                className="mt-4 py-3 rounded items-center"
-                style={{ backgroundColor: Colors.primary }}
+                className="mt-4 items-center rounded bg-[#0A84FF] py-3"
               >
-                <Text className="text-base font-semibold" style={{ color: Colors.text }}>
+                <Text className="text-base font-semibold text-white">
                   Done
                 </Text>
               </TouchableOpacity>
