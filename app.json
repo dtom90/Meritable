@@ -2,7 +2,7 @@
   "expo": {
     "name": "Meritable",
     "slug": "meritable",
-    "version": "1.4.8",
+    "version": "1.4.9",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "app.meritable",
