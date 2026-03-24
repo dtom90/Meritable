@@ -1,7 +1,15 @@
-import React from 'react';
-import { Modal, View, Text, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { Colors } from '@/lib/Colors';
-import TagsReorderList from './TagsReorderList';
+import TagsEditList from './TagsEditList';
+import TagsReorderPanel from './TagsReorderPanel';
 
 type TagsEditModalProps = {
   visible: boolean;
@@ -9,6 +17,12 @@ type TagsEditModalProps = {
 };
 
 export default function TagsEditModal({ visible, onClose }: TagsEditModalProps) {
+  const [reorderMode, setReorderMode] = useState(false);
+
+  useEffect(() => {
+    if (!visible) setReorderMode(false);
+  }, [visible]);
+
   return (
     <Modal
       visible={visible}
@@ -28,6 +42,7 @@ export default function TagsEditModal({ visible, onClose }: TagsEditModalProps) 
         >
           <TouchableWithoutFeedback>
             <View
+              className="min-h-0"
               style={{
                 backgroundColor: Colors.surface,
                 borderRadius: 16,
@@ -51,7 +66,14 @@ export default function TagsEditModal({ visible, onClose }: TagsEditModalProps) 
                   </Text>
                 </TouchableOpacity>
               </View>
-              <TagsReorderList />
+              <Pressable onPress={() => setReorderMode((v) => !v)} className="mb-2 self-start">
+                <Text style={{ color: Colors.primary }}>
+                  {reorderMode ? 'Done' : 'Reorder'}
+                </Text>
+              </Pressable>
+              <View className="min-h-0">
+                {reorderMode ? <TagsReorderPanel /> : <TagsEditList />}
+              </View>
               <TouchableOpacity
                 onPress={onClose}
                 className="mt-4 py-3 rounded items-center"

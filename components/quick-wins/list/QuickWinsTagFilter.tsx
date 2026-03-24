@@ -61,10 +61,9 @@ export default function QuickWinsTagFilter({
       {showReorderButton && (
         <TouchableOpacity
           onPress={onReorderPress}
-          className="px-3 py-1.5 rounded-full"
-          style={{ backgroundColor: Colors.border }}
+          className="py-1.5"
         >
-          <Text className="text-sm" style={{ color: Colors.textSecondary }}>
+          <Text className="text-sm font-medium" style={{ color: Colors.primary }}>
             Edit tags
           </Text>
         </TouchableOpacity>

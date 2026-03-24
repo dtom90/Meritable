@@ -1,5 +1,4 @@
 import { useCreateHabitCompletion, useDeleteHabitCompletion, useUpdateHabitCompletion } from '@/db/useHabitDb';
-import { Colors } from '@/lib/Colors';
 import { Habit, HabitCompletion } from '@/db/types';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';

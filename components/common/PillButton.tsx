@@ -10,6 +10,15 @@ export interface PillButtonCheckButtonProps {
   completed: boolean;
 }
 
+export interface PillButtonSecondaryButtonProps {
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  /** react-native-paper Icon `source` name; defaults to `check` when omitted */
+  icon?: string;
+  iconColor?: string;
+}
+
 export interface PillButtonMultiCountProps {
   currentCount: number;
   targetCount: number;
@@ -36,7 +45,10 @@ export interface PillButtonProps {
   children?: React.ReactNode;
   /** When set, renders a drag handle on the left with spacing matching habit/workout lists. */
   dragHandleProps?: PillButtonDragHandleProps | null;
+  /** Completion / count toggle (check, restore, plus). */
   checkButton?: PillButtonCheckButtonProps;
+  /** Extra trailing action (e.g. edit pencil on tag rows). Rendered after checkButton when both are set. */
+  secondaryButton?: PillButtonSecondaryButtonProps;
   multiCount?: PillButtonMultiCountProps;
   /** When true and highlightAsCompleted, shows a checkmark icon on the right in the main row (no separate button). Used by ExerciseList. */
   showCompletedCheckIcon?: boolean;
@@ -84,6 +96,7 @@ export default function PillButton({
   children,
   dragHandleProps,
   checkButton,
+  secondaryButton,
   multiCount,
   showCompletedCheckIcon = false,
   rightIcon,
@@ -101,12 +114,17 @@ export default function PillButton({
   const mainPressProps = onMainPress != null ? { onPress: onMainPress } : {};
   const chevronColor =
     highlightAsCompleted || checkButton?.completed ? Colors.text : Colors.textSecondary;
-  const hasRightButton = multiCount != null || checkButton != null;
+  const hasRightButton =
+    multiCount != null || checkButton != null || secondaryButton != null;
 
   const leftSlot =
     dragHandleProps != null ? (
       <DragHandle dragHandleProps={dragHandleProps} />
     ) : null;
+
+  const resolvedSecondaryIcon = secondaryButton?.icon ?? 'check';
+  const resolvedSecondaryIconColor = secondaryButton?.iconColor ?? Colors.text;
+  const checkNeedsRightBorder = secondaryButton != null;
 
   return (
     <View
@@ -185,7 +203,7 @@ export default function PillButton({
         <TouchableOpacity
           onPress={checkButton.onPress}
           disabled={checkButton.disabled}
-          className="h-full w-16 flex items-center justify-center"
+          className={`h-full w-16 flex items-center justify-center ${checkNeedsRightBorder ? 'border-r border-gray-600' : ''}`}
           style={{ backgroundColor: 'transparent', zIndex: 1 }}
         >
           {checkButton.loading ? (
@@ -210,6 +228,25 @@ export default function PillButton({
                       ? Colors.text
                       : Colors.success
               }
+              size={24}
+            />
+          )}
+        </TouchableOpacity>
+      ) : null}
+
+      {secondaryButton != null ? (
+        <TouchableOpacity
+          onPress={secondaryButton.onPress}
+          disabled={secondaryButton.disabled}
+          className="h-full w-16 flex items-center justify-center"
+          style={{ backgroundColor: 'transparent', zIndex: 1 }}
+        >
+          {secondaryButton.loading ? (
+            <Icon source="loading" color={Colors.textSecondary} size={24} />
+          ) : (
+            <Icon
+              source={resolvedSecondaryIcon}
+              color={resolvedSecondaryIconColor}
               size={24}
             />
           )}

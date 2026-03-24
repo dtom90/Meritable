@@ -11,7 +11,7 @@ alwaysApply: false
 - **common/** — Shared UI: Spinner, NarrowView, ThemedView, ThemedText, ExternalLink, WeekHeader, CustomDayHeader, ReorderEditLayout, ReorderItem. Tests: `common/__tests__/`.
 - **habits/list/** — Habits list page: HabitCompletionsList, HabitCompletions, HabitCompletionButton, HabitReorderList, HabitReorderItem, AddHabitButton, HabitInputModal, HabitInputForm.
 - **habits/detail/** — Habit detail page: HabitTitle, HabitActions, HabitCompletionsCalendar.
-- **quick-wins/list/** — QuickWinsList, QuickWinsButton, AddTaskButton, AddTaskModal (task list for selected day; data from task table via useTasks).
+- **quick-wins/list/** — QuickWinsList, QuickWinsButton, AddTaskButton, AddTaskModal, TagsEditModal, TagsBrowseList, TagBrowseRow, TagsReorderPanel (task list for selected day; data from task table via useTasks).
 - **quick-wins/detail/** — TaskDetailHeader, TaskDetailDates (task detail page).
 - **data/** — CloudAuthSection (data/sync tab).
 - **Modals/** — LoginModal, OAuthErrorModal, SignOutAlertModal.
