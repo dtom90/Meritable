@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 
 export default function Index() {
   // On web, check for OAuth error parameters before redirecting
-  // This check happens synchronously during render to prevent redirect to /quick-wins
+  // This check happens synchronously during render to prevent redirect to /habits
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const searchParams = new URLSearchParams(window.location.search);
     const hash = window.location.hash;
@@ -27,5 +27,5 @@ export default function Index() {
     }
   }
 
-  return <Redirect href="/quick-wins" />;
+  return <Redirect href="/habits" />;
 }
