@@ -7,6 +7,7 @@ import {
   Pressable,
   Keyboard,
   Platform,
+  ScrollView,
   StyleSheet,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
@@ -151,7 +152,12 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(
       : 'Add Task';
 
   return (
-    <View style={styles.formWrap}>
+    <ScrollView
+      style={styles.formWrap}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="none"
+      showsVerticalScrollIndicator={false}
+    >
       <View className="mb-4">
         <Text className="text-sm mb-1" style={{ color: Colors.textSecondary }}>
           Title
@@ -250,7 +256,7 @@ const TaskForm = forwardRef<TaskFormRef, TaskFormProps>(
           accessibilityLabel="Dismiss calendar"
         />
       )}
-    </View>
+    </ScrollView>
   );
   }
 );
