@@ -319,10 +319,36 @@ export class SupabaseDb extends HabitDatabaseInterface {
       .from('exercises')
       .select('*')
       .eq('user_id', user?.id)
+      .or('archived.is.null,archived.eq.false')
       .order('order', { ascending: true })
       .order('id', { ascending: true })
     if (error) throw error
     return (data || []).map(mapExerciseRow)
+  }
+
+  async getArchivedExercises(): Promise<Exercise[]> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('exercises')
+      .select('*')
+      .eq('user_id', user?.id)
+      .eq('archived', true)
+      .order('order', { ascending: true })
+      .order('id', { ascending: true })
+    if (error) throw error
+    return (data || []).map(mapExerciseRow)
+  }
+
+  async getExercise(id: number): Promise<Exercise | null> {
+    const user = await this.getUser()
+    const { data, error } = await this.supabase
+      .from('exercises')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user?.id)
+      .maybeSingle()
+    if (error) throw error
+    return data ? mapExerciseRow(data) : null
   }
 
   async updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise> {
@@ -646,6 +672,7 @@ function mapExerciseRow(row: any): Exercise {
     id: Number(row.id),
     name: row.name,
     order: row.order ?? 0,
+    archived: row.archived === true,
     created_at: row.created_at,
     updated_at: row.updated_at
   }

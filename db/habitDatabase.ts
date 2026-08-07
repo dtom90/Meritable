@@ -32,6 +32,8 @@ export abstract class HabitDatabaseInterface {
   // Exercise operations
   abstract createExercise(exercise: { name: string }): Promise<Exercise>
   abstract getExercises(): Promise<Exercise[]>
+  abstract getArchivedExercises(): Promise<Exercise[]>
+  abstract getExercise(id: number): Promise<Exercise | null>
   abstract updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise>
   abstract reorderExercises(exercises: Exercise[]): Promise<Exercise[]>
   abstract deleteExercise(id: number): Promise<void>

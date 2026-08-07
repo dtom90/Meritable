@@ -260,7 +260,20 @@ class AsyncStorageDb implements HabitDatabaseInterface {
 
   async getExercises(): Promise<Exercise[]> {
     const exercises = await this.loadExercises();
-    return exercises.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+    const active = exercises.filter((e) => e.archived !== true);
+    return active.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+
+  async getArchivedExercises(): Promise<Exercise[]> {
+    const exercises = await this.loadExercises();
+    const archived = exercises.filter((e) => e.archived === true);
+    return archived.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+
+  async getExercise(id: number): Promise<Exercise | null> {
+    const exercises = await this.loadExercises();
+    const exercise = exercises.find((e) => e.id === id);
+    return exercise ?? null;
   }
 
   async updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise> {

@@ -693,6 +693,70 @@ describe.each(databaseImplementations)('HabitDatabaseInterface Implementation: $
         expect(exercises[1].name).toBe('A');
         expect(exercises[2].name).toBe('B');
       });
+
+      it('should not return archived exercises', async () => {
+        const exercise = await db.createExercise({ name: 'Active' });
+        await db.updateExercise(exercise.id, { archived: true });
+
+        const exercises = await db.getExercises();
+        expect(exercises).toHaveLength(0);
+      });
+    });
+
+    describe('getArchivedExercises', () => {
+      it('should return empty array when no archived exercises exist', async () => {
+        await db.createExercise({ name: 'Active Only' });
+        const archived = await db.getArchivedExercises();
+        expect(archived).toEqual([]);
+      });
+
+      it('should return only archived exercises sorted by order', async () => {
+        const a = await db.createExercise({ name: 'Active' });
+        const b = await db.createExercise({ name: 'To Archive 1' });
+        const c = await db.createExercise({ name: 'To Archive 2' });
+        await db.updateExercise(b.id, { archived: true });
+        await db.updateExercise(c.id, { archived: true });
+
+        const archived = await db.getArchivedExercises();
+        expect(archived).toHaveLength(2);
+        expect(archived.map((e) => e.name).sort()).toEqual(['To Archive 1', 'To Archive 2']);
+
+        const active = await db.getExercises();
+        expect(active).toHaveLength(1);
+        expect(active[0].name).toBe('Active');
+      });
+
+      it('should return exercise after archive and not after unarchive', async () => {
+        const exercise = await db.createExercise({ name: 'Flip' });
+        expect(await db.getExercises()).toHaveLength(1);
+        expect(await db.getArchivedExercises()).toHaveLength(0);
+
+        await db.updateExercise(exercise.id, { archived: true });
+        expect(await db.getExercises()).toHaveLength(0);
+        expect(await db.getArchivedExercises()).toHaveLength(1);
+        expect((await db.getArchivedExercises())[0].name).toBe('Flip');
+
+        await db.updateExercise(exercise.id, { archived: false });
+        expect(await db.getExercises()).toHaveLength(1);
+        expect(await db.getArchivedExercises()).toHaveLength(0);
+        expect((await db.getExercises())[0].name).toBe('Flip');
+      });
+    });
+
+    describe('getExercise', () => {
+      it('should return exercise by id including when archived', async () => {
+        const exercise = await db.createExercise({ name: 'Bench Press' });
+        await db.updateExercise(exercise.id, { archived: true });
+
+        const found = await db.getExercise(exercise.id);
+        expect(found?.name).toBe('Bench Press');
+        expect(found?.archived).toBe(true);
+      });
+
+      it('should return null for non-existent exercise', async () => {
+        const found = await db.getExercise(999);
+        expect(found).toBeNull();
+      });
     });
 
     describe('updateExercise', () => {

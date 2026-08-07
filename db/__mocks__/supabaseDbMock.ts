@@ -14,6 +14,8 @@ export const MockedSupabaseDb = jest.fn().mockImplementation(() => ({
   deleteHabitCompletion: jest.fn(),
   createExercise: jest.fn(),
   getExercises: jest.fn().mockResolvedValue([]),
+  getArchivedExercises: jest.fn().mockResolvedValue([]),
+  getExercise: jest.fn().mockResolvedValue(null),
   updateExercise: jest.fn(),
   reorderExercises: jest.fn(),
   deleteExercise: jest.fn(),

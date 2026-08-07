@@ -18,6 +18,30 @@ export const useListExercises = () => {
   });
 };
 
+export const useListArchivedExercises = () => {
+  const { activeDb, isInitialized } = useDataSource();
+  return useQuery({
+    queryKey: [EXERCISES_QUERY_KEY, 'archived'],
+    queryFn: () => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return activeDb.getArchivedExercises();
+    },
+    enabled: isInitialized && !!activeDb,
+  });
+};
+
+export const useExercise = (exerciseId: number | undefined) => {
+  const { activeDb, isInitialized } = useDataSource();
+  return useQuery({
+    queryKey: [EXERCISES_QUERY_KEY, 'exercise', exerciseId],
+    queryFn: async () => {
+      if (!activeDb || exerciseId == null) return null;
+      return await activeDb.getExercise(exerciseId);
+    },
+    enabled: isInitialized && !!activeDb && exerciseId != null,
+  });
+};
+
 export const useCreateExercise = () => {
   const queryClient = useQueryClient();
   const { activeDb } = useDataSource();
@@ -40,8 +64,41 @@ export const useUpdateExercise = () => {
       if (!activeDb) throw new Error('Database not initialized');
       return await activeDb.updateExercise(id, updates);
     },
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY, 'exercise', id] });
+    },
+  });
+};
+
+export const useArchiveExercise = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  return useMutation({
+    mutationFn: async (exerciseId: number) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.updateExercise(exerciseId, { archived: true });
+    },
+    onSuccess: (_, exerciseId) => {
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY, 'archived'] });
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY, 'exercise', exerciseId] });
+    },
+  });
+};
+
+export const useUnarchiveExercise = () => {
+  const queryClient = useQueryClient();
+  const { activeDb } = useDataSource();
+  return useMutation({
+    mutationFn: async (exerciseId: number) => {
+      if (!activeDb) throw new Error('Database not initialized');
+      return await activeDb.updateExercise(exerciseId, { archived: false });
+    },
+    onSuccess: (_, exerciseId) => {
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY, 'archived'] });
+      queryClient.invalidateQueries({ queryKey: [EXERCISES_QUERY_KEY, 'exercise', exerciseId] });
     },
   });
 };

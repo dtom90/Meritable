@@ -206,7 +206,19 @@ class DexieDb extends Dexie implements HabitDatabaseInterface {
 
   async getExercises(): Promise<Exercise[]> {
     const list = await this.exercises.toArray();
-    return list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+    const active = list.filter((e) => e.archived !== true);
+    return active.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+
+  async getArchivedExercises(): Promise<Exercise[]> {
+    const list = await this.exercises.toArray();
+    const archived = list.filter((e) => e.archived === true);
+    return archived.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+
+  async getExercise(id: number): Promise<Exercise | null> {
+    const exercise = await this.exercises.get(id);
+    return exercise ?? null;
   }
 
   async updateExercise(id: number, updates: Partial<ExerciseInput>): Promise<Exercise> {
