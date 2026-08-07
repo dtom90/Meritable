@@ -21,6 +21,7 @@ import DraggableFlatList from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Spinner from '@/components/common/Spinner';
 import ReorderItem from '@/components/common/ReorderItem';
+import type { PillButtonSecondaryButtonProps } from '@/components/common/PillButton';
 
 export interface ReorderEditLayoutProps<T = unknown> {
   children?: React.ReactNode;
@@ -28,6 +29,7 @@ export interface ReorderEditLayoutProps<T = unknown> {
   data?: T[];
   getItemId?: (item: T) => string;
   getItemLabel?: (item: T) => string;
+  getItemSecondaryButton?: (item: T) => PillButtonSecondaryButtonProps | undefined;
   onReorder?: (reorderedData: T[]) => void;
   loading?: boolean;
 }
@@ -36,10 +38,12 @@ function SortableRow<T>({
   item,
   getItemId,
   getItemLabel,
+  getItemSecondaryButton,
 }: {
   item: T;
   getItemId: (item: T) => string;
   getItemLabel: (item: T) => string;
+  getItemSecondaryButton?: (item: T) => PillButtonSecondaryButtonProps | undefined;
 }) {
   const id = getItemId(item);
   const {
@@ -63,6 +67,7 @@ function SortableRow<T>({
       style={style}
       isActive={isDragging}
       dragHandleProps={{ ...attributes, ...listeners }}
+      secondaryButton={getItemSecondaryButton?.(item)}
     />
   );
 }
@@ -73,6 +78,7 @@ export function ReorderEditLayout<T = unknown>({
   data,
   getItemId,
   getItemLabel,
+  getItemSecondaryButton,
   onReorder,
   loading = false,
 }: ReorderEditLayoutProps<T>) {
@@ -152,6 +158,7 @@ export function ReorderEditLayout<T = unknown>({
                     item={item}
                     getItemId={getItemId}
                     getItemLabel={getItemLabel}
+                    getItemSecondaryButton={getItemSecondaryButton}
                   />
                 ))}
               </SortableContext>
@@ -199,6 +206,7 @@ export function ReorderEditLayout<T = unknown>({
                   label={getItemLabel(item)}
                   drag={drag}
                   isActive={isActive}
+                  secondaryButton={getItemSecondaryButton?.(item)}
                 />
               )}
               ListFooterComponent={

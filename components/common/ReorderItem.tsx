@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, ViewProps } from 'react-native';
 import { ScaleDecorator } from 'react-native-draggable-flatlist';
-import PillButton, { type PillButtonDragHandleProps } from '@/components/common/PillButton';
+import PillButton, {
+  type PillButtonDragHandleProps,
+  type PillButtonSecondaryButtonProps,
+} from '@/components/common/PillButton';
 
 export interface ReorderItemProps extends ViewProps {
   label: string;
@@ -10,10 +13,11 @@ export interface ReorderItemProps extends ViewProps {
   dragHandleProps?: PillButtonDragHandleProps | null;
   /** Mobile: long-press to drag */
   drag?: () => void;
+  secondaryButton?: PillButtonSecondaryButtonProps;
 }
 
 const ReorderItem = React.forwardRef<View, ReorderItemProps>(function ReorderItem(
-  { label, isActive = false, dragHandleProps, drag, style, ...props },
+  { label, isActive = false, dragHandleProps, drag, secondaryButton, style, ...props },
   ref
 ) {
   const isWeb = dragHandleProps != null;
@@ -28,6 +32,7 @@ const ReorderItem = React.forwardRef<View, ReorderItemProps>(function ReorderIte
       <PillButton
         isDragging={isActive}
         dragHandleProps={resolvedDragHandleProps ?? undefined}
+        secondaryButton={secondaryButton}
         text={label}
       />
     </View>
