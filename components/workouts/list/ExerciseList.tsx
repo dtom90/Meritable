@@ -13,12 +13,8 @@ export function ExerciseList() {
   const { data: exercises = [], isLoading: isLoadingExercises, refetch, isFetching } = useListExercises();
   const { mutate: reorderExercises } = useReorderExercises();
 
-  return (
-    <NarrowView
-      disableScroll={isEditing}
-      refreshing={isFetching}
-      onRefresh={() => { void refetch(); }}
-    >
+  const listBody = (
+    <>
       {exercises && exercises.length > 0 && (
         <View className="flex-row justify-between items-center">
           <Pressable onPress={() => setIsEditing(!isEditing)}>
@@ -46,6 +42,20 @@ export function ExerciseList() {
           {exercises.length === 0 ? null : <ExerciseListStandard />}
           <AddExerciseButton />
         </>
+      )}
+    </>
+  );
+
+  return (
+    <NarrowView
+      disableScroll={isEditing}
+      refreshing={isFetching}
+      onRefresh={() => { void refetch(); }}
+    >
+      {isEditing ? (
+        <View className="flex-1 min-h-0">{listBody}</View>
+      ) : (
+        listBody
       )}
     </NarrowView>
   );

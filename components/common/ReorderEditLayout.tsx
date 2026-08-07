@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, ScrollView, Platform } from 'react-native';
+import { View, ScrollView, Platform, type LayoutChangeEvent } from 'react-native';
 import {
   DndContext,
   closestCenter,
@@ -31,8 +31,6 @@ export interface ReorderEditLayoutProps<T = unknown> {
   onReorder?: (reorderedData: T[]) => void;
   loading?: boolean;
 }
-
-const EXTRA_HEIGHT = 16;
 
 function SortableRow<T>({
   item,
@@ -79,7 +77,14 @@ export function ReorderEditLayout<T = unknown>({
   loading = false,
 }: ReorderEditLayoutProps<T>) {
   const wrapperClassName = 'flex-1 min-h-0';
-  const [contentHeight, setContentHeight] = useState(EXTRA_HEIGHT);
+  const [viewportHeight, setViewportHeight] = useState(0);
+
+  const handleViewportLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    if (height > 0) {
+      setViewportHeight((current) => (current === height ? current : height));
+    }
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -181,31 +186,27 @@ export function ReorderEditLayout<T = unknown>({
     }
 
     return (
-      <View className={wrapperClassName}>
-        <GestureHandlerRootView
-          style={
-            contentHeight > 0 ? { height: contentHeight } : { flex: 1 }
-          }
-        >
-          <DraggableFlatList
-            data={data}
-            onDragEnd={({ data: reordered }) => onReorder(reordered)}
-            onContentSizeChange={(_w, h) =>
-              setContentHeight(h + EXTRA_HEIGHT)
-            }
-            keyExtractor={getItemId}
-            renderItem={({ item, drag, isActive }) => (
-              <ReorderItem
-                label={getItemLabel(item)}
-                drag={drag}
-                isActive={isActive}
-              />
-            )}
-            ListFooterComponent={
-              footer != null ? () => <>{footer}</> : undefined
-            }
-          />
-        </GestureHandlerRootView>
+      <View className={wrapperClassName} onLayout={handleViewportLayout}>
+        {viewportHeight > 0 ? (
+          <GestureHandlerRootView style={{ height: viewportHeight }}>
+            <DraggableFlatList
+              data={data}
+              onDragEnd={({ data: reordered }) => onReorder(reordered)}
+              keyExtractor={getItemId}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item, drag, isActive }) => (
+                <ReorderItem
+                  label={getItemLabel(item)}
+                  drag={drag}
+                  isActive={isActive}
+                />
+              )}
+              ListFooterComponent={
+                footer != null ? () => <>{footer}</> : undefined
+              }
+            />
+          </GestureHandlerRootView>
+        ) : null}
       </View>
     );
   }

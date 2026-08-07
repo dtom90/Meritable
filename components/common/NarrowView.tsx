@@ -36,7 +36,7 @@ export function NarrowView({
         }
       >
         {disableScroll ? (
-          <View className="flex-1">
+          <View className="flex-1 min-h-0">
             {children}
           </View>
         ) : (

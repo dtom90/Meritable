@@ -37,12 +37,8 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
     void refetchArchived();
   };
 
-  return (
-    <NarrowView
-      disableScroll={isEditing}
-      refreshing={isFetching}
-      onRefresh={handleRefresh}
-    >
+  const listBody = (
+    <>
       <View className="flex-row justify-between items-center mb-2">
         {showActive && habits && habits.length > 0 ? (
           <Pressable onPress={() => setIsEditing(!isEditing)}>
@@ -79,6 +75,20 @@ export default function HabitCompletionsList({ selectedDate }: HabitCompletionsL
         )
       ) : (
         <ArchivedHabitsList habits={archivedHabits} onPressHabit={(id) => router.push(`/habits/${id}`)} />
+      )}
+    </>
+  );
+
+  return (
+    <NarrowView
+      disableScroll={isEditing}
+      refreshing={isFetching}
+      onRefresh={handleRefresh}
+    >
+      {isEditing ? (
+        <View className="flex-1 min-h-0">{listBody}</View>
+      ) : (
+        listBody
       )}
     </NarrowView>
   );
