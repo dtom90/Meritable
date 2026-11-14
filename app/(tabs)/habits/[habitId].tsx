@@ -5,6 +5,7 @@ import { useHabit } from '@/db/useHabitDb';
 import HabitTitle from '@/components/habits/detail/HabitTitle';
 import HabitActions from '@/components/habits/detail/HabitActions';
 import HabitCompletionsCalendar from '@/components/habits/detail/HabitCompletionsCalendar';
+import HabitDailyCountChart from '@/components/habits/detail/HabitDailyCountChart';
 import { NarrowView } from '@/components/common/NarrowView';
 import Spinner from '@/components/common/Spinner';
 
@@ -34,6 +35,10 @@ export default function HabitDetail() {
       <HabitTitle habit={habit} />
 
       <HabitCompletionsCalendar habitId={habit.id} />
+
+      {habit.countTarget != null && habit.countTarget > 0 && (
+        <HabitDailyCountChart habitId={habit.id} countTarget={habit.countTarget} />
+      )}
 
       <HabitActions habitId={habit.id} habit={habit} />
 
